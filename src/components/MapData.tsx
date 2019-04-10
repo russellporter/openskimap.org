@@ -48,7 +48,11 @@ export interface SkiRunData extends SkiWayData {
 }
 
 export interface SkiAreaData {
-  'id': string;
+  'id'?: string;
+  'lid': string;
   'name': string;
   'operating_status': string;
+  'has_downhill': boolean;
+  'has_nordic': boolean;
+  'generated': boolean;
 }
