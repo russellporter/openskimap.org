@@ -1,7 +1,7 @@
 import * as lunr from "lunr";
 import * as mapboxgl from "mapbox-gl";
 import { MapInteractionManager } from "./MapInteractionManager";
-import { MapStyleControl } from "./MapStyleControl";
+import { SearchBarControl } from "./SearchBarControl";
 
 export class Map {
   private map: mapboxgl.Map;
@@ -62,7 +62,7 @@ export class Map {
       })
     );
 
-    this.map.addControl(new MapStyleControl());
+    this.map.addControl(new SearchBarControl());
 
     this.map.addControl(
       new mapboxgl.GeolocateControl({

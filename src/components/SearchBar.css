@@ -1,0 +1,20 @@
+.root {
+  padding: 2px 4px;
+  display: flex;
+  align-items: "center";
+  width: 100%;
+  max-width: 400px;
+  min-width: 300px;
+}
+.input {
+  margin-left: 8;
+  flex: 1;
+}
+.icon-button {
+  padding: 10;
+}
+.divider {
+  width: 1;
+  height: 28;
+  margin: 4;
+}

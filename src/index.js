@@ -1,6 +1,6 @@
 import * as mapboxgl from "mapbox-gl";
 import { Map } from "./components/Map";
-import SearchBar from "./components/SearchBar";
+import "./index.css";
 
 let map;
 
@@ -18,7 +18,6 @@ function initialize() {
     var zoom = 2;
     var center = [-100, 40];
   }
-
 
   map = new Map(center, zoom, "map");
   $(".edit-map-button").click(editInPotlatch);
