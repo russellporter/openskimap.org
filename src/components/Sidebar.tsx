@@ -12,19 +12,17 @@ import InfoIcon from "@material-ui/icons/Info";
 import SatelliteIcon from "@material-ui/icons/Satellite";
 import TerrainIcon from "@material-ui/icons/Terrain";
 import * as React from "react";
+import EventBus from "./EventBus";
 
-interface Props {}
+interface Props {
+  eventBus: EventBus;
+  open: boolean;
+}
 
-export default class Sidebar extends React.Component<Props, { open: boolean }> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = { open: false };
-  }
-
+export default class Sidebar extends React.Component<Props, {}> {
   render = () => {
     return (
-      <Drawer anchor="left" open={this.state.open} onClose={this.close}>
+      <Drawer anchor="left" open={this.props.open} onClose={this.close}>
         <div
           tabIndex={0}
           role="button"
@@ -77,6 +75,6 @@ export default class Sidebar extends React.Component<Props, { open: boolean }> {
   };
 
   close = () => {
-    this.setState({ open: false });
+    this.props.eventBus.closeSidebar();
   };
 }

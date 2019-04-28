@@ -1,5 +1,6 @@
 import * as lunr from "lunr";
 import * as mapboxgl from "mapbox-gl";
+import EventBus from "./EventBus";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
 
@@ -14,7 +15,8 @@ export class Map {
   constructor(
     center: mapboxgl.LngLatLike,
     zoom: number,
-    containerID: string | Element
+    containerID: string | Element,
+    eventBus: EventBus
   ) {
     this.map = new mapboxgl.Map({
       container: containerID, // container id
@@ -62,7 +64,7 @@ export class Map {
       })
     );
 
-    this.map.addControl(new SearchBarControl());
+    this.map.addControl(new SearchBarControl(eventBus));
 
     this.map.addControl(
       new mapboxgl.GeolocateControl({
