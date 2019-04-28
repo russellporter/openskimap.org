@@ -2,6 +2,7 @@ import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Map } from "./components/Map";
+import Sidebar from "./components/Sidebar";
 import "./index.css";
 
 let map: Map | null = null;
@@ -23,6 +24,8 @@ function initialize() {
     center = [-100, 40];
     zoom = 2;
   }
+
+  ReactDOM.render(<Sidebar />, document.getElementById("sidebar"));
 
   map = new Map(center, zoom, "map");
   $(".edit-map-button").click(editInPotlatch);
