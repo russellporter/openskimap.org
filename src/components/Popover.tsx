@@ -1,10 +1,12 @@
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from "react-dom";
 
 export abstract class Popover {
-  protected container = document.createElement('div');
+  protected container = document.createElement("div");
   protected highlightPosition: mapboxgl.LngLatLike | null = null;
 
-  public onHoverChartPosition: (position: mapboxgl.LngLatLike | null) => void = () => {}
+  public onHoverChartPosition: (
+    position: mapboxgl.LngLatLike | null
+  ) => void = () => {};
 
   constructor() {}
 
@@ -18,8 +20,8 @@ export abstract class Popover {
   }
 
   _onHoverChartPosition = (position: mapboxgl.LngLatLike | null) => {
-    this.onHoverChartPosition(position)
-  }
+    this.onHoverChartPosition(position);
+  };
 
   public abstract addTo(map: mapboxgl.Map): void;
   public abstract remove(map: mapboxgl.Map): void;

@@ -1,15 +1,18 @@
-import * as React from 'react';
-import * as Popup from './PopupComponents';
-import { PointPopover } from './PointPopover';
-import { SkiLiftData } from './MapData';
-import { StatusIcon } from './StatusIcon';
-import { loadLift } from './GeoJSONLoader';
-import turfLength from '@turf/length';
-import { Feature, Geometry, LineString } from 'geojson';
-import loadElevationProfile, { extractEndpoints, ElevationData } from './ElevationProfileLoader';
+import turfLength from "@turf/length";
+import { Feature, Geometry, LineString } from "geojson";
+import * as React from "react";
+import loadElevationProfile, {
+  ElevationData,
+  extractEndpoints
+} from "./ElevationProfileLoader";
+import { loadLift } from "./GeoJSONLoader";
+import { SkiLiftData } from "./MapData";
+import { PointPopover } from "./PointPopover";
+import * as Popup from "./PopupComponents";
+import { StatusIcon } from "./StatusIcon";
 
 interface Props {
-  data: SkiLiftData,
+  data: SkiLiftData;
 }
 
 interface State {
@@ -23,7 +26,12 @@ export class SkiLiftPopup extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = {feature: null, distance: null, elevationData: null, speed: null}
+    this.state = {
+      feature: null,
+      distance: null,
+      elevationData: null,
+      speed: null
+    };
   }
 
   componentDidMount() {
@@ -31,30 +39,40 @@ export class SkiLiftPopup extends React.Component<Props, State> {
       .then(feature => {
         this.setState({
           feature: feature,
-          distance: feature.geometry.type === 'LineString'
-            ? turfLength(feature, {units: 'meters'})
-            : null
+          distance:
+            feature.geometry.type === "LineString"
+              ? turfLength(feature, { units: "meters" })
+              : null
         });
-        return feature
+        return feature;
       })
       .then(feature => {
-        if (feature.geometry.type === 'LineString') {
-          return loadElevationProfile(extractEndpoints(feature.geometry as LineString))
+        if (feature.geometry.type === "LineString") {
+          return loadElevationProfile(
+            extractEndpoints(feature.geometry as LineString)
+          );
         }
 
-        return Promise.reject('no elevation profile to load')
+        return Promise.reject("no elevation profile to load");
       })
       .then(elevationData => {
-        const elevationChange = Math.max(elevationData.ascent, elevationData.descent);
+        const elevationChange = Math.max(
+          elevationData.ascent,
+          elevationData.descent
+        );
         const distance = this.state.distance;
-        const durationInSeconds = normalizeDuration(this.props.data['aerialway:duration']);
+        const durationInSeconds = normalizeDuration(
+          this.props.data["aerialway:duration"]
+        );
         let speed = null;
         if (distance !== null && durationInSeconds !== null) {
-            const slopeDistance = Math.sqrt(Math.pow(distance, 2) + Math.pow(elevationChange, 2));
-            speed = (slopeDistance / durationInSeconds);
+          const slopeDistance = Math.sqrt(
+            Math.pow(distance, 2) + Math.pow(elevationChange, 2)
+          );
+          speed = slopeDistance / durationInSeconds;
         }
 
-        this.setState({elevationData: elevationData, speed: speed})
+        this.setState({ elevationData: elevationData, speed: speed });
       });
   }
 
@@ -63,51 +81,40 @@ export class SkiLiftPopup extends React.Component<Props, State> {
     const distance = this.state.distance;
     const elevationData = this.state.elevationData;
     const speed = this.state.speed;
-    const badgeProps = Popup.refBadgeFromData(data)
-    const badge = badgeProps ? <Popup.Badge {...badgeProps} /> : null
+    const badgeProps = Popup.refBadgeFromData(data);
+    const badge = badgeProps ? <Popup.Badge {...badgeProps} /> : null;
     return (
       <Popup.Container>
         <Popup.Header>
-          {data.name_and_type &&
-            <Popup.Title title={data.name_and_type} />
-          }
-          {badge &&
-            ' '
-          }
-          {badge &&
-            badge
-          }
-          {data.status &&
-            ' '
-          }
-          {data.status &&
+          {data.name_and_type && <Popup.Title title={data.name_and_type} />}
+          {badge && " "}
+          {badge && badge}
+          {data.status && " "}
+          {data.status && (
             <StatusIcon
-            status={data.status}
-            entityName={'lift'}
-            hideIfOperating={true} />
-          }
+              status={data.status}
+              entityName={"lift"}
+              hideIfOperating={true}
+            />
+          )}
         </Popup.Header>
         {
           <div className={"distance-and-elevation-info"}>
-          {distance &&
-            <span>Distance: {Math.round(distance)}m</span>
-          }
-          {elevationData && elevationData.ascent > 1 &&
-            <span>Ascent: {Math.round(elevationData.ascent)}m</span>
-          }
-          {elevationData && elevationData.descent > 1 &&
-            <span>Descent: {Math.round(elevationData.descent)}m</span>
-          }
-          {speed &&
-            <span>Speed: {speed.toFixed(1)} m/s</span>
-          }
+            {distance && <span>Distance: {Math.round(distance)}m</span>}
+            {elevationData && elevationData.ascent > 1 && (
+              <span>Ascent: {Math.round(elevationData.ascent)}m</span>
+            )}
+            {elevationData && elevationData.descent > 1 && (
+              <span>Descent: {Math.round(elevationData.descent)}m</span>
+            )}
+            {speed && <span>Speed: {speed.toFixed(1)} m/s</span>}
           </div>
         }
-        {data.note &&
+        {data.note && (
           <div>
             <span>Notes: {data.note}</span>
           </div>
-        }
+        )}
       </Popup.Container>
     );
   }
@@ -125,13 +132,13 @@ function normalizeDuration(string: string | undefined): number | null {
     return Math.round(parseFloat(string) * 60);
   }
 
-  if (string.indexOf(':') !== -1) {
-    const components = string.split(':');
+  if (string.indexOf(":") !== -1) {
+    const components = string.split(":");
     if (components.length !== 2) {
       return null;
     }
 
-    return parseInt(components[0]) * 60 + parseInt(components[1])
+    return parseInt(components[0]) * 60 + parseInt(components[1]);
   }
 
   return null;
@@ -148,16 +155,16 @@ export class SkiLiftPopover extends PointPopover {
   public addTo(map: mapboxgl.Map) {
     super.addTo(map);
 
-    map.setFilter('selected-lift', ['==', 'lid', this.data.lid]);
+    map.setFilter("selected-lift", ["==", "lid", this.data.lid]);
   }
 
   public remove(map: mapboxgl.Map) {
-    super.remove(map)
+    super.remove(map);
 
-    map.setFilter('selected-lift', ['==', 'lid', -1]);
+    map.setFilter("selected-lift", ["==", "lid", -1]);
   }
 
-	protected render(): React.ReactElement<any> {
-		return <SkiLiftPopup data={this.data} />;
-	}
+  protected render(): React.ReactElement<any> {
+    return <SkiLiftPopup data={this.data} />;
+  }
 }

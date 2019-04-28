@@ -1,5 +1,11 @@
-html { height: 100% }
-body { height: 100%; margin: 0px; padding: 0px }
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+}
 
 #map {
   width: 100%;
@@ -7,16 +13,16 @@ body { height: 100%; margin: 0px; padding: 0px }
 }
 
 #settings-box {
-    display: flex;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0.8;
-    background: #eee;
-    padding:4px;
-    border-top-right-radius: 4px;
-    font-family:Helvetica;
-    font-size:x-small;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.8;
+  background: #eee;
+  padding: 4px;
+  border-top-right-radius: 4px;
+  font-family: Helvetica;
+  font-size: x-small;
 }
 .openskimap-style-control > button {
   font-weight: bold;
@@ -24,7 +30,7 @@ body { height: 100%; margin: 0px; padding: 0px }
   padding: 0 8px 0 8px;
 }
 .openskimap-style-enabled {
-  color: #3CB6E3;
+  color: #3cb6e3;
 }
 
 .ski-area-cluster-popup {
@@ -67,20 +73,25 @@ body { height: 100%; margin: 0px; padding: 0px }
   color: grey;
 }
 
-.operating-status-icon-operating, .status-icon-operating {
+.operating-status-icon-operating,
+.status-icon-operating {
   color: green;
 }
 
-.operating-status-icon-closed, .status-icon-disused, .status-icon-abandoned {
+.operating-status-icon-closed,
+.status-icon-disused,
+.status-icon-abandoned {
   color: red;
 }
 
-.status-icon-construction, .status-icon-planned, .status-icon-proposed {
+.status-icon-construction,
+.status-icon-planned,
+.status-icon-proposed {
   color: purple;
 }
 
 .tooltip-inner {
-    max-width: 250px !important;
+  max-width: 250px !important;
 }
 
 .mapboxgl-popup-content {

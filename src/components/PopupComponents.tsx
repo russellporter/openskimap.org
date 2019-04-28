@@ -1,63 +1,65 @@
-import * as React from 'react'
-import {SkiWayData} from "./MapData"
+import * as React from "react";
+import { SkiWayData } from "./MapData";
 
 interface WithTitleProps {
-  title: string | undefined,
-  badge: BadgeProps | null | undefined,
-};
+  title: string | undefined;
+  badge: BadgeProps | null | undefined;
+}
 
 interface TitleProps {
-  title: string,
-};
+  title: string;
+}
 
-interface ContainerProps {};
+interface ContainerProps {}
 
-interface HeaderProps {};
+interface HeaderProps {}
 
 export const WithTitle: React.SFC<WithTitleProps> = props => {
-  let title = props.title ? <Title title={props.title} /> : null
-  let badge = props.badge ? <Badge {...props.badge} /> : null
+  let title = props.title ? <Title title={props.title} /> : null;
+  let badge = props.badge ? <Badge {...props.badge} /> : null;
   return (
     <Container>
-      {(title || badge) &&
+      {(title || badge) && (
         <Header>
           {title}
-          {title && badge &&
-            ' '
-          }
+          {title && badge && " "}
           {badge}
         </Header>
-      }
+      )}
       {props.children}
     </Container>
   );
 };
 
 export const Container: React.SFC<ContainerProps> = props => {
-  return <div className='ski-popup'>{props.children}</div>;
+  return <div className="ski-popup">{props.children}</div>;
 };
 
 export const Header: React.SFC<HeaderProps> = props => {
-  return <div className='ski-popup-header'>{props.children}</div>;
+  return <div className="ski-popup-header">{props.children}</div>;
 };
 
 export const Title: React.SFC<TitleProps> = props => {
-  return <span className='ski-popup-title'>{props.title}</span>;
+  return <span className="ski-popup-title">{props.title}</span>;
 };
 
 interface BadgeProps {
-  color: string,
-  content: string,
-};
+  color: string;
+  content: string;
+}
 
 export function refBadgeFromData(data: SkiWayData): BadgeProps | null {
   if (data.ref && data.ref.length > 0) {
-    return {color: data.color, content: data.ref}
+    return { color: data.color, content: data.ref };
   } else {
-    return null
+    return null;
   }
 }
 
 export const Badge: React.SFC<BadgeProps> = props => {
-  return <span className='badge badge-pill' style={{backgroundColor: props.color}}>{props.content}</span>;
+  return (
+    <span className="badge badge-pill" style={{ backgroundColor: props.color }}>
+      {props.content}
+    </span>
+  );
 };

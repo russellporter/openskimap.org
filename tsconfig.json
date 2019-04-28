@@ -1,26 +1,16 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist/",
-        "sourceMap": true,
-        "strict": true,
-        "module": "esnext",
-        "moduleResolution": "node",
-        "target": "es5",
-        "jsx": "react",
-        "importHelpers": true,
-        "lib": [
-          "dom",
-          "es5",
-          "es2015.promise",
-          "es2015.collection"
-        ],
-        "typeRoots": [
-          "./node_modules/@types",
-          "./definitions"
-        ]
-    },
-    "include": [
-        "./src/**/*"
-    ],
-    "files": ["./definitions/index.d.ts"]
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "strict": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es5",
+    "jsx": "react",
+    "importHelpers": true,
+    "lib": ["dom", "es5", "es2015.promise", "es2015.collection"],
+    "typeRoots": ["./node_modules/@types", "./definitions"]
+  },
+  "include": ["./src/**/*"],
+  "files": ["./definitions/index.d.ts"]
 }

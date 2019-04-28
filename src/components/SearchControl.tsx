@@ -1,7 +1,7 @@
+import * as lunr from "lunr";
 import * as mapboxgl from "mapbox-gl";
-import 'MapboxGeocoder';
-import 'whatwg-fetch';
-import * as lunr from 'lunr';
+import "MapboxGeocoder";
+import "whatwg-fetch";
 
 interface Options {
   accessToken: string;
@@ -14,7 +14,7 @@ export class SearchControl implements mapboxgl.IControl {
   private geocoder: MapboxGeocoder;
 
   constructor(options: Options) {
-	  this.geocoder = new MapboxGeocoder({accessToken: options.accessToken});
+    this.geocoder = new MapboxGeocoder({ accessToken: options.accessToken });
 
     fetch(options.searchIndexURL)
       .then(response => {
@@ -27,14 +27,14 @@ export class SearchControl implements mapboxgl.IControl {
   }
 
   getDefaultPosition(): string {
-		return this.geocoder.getDefaultPosition();
-	}
-	onRemove(map: mapboxgl.Map) {
-		this.geocoder.onRemove(map);
-	}
-	onAdd(map: mapboxgl.Map): HTMLElement {
-		return this.geocoder.onAdd(map);
-	}
+    return this.geocoder.getDefaultPosition();
+  }
+  onRemove(map: mapboxgl.Map) {
+    this.geocoder.onRemove(map);
+  }
+  onAdd(map: mapboxgl.Map): HTMLElement {
+    return this.geocoder.onAdd(map);
+  }
 
   _geocode = (query: string) => {
     const index = this.index;
@@ -48,19 +48,19 @@ export class SearchControl implements mapboxgl.IControl {
       }
     }
     return null;
-  }
+  };
 }
 
 function skiAreaFeature(data: any) {
   return {
     center: data.coordinates,
     geometry: {
-        type: "Point",
-        coordinates: data.coordinates
+      type: "Point",
+      coordinates: data.coordinates
     },
     place_name: data.name, // eslint-disable-line camelcase
-    place_type: ['coordinate'], // eslint-disable-line camelcase
+    place_type: ["coordinate"], // eslint-disable-line camelcase
     properties: {},
-    type: 'Feature'
+    type: "Feature"
   };
 }
