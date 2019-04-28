@@ -1,9 +1,10 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import AboutModal from "./components/AboutModal";
 import { Map } from "./components/Map";
 import Sidebar from "./components/Sidebar";
-import State from "./components/State";
+import State, { StateChange } from "./components/State";
 import StateStore from "./components/StateStore";
 import "./index.css";
 import { MapStyle } from "./MapStyle";
@@ -12,7 +13,7 @@ let map: Map | null = null;
 
 function initialize() {
   const store = new StateStore(
-    { sidebarOpen: false, mapStyle: MapStyle.Terrain },
+    { sidebarOpen: false, aboutInfoOpen: false, mapStyle: MapStyle.Terrain },
     update
   );
 
@@ -36,18 +37,30 @@ function initialize() {
   map = new Map(center, zoom, "map", store);
   $(".edit-map-button").click(editInPotlatch);
 
-  update(store._state);
+  update(store._state, store._state);
 
-  function update(state: State) {
-    map!.setStyle(state.mapStyle);
-    ReactDOM.render(
-      <Sidebar
-        eventBus={store}
-        open={state.sidebarOpen}
-        selectedMapStyle={state.mapStyle}
-      />,
-      document.getElementById("sidebar")
-    );
+  function update(state: State, changes: StateChange) {
+    if (changes.mapStyle !== undefined) {
+      map!.setStyle(state.mapStyle);
+    }
+
+    if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
+      ReactDOM.render(
+        <Sidebar
+          eventBus={store}
+          open={state.sidebarOpen}
+          selectedMapStyle={state.mapStyle}
+        />,
+        document.getElementById("sidebar")
+      );
+    }
+
+    if (changes.aboutInfoOpen !== undefined) {
+      ReactDOM.render(
+        <AboutModal eventBus={store} open={state.aboutInfoOpen} />,
+        document.getElementById("about-modal")
+      );
+    }
   }
 }
 

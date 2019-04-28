@@ -1,32 +1,44 @@
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
-import State from "./State";
+import State, { StateChange as StateChanges } from "./State";
 
 export default class StateStore implements EventBus {
   _state: State;
-  updateHandler: (state: State) => void = () => {};
+  updateHandler: (state: State, changes: StateChanges) => void = () => {};
 
-  constructor(state: State, updateHandler: (state: State) => void = () => {}) {
+  constructor(
+    state: State,
+    updateHandler: (state: State, changes: StateChanges) => void = () => {}
+  ) {
     this._state = state;
     this.updateHandler = updateHandler;
   }
 
   openSidebar = () => {
-    this._state.sidebarOpen = true;
-    this.update();
+    this.update({ sidebarOpen: true });
   };
 
   closeSidebar = () => {
-    this._state.sidebarOpen = false;
-    this.update();
+    this.update({ sidebarOpen: false });
+  };
+
+  openAboutInfo = () => {
+    this.update({ aboutInfoOpen: true });
+  };
+
+  closeAboutInfo = () => {
+    this.update({ aboutInfoOpen: false });
   };
 
   setMapStyle(style: MapStyle): void {
-    this._state.mapStyle = style;
-    this.update();
+    this.update({ mapStyle: style });
   }
 
-  private update(): void {
-    this.updateHandler(this._state);
+  private update(changes: StateChanges): void {
+    Object.keys(changes).forEach(key => {
+      const change = (changes as { [key: string]: any })[key];
+      (this._state as { [key: string]: any })[key] = change;
+    });
+    this.updateHandler(this._state, changes);
   }
 }

@@ -68,7 +68,11 @@ export default class Sidebar extends React.Component<Props, {}> {
                 </ListItemIcon>
                 <ListItemText primary={"Edit"} />
               </ListItem>
-              <ListItem button key={"about"}>
+              <ListItem
+                button
+                key={"about"}
+                onClick={this.props.eventBus.openAboutInfo}
+              >
                 <ListItemIcon>
                   <InfoIcon />
                 </ListItemIcon>
