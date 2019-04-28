@@ -23,7 +23,8 @@ export class Map {
       style: "https://tiles.skimap.org/styles/terrain.json",
       center: center, // starting position [lng, lat]
       zoom: zoom, // starting zoom,
-      hash: true
+      hash: true,
+      attributionControl: false
     });
 
     this.interactionManager = new MapInteractionManager(this.map);
@@ -35,35 +36,7 @@ export class Map {
       })
     );
 
-    fetch("https://tiles.skimap.org/search_index.json")
-      .then(response => {
-        return response.json();
-      })
-      .then(json => {
-        this.index = lunr.Index.load(json.index);
-        this.data = json.skiAreas;
-      });
-
-    this.map.addControl(
-      new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        zoom: 12,
-        localGeocoder: (query: string) => {
-          const index = this.index;
-          if (index) {
-            const results = index.search(query.trim() + "*");
-            const geocoded = results.map(result => {
-              return skiAreaFeature(this.data[result.ref]);
-            });
-            if (geocoded.length > 0) {
-              return geocoded;
-            }
-          }
-          return null;
-        }
-      })
-    );
-
+    this.map.addControl(new mapboxgl.AttributionControl({ compact: true }));
     this.map.addControl(new SearchBarControl(eventBus));
 
     this.map.addControl(
