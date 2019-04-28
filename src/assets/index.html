@@ -1,54 +1,117 @@
 <html>
-<head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-2618724-7"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+  <head>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-2618724-7"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-    gtag('config', 'UA-2618724-7');
-  </script>
-  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
-  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
-  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
-  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css' />
-  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-  <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta charset="utf-8">
-  <title>OpenSkiMap.org</title>
-</head>
-<body>
-  <div id="map"></div>
-  <div id="settings-box">
-    <div class="btn-group-vertical btn-group-xs">
-      <button class="btn btn-default edit-map-button">Edit Map</button>
-      <a class="btn btn-default" href="http://www.skimap.org">Skimap.org</a>
-      <button class="btn btn-default"  data-toggle="modal" data-target="#about-modal">About</button>
+      gtag("config", "UA-2618724-7");
+    </script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js"></script>
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css"
+      type="text/css"
+    />
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"
+    ></script>
+    <link
+      href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      names="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta charset="utf-8" />
+    <title>OpenSkiMap.org</title>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="settings-box">
+      <div class="btn-group-vertical btn-group-xs">
+        <button class="btn btn-default edit-map-button">Edit Map</button>
+        <a class="btn btn-default" href="http://www.skimap.org">Skimap.org</a>
+        <button
+          class="btn btn-default"
+          data-toggle="modal"
+          data-target="#about-modal"
+        >
+          About
+        </button>
+      </div>
     </div>
-  </div>
 
-  <div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modal-label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title" id="about-modal-label">About</h4>
+    <div
+      class="modal fade"
+      id="about-modal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="about-modal-label"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-hidden="true"
+            >
+              &times;
+            </button>
+            <h4 class="modal-title" id="about-modal-label">About</h4>
+          </div>
+          <div class="modal-body">
+            <p>
+              This map uses OpenStreetMap data to show ski trails and lifts
+              around the world. Backcountry ski routes are also displayed. You
+              can add ski trails and lifts by
+              <a href="#" class="edit-map-button">editing the map</a>.
+            </p>
+
+            <p>
+              Want to see the world's largest collection of traditional ski
+              maps? Visit <a href="http://www.skimap.org">skimap.org</a>
+            </p>
+
+            <p>
+              Suggestions for improvements? Email
+              <a href="mailto:contact@skimap.org">contact@skimap.org</a>
+            </p>
+          </div>
         </div>
-        <div class="modal-body">
-          <p>This map uses OpenStreetMap data to show ski trails and lifts around the world. Backcountry ski routes are also displayed. You can add ski trails and lifts by <a href="#" class="edit-map-button">editing the map</a>.</p>
-
-          <p>Want to see the world's largest collection of traditional ski maps? Visit <a href="http://www.skimap.org">skimap.org</a></p>
-
-          <p>Suggestions for improvements? Email <a href="mailto:contact@skimap.org">contact@skimap.org</a></p>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-  </div>
-</body>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+  </body>
 </html>
