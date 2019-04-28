@@ -12,10 +12,12 @@ import InfoIcon from "@material-ui/icons/Info";
 import SatelliteIcon from "@material-ui/icons/Satellite";
 import TerrainIcon from "@material-ui/icons/Terrain";
 import * as React from "react";
+import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 
 interface Props {
   eventBus: EventBus;
+  selectedMapStyle: MapStyle;
   open: boolean;
 }
 
@@ -31,13 +33,27 @@ export default class Sidebar extends React.Component<Props, {}> {
         >
           <div style={{ width: "256" }}>
             <List>
-              <ListItem button key={"terrain"}>
+              <ListItem
+                button
+                key={"terrain"}
+                onClick={() => {
+                  this.props.eventBus.setMapStyle(MapStyle.Terrain);
+                }}
+                selected={this.props.selectedMapStyle === MapStyle.Terrain}
+              >
                 <ListItemIcon>
                   <TerrainIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Terrain"} />
               </ListItem>
-              <ListItem button key={"satellite"}>
+              <ListItem
+                button
+                key={"satellite"}
+                onClick={() => {
+                  this.props.eventBus.setMapStyle(MapStyle.Satellite);
+                }}
+                selected={this.props.selectedMapStyle === MapStyle.Satellite}
+              >
                 <ListItemIcon>
                   <SatelliteIcon />
                 </ListItemIcon>

@@ -1,5 +1,6 @@
 import * as lunr from "lunr";
 import * as mapboxgl from "mapbox-gl";
+import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
@@ -20,7 +21,6 @@ export class Map {
   ) {
     this.map = new mapboxgl.Map({
       container: containerID, // container id
-      style: "https://tiles.skimap.org/styles/terrain.json",
       center: center, // starting position [lng, lat]
       zoom: zoom, // starting zoom,
       hash: true,
@@ -48,6 +48,10 @@ export class Map {
       })
     );
   }
+
+  setStyle = (style: MapStyle) => {
+    this.map.setStyle(style);
+  };
 
   getCenter = () => {
     return this.map.getCenter();

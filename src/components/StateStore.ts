@@ -1,3 +1,4 @@
+import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import State from "./State";
 
@@ -19,6 +20,11 @@ export default class StateStore implements EventBus {
     this._state.sidebarOpen = false;
     this.update();
   };
+
+  setMapStyle(style: MapStyle): void {
+    this._state.mapStyle = style;
+    this.update();
+  }
 
   private update(): void {
     this.updateHandler(this._state);

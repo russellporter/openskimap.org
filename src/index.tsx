@@ -6,11 +6,15 @@ import Sidebar from "./components/Sidebar";
 import State from "./components/State";
 import StateStore from "./components/StateStore";
 import "./index.css";
+import { MapStyle } from "./MapStyle";
 
 let map: Map | null = null;
 
 function initialize() {
-  const store = new StateStore({ sidebarOpen: false }, update);
+  const store = new StateStore(
+    { sidebarOpen: false, mapStyle: MapStyle.Terrain },
+    update
+  );
 
   (mapboxgl as any).accessToken =
     "pk.eyJ1IjoicnVzc2VsbCIsImEiOiJjaXUwYWE5NGYwMW94MnpydG5jaWxjOHJsIn0.oyWAcfWU5SMOOWevkrenlw";
@@ -35,8 +39,13 @@ function initialize() {
   update(store._state);
 
   function update(state: State) {
+    map!.setStyle(state.mapStyle);
     ReactDOM.render(
-      <Sidebar eventBus={store} open={state.sidebarOpen} />,
+      <Sidebar
+        eventBus={store}
+        open={state.sidebarOpen}
+        selectedMapStyle={state.mapStyle}
+      />,
       document.getElementById("sidebar")
     );
   }
