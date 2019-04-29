@@ -62,7 +62,11 @@ export default class Sidebar extends React.Component<Props, {}> {
             </List>
             <Divider />
             <List>
-              <ListItem button key={"edit"}>
+              <ListItem
+                button
+                key={"edit"}
+                onClick={this.props.eventBus.editMap}
+              >
                 <ListItemIcon>
                   <EditIcon />
                 </ListItemIcon>
@@ -81,7 +85,13 @@ export default class Sidebar extends React.Component<Props, {}> {
             </List>
             <Divider />
             <List>
-              <ListItem button key={"skimap.org"}>
+              <ListItem
+                button
+                key={"skimap.org"}
+                onClick={() => {
+                  window.location.href = "https://skimap.org";
+                }}
+              >
                 <ListItemIcon>
                   <BookmarkIcon />
                 </ListItemIcon>

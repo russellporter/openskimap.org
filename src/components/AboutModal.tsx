@@ -17,7 +17,7 @@ export default class AboutModal extends React.Component<Props> {
           this.props.eventBus.closeAboutInfo();
         }}
       >
-        <About />
+        <About eventBus={this.props.eventBus} />
       </Modal>
     );
   }

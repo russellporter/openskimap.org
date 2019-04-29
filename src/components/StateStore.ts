@@ -1,6 +1,6 @@
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
-import State, { StateChange as StateChanges } from "./State";
+import State, { StateChanges } from "./State";
 
 export default class StateStore implements EventBus {
   _state: State;
@@ -13,6 +13,10 @@ export default class StateStore implements EventBus {
     this._state = state;
     this.updateHandler = updateHandler;
   }
+
+  editMap = () => {
+    this.update({ editMapOpen: true });
+  };
 
   openSidebar = () => {
     this.update({ sidebarOpen: true });

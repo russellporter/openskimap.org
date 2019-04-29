@@ -4,7 +4,7 @@ import * as ReactDOM from "react-dom";
 import AboutModal from "./components/AboutModal";
 import { Map } from "./components/Map";
 import Sidebar from "./components/Sidebar";
-import State, { StateChange } from "./components/State";
+import State, { StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import "./index.css";
 import { MapStyle } from "./MapStyle";
@@ -13,7 +13,12 @@ let map: Map | null = null;
 
 function initialize() {
   const store = new StateStore(
-    { sidebarOpen: false, aboutInfoOpen: false, mapStyle: MapStyle.Terrain },
+    {
+      editMapOpen: false,
+      sidebarOpen: false,
+      aboutInfoOpen: false,
+      mapStyle: MapStyle.Terrain
+    },
     update
   );
 
@@ -35,13 +40,16 @@ function initialize() {
   }
 
   map = new Map(center, zoom, "map", store);
-  $(".edit-map-button").click(editInPotlatch);
 
   update(store._state, store._state);
 
-  function update(state: State, changes: StateChange) {
+  function update(state: State, changes: StateChanges) {
     if (changes.mapStyle !== undefined) {
       map!.setStyle(state.mapStyle);
+    }
+
+    if (changes.editMapOpen === true) {
+      editMap();
     }
 
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
@@ -64,7 +72,7 @@ function initialize() {
   }
 }
 
-function editInPotlatch() {
+function editMap() {
   var center = map!.getCenter().wrap();
   window.location.href =
     "https://www.openstreetmap.org/edit?editor=id#map=" +

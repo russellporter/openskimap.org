@@ -1,9 +1,14 @@
 import { Link, Typography } from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import * as React from "react";
+import EventBus from "./EventBus";
 import { theme } from "./Theme";
 
-export default class About extends React.Component {
+interface Props {
+  eventBus: EventBus;
+}
+
+export default class About extends React.Component<Props> {
   render() {
     return (
       <div
@@ -28,7 +33,14 @@ export default class About extends React.Component {
               This map uses OpenStreetMap data to show ski trails and lifts
               around the world. Backcountry ski routes are also displayed. You
               can add ski trails and lifts by{" "}
-              <Link href="#" className="edit-map-button">
+              <Link
+                onClick={(e: any) => {
+                  e.preventDefault();
+                  this.props.eventBus.editMap();
+                }}
+                href="#"
+                className="edit-map-button"
+              >
                 editing the map
               </Link>
               .
