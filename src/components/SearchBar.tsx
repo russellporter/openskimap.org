@@ -9,9 +9,11 @@ import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
+import { Feature, Geometry } from "geojson";
 import * as lunr from "lunr";
 import * as React from "react";
 import EventBus from "./EventBus";
+import { SkiAreaData } from "./MapData";
 import * as styles from "./SearchBar.css";
 
 interface Props {
@@ -32,17 +34,12 @@ interface SearchIndex {
 }
 
 enum Activity {
-  Downhill = "DOWNHILL",
-  Nordic = "NORDIC",
-  Backcountry = "BACKCOUNTRY"
+  Downhill = "downhill",
+  Nordic = "nordic",
+  Backcountry = "backcountry"
 }
 
-interface Result {
-  lid: string;
-  text: string;
-  activities: Activity[];
-  geometry: GeoJSON.Point;
-}
+type Result = Feature<Geometry, SkiAreaData>;
 
 export default class SearchBar extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -70,34 +67,39 @@ export default class SearchBar extends React.Component<Props, State> {
     const width = this.props.width;
     return (
       <Paper className={styles.root} style={{ width: width }} elevation={1}>
-        <IconButton
-          className={styles.iconButton}
-          aria-label="Menu"
-          onClick={this.props.eventBus.openSidebar}
-        >
-          <MenuIcon />
-        </IconButton>
-        <InputBase
-          className={styles.input}
-          placeholder="Search Ski Areas"
-          onChange={e => {
-            this.setState({
-              results: results(e.target.value, this.state.searchIndex)
-            });
-          }}
-        />
-        <IconButton
-          className={styles.iconButton}
-          aria-label="Search"
-          disabled={this.state.searchQuery.length == 0}
-          onClick={() => {}}
-        >
-          <SearchIcon />
-        </IconButton>
+        <div style={{ alignItems: "center", display: "flex" }}>
+          <IconButton
+            className={styles.iconButton}
+            aria-label="Menu"
+            onClick={this.props.eventBus.openSidebar}
+          >
+            <MenuIcon />
+          </IconButton>
+          <InputBase
+            className={styles.input}
+            placeholder="Search Ski Areas"
+            onChange={e => {
+              this.setState({
+                results: results(e.target.value, this.state.searchIndex)
+              });
+            }}
+          />
+          <IconButton
+            className={styles.iconButton}
+            aria-label="Search"
+            disabled={this.state.searchQuery.length == 0}
+            onClick={() => {}}
+          >
+            <SearchIcon />
+          </IconButton>
+        </div>
         {this.state.results.length > 0 ? (
           <React.Fragment>
             <Divider />
-            <SearchResults {...this.state.results} />
+            <SearchResults
+              eventBus={this.props.eventBus}
+              results={this.state.results}
+            />
           </React.Fragment>
         ) : null}
       </Paper>
@@ -108,40 +110,52 @@ export default class SearchBar extends React.Component<Props, State> {
 function results(text: string, searchIndex: SearchIndex | null): Result[] {
   if (searchIndex) {
     const results = searchIndex.index.search(text);
-    return results.map(result => {
-      const data = searchIndex.data[result.ref];
-      return {
-        lid: "",
-        text: data.name,
-        activities: [] as Activity[],
-        geometry: {
-          type: "Point",
-          coordinates: data.coordinates
-        } as GeoJSON.Point
-      };
-    });
+    return results.map(result => searchIndex.data[result.ref]);
   }
   return [];
 }
 
-export const SearchResults: React.FunctionComponent<Result[]> = results => {
+export const SearchResults: React.FunctionComponent<{
+  eventBus: EventBus;
+  results: Result[];
+}> = props => {
   return (
-    <List>
-      {results
+    <List disablePadding={true}>
+      {props.results
         .map(result => {
-          return <SearchResult key={result.lid} {...result} />;
+          return (
+            <SearchResult
+              eventBus={props.eventBus}
+              key={result.properties.lid}
+              result={result}
+            />
+          );
         })
         .reduce((previous, current) => [previous, <Divider />, current] as any)}
     </List>
   );
 };
 
-const SearchResult: React.FunctionComponent<Result> = result => {
+const SearchResult: React.FunctionComponent<{
+  result: Result;
+  eventBus: EventBus;
+}> = props => {
   return (
-    <ListItem>
+    <ListItem
+      button
+      onClick={() => {
+        props.eventBus.showInfo({
+          lid: props.result.properties.lid,
+          panToPosition:
+            props.result.geometry.type == "Point"
+              ? props.result.geometry.coordinates
+              : null
+        });
+      }}
+    >
       <ListItemText
-        primary={result.text}
-        secondary={result.activities
+        primary={props.result.properties.name}
+        secondary={props.result.properties.activities
           .map(activity => {
             switch (activity) {
               case Activity.Downhill:

@@ -59,7 +59,10 @@ export class MapInteractionManager {
   }
 
   _onClickItem = (e: any) => {
-    this.eventBus.showInfo({ lid: e.features[0].properties.lid });
+    this.eventBus.showInfo({
+      lid: e.features[0].properties.lid,
+      panToPosition: null
+    });
   };
 }
 

@@ -1,6 +1,4 @@
 .root {
-  display: flex;
-  align-items: "center";
   width: 100%;
   max-width: 400px;
   min-width: 300px;

@@ -55,6 +55,9 @@ export class Map {
   }
 
   setInfo = (info: InfoData | null) => {
+    if (info && info.panToPosition) {
+      this.map.panTo(info.panToPosition);
+    }
     if (this.infoControl !== null) {
       this.map.removeControl(this.infoControl);
     }
