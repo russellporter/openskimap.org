@@ -1,3 +1,4 @@
+import { Card, CardContent, Typography } from "@material-ui/core";
 import turfLength from "@turf/length";
 import { Feature, Geometry } from "geojson";
 import * as React from "react";
@@ -14,7 +15,6 @@ import {
 import { LabelWithIcon } from "./LabelWithIcon";
 import { SkiRunData } from "./MapData";
 import { PointPopover } from "./PointPopover";
-import * as Popup from "./PopupComponents";
 
 interface Props extends HeightProfileHighlightProps {
   data: SkiRunData;
@@ -91,81 +91,86 @@ export class SkiRunInfo extends React.Component<Props, State> {
     const slopeInfo = elevationData && elevationData.slopeInfo;
 
     return (
-      <Popup.WithTitle title={data.name} badge={Popup.refBadgeFromData(data)}>
-        {difficultyText(data)}
-        <div className="ski-popup-labels">
-          <GroomingLabel data={data} />
-          {data.oneway === "yes" && type !== "downhill" ? (
-            <LabelWithIcon
-              appearance="info"
-              text="One Way"
-              icon="arrow-right"
-            />
-          ) : null}
-          {data.lit === "yes" ? (
-            <LabelWithIcon
-              appearance="night"
-              text="Night Lit"
-              icon="asterisk"
-            />
-          ) : null}
-          {data.gladed === "yes" ? (
-            <LabelWithIcon
-              appearance="success"
-              text="Gladed"
-              icon="tree-conifer"
-            />
-          ) : null}
-          {data.patrolled === "yes" ? (
-            <LabelWithIcon appearance="info" text="Patrolled" icon="plus" />
-          ) : null}
-          {data.patrolled === "no" ? (
-            <LabelWithIcon
-              appearance="danger"
-              text="Not Patrolled"
-              icon="plus"
-            />
-          ) : null}
-        </div>
-        <div className={"distance-and-elevation-info"}>
-          {distance ? <span>Distance: {Math.round(distance)}m</span> : null}
-          {elevationData && elevationData.ascent > 1 ? (
-            <span>Ascent: {Math.round(elevationData.ascent)}m</span>
-          ) : null}
-          {elevationData && elevationData.descent > 1 ? (
-            <span>Descent: {Math.round(elevationData.descent)}m</span>
-          ) : null}
-        </div>
-        {slopeInfo && (
+      <Card>
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="h2">
+            {data.name}
+          </Typography>
+          {difficultyText(data)}
+          <div className="ski-popup-labels">
+            <GroomingLabel data={data} />
+            {data.oneway === "yes" && type !== "downhill" ? (
+              <LabelWithIcon
+                appearance="info"
+                text="One Way"
+                icon="arrow-right"
+              />
+            ) : null}
+            {data.lit === "yes" ? (
+              <LabelWithIcon
+                appearance="night"
+                text="Night Lit"
+                icon="asterisk"
+              />
+            ) : null}
+            {data.gladed === "yes" ? (
+              <LabelWithIcon
+                appearance="success"
+                text="Gladed"
+                icon="tree-conifer"
+              />
+            ) : null}
+            {data.patrolled === "yes" ? (
+              <LabelWithIcon appearance="info" text="Patrolled" icon="plus" />
+            ) : null}
+            {data.patrolled === "no" ? (
+              <LabelWithIcon
+                appearance="danger"
+                text="Not Patrolled"
+                icon="plus"
+              />
+            ) : null}
+          </div>
           <div className={"distance-and-elevation-info"}>
-            {slopeInfo.average !== null && (
-              <span>Average Slope: {formattedSlope(slopeInfo.average)}</span>
-            )}
-            {slopeInfo.max !== null && (
-              <span>Max Slope: {formattedSlope(slopeInfo.max)}</span>
-            )}
+            {distance ? <span>Distance: {Math.round(distance)}m</span> : null}
+            {elevationData && elevationData.ascent > 1 ? (
+              <span>Ascent: {Math.round(elevationData.ascent)}m</span>
+            ) : null}
+            {elevationData && elevationData.descent > 1 ? (
+              <span>Descent: {Math.round(elevationData.descent)}m</span>
+            ) : null}
           </div>
-        )}
-        {data.note !== undefined && (
-          <div>
-            <span>Notes: {data.note}</span>
-          </div>
-        )}
-        {feature !== null &&
-        distance !== null &&
-        elevationData !== null &&
-        this.showHeightProfile() ? (
-          <HeightProfile
-            feature={feature}
-            distance={distance}
-            elevationData={elevationData}
-            chartHighlightPosition={this.props.chartHighlightPosition}
-            onHoverChartPosition={this.props.onHoverChartPosition}
-          />
-        ) : this.state.loadingElevationData ? (
-          <HeightProfilePlaceholder />
-        ) : null}
-      </Popup.WithTitle>
+          {slopeInfo && (
+            <div className={"distance-and-elevation-info"}>
+              {slopeInfo.average !== null && (
+                <span>Average Slope: {formattedSlope(slopeInfo.average)}</span>
+              )}
+              {slopeInfo.max !== null && (
+                <span>Max Slope: {formattedSlope(slopeInfo.max)}</span>
+              )}
+            </div>
+          )}
+          {data.note !== undefined && (
+            <div>
+              <span>Notes: {data.note}</span>
+            </div>
+          )}
+          {feature !== null &&
+          distance !== null &&
+          elevationData !== null &&
+          this.showHeightProfile() ? (
+            <HeightProfile
+              feature={feature}
+              distance={distance}
+              elevationData={elevationData}
+              chartHighlightPosition={this.props.chartHighlightPosition}
+              onHoverChartPosition={this.props.onHoverChartPosition}
+            />
+          ) : this.state.loadingElevationData ? (
+            <HeightProfilePlaceholder />
+          ) : null}
+        </CardContent>
+      </Card>
     );
   }
 }

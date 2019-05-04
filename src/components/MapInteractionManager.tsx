@@ -1,18 +1,12 @@
 import EventBus from "./EventBus";
-import { HighlightManager } from "./HighlightManager";
-import { PopoverManager } from "./PopoverManager";
 
 export class MapInteractionManager {
-  private popoverManager: PopoverManager;
-  private highlightManager: HighlightManager;
   private map: mapboxgl.Map;
   private eventBus: EventBus;
 
   constructor(map: mapboxgl.Map, eventBus: EventBus) {
     this.map = map;
     this.eventBus = eventBus;
-    this.popoverManager = new PopoverManager(map);
-    this.highlightManager = new HighlightManager(map, this.popoverManager);
 
     map.on("load", () => {
       this.attachListeners();
@@ -61,10 +55,6 @@ export class MapInteractionManager {
 
     skiAreaLayers.forEach(layer => {
       this.map.on("click", layer, this._onClickItem);
-    });
-
-    this.map.on("zoomstart", () => {
-      this.popoverManager.clear();
     });
   }
 

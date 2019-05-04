@@ -7,6 +7,7 @@ import { loadGeoJSON } from "./GeoJSONLoader";
 import { FeatureType, SkiAreaData, SkiLiftData, SkiRunData } from "./MapData";
 import { SkiAreaInfo } from "./SkiAreaPopup";
 import { SkiLiftInfo } from "./SkiLiftPopup";
+import { SkiRunInfo } from "./SkiRunPopup";
 
 type MapFeature = Feature<Geometry, SkiRunData | SkiLiftData | SkiAreaData>;
 
@@ -14,6 +15,8 @@ export const Info: React.FunctionComponent<{
   lid: string;
   width: number;
   eventBus: EventBus;
+  chartHighlightPosition: mapboxgl.LngLatLike | null;
+  onHoverChartPosition: (position: mapboxgl.LngLatLike | null) => void;
 }> = props => {
   const [data, setData] = useState<MapFeature | null>(null);
   useEffect(() => {
@@ -33,7 +36,13 @@ export const Info: React.FunctionComponent<{
       {data && data.properties.type == FeatureType.Lift && (
         <SkiLiftInfo data={data.properties} />
       )}
-      {data && data.properties.type == FeatureType.Run && <div />}
+      {data && data.properties.type == FeatureType.Run && (
+        <SkiRunInfo
+          data={data.properties}
+          chartHighlightPosition={props.chartHighlightPosition}
+          onHoverChartPosition={props.onHoverChartPosition}
+        />
+      )}
       {data && data.properties.type == FeatureType.SkiArea && (
         <SkiAreaInfo data={data.properties} />
       )}

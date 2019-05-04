@@ -1,4 +1,4 @@
-import { CardContent } from "@material-ui/core";
+import { Card, CardContent, Typography } from "@material-ui/core";
 import turfLength from "@turf/length";
 import { Feature, Geometry, LineString } from "geojson";
 import * as React from "react";
@@ -85,9 +85,9 @@ export class SkiLiftInfo extends React.Component<Props, State> {
     const badgeProps = Popup.refBadgeFromData(data);
     const badge = badgeProps ? <Popup.Badge {...badgeProps} /> : null;
     return (
-      <Popup.Container>
+      <Card>
         <CardContent>
-          <Popup.Header>
+          <Typography gutterBottom variant="h5" component="h2">
             {data.name_and_type && <Popup.Title title={data.name_and_type} />}
             {badge && " "}
             {badge && badge}
@@ -99,7 +99,7 @@ export class SkiLiftInfo extends React.Component<Props, State> {
                 hideIfOperating={true}
               />
             )}
-          </Popup.Header>
+          </Typography>
           {
             <div className={"distance-and-elevation-info"}>
               {distance && <span>Distance: {Math.round(distance)}m</span>}
@@ -118,7 +118,7 @@ export class SkiLiftInfo extends React.Component<Props, State> {
             </div>
           )}
         </CardContent>
-      </Popup.Container>
+      </Card>
     );
   }
 }

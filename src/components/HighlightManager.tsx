@@ -1,16 +1,16 @@
-import { PopoverManager } from "./PopoverManager";
+export interface ChartHighlighter {
+  setChartHighlightPosition(position: mapboxgl.LngLatLike | null): void;
+}
 
 // Syncs highlighted position between a chart displayed and the map.
-export class HighlightManager {
+export default class HighlightManager {
   private map: mapboxgl.Map;
-  private popoverManager: PopoverManager;
+  private chartHighlighter: ChartHighlighter;
   private marker: mapboxgl.Marker | null = null;
 
-  constructor(map: mapboxgl.Map, popoverManager: PopoverManager) {
+  constructor(map: mapboxgl.Map, chartHighlighter: ChartHighlighter) {
     this.map = map;
-    this.popoverManager = popoverManager;
-
-    popoverManager.onHoverChartPosition = this._hoveredChartPosition;
+    this.chartHighlighter = chartHighlighter;
 
     this.map.on("mousemove", "selected-run", this._onHover);
     this.map.on("mouseleave", "selected-run", this._onHoverOut);
@@ -34,7 +34,7 @@ export class HighlightManager {
     marker.setLngLat(position);
   }
 
-  _hoveredChartPosition = (position: mapboxgl.LngLatLike | null) => {
+  hoveredChartPosition = (position: mapboxgl.LngLatLike | null) => {
     if (position === null) {
       this.clearMarker();
     } else {
@@ -43,10 +43,10 @@ export class HighlightManager {
   };
 
   _onHover = (e: any) => {
-    this.popoverManager.setChartHighlightPosition(e.lngLat);
+    this.chartHighlighter.setChartHighlightPosition(e.lngLat);
   };
 
   _onHoverOut = (e: any) => {
-    this.popoverManager.setChartHighlightPosition(null);
+    this.chartHighlighter.setChartHighlightPosition(null);
   };
 }
