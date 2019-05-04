@@ -1,4 +1,8 @@
-import { Card, CardContent, Typography } from "@material-ui/core";
+import { Avatar, Card, CardContent, Chip, Typography } from "@material-ui/core";
+import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
+import HighlightIcon from "@material-ui/icons/Highlight";
+import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
+import WarningIcon from "@material-ui/icons/Warning";
 import turfLength from "@turf/length";
 import { Feature, Geometry } from "geojson";
 import * as React from "react";
@@ -12,7 +16,6 @@ import {
   HeightProfileHighlightProps,
   HeightProfilePlaceholder
 } from "./HeightProfile";
-import { LabelWithIcon } from "./LabelWithIcon";
 import { SkiRunData } from "./MapData";
 import { PointPopover } from "./PointPopover";
 
@@ -96,42 +99,53 @@ export class SkiRunInfo extends React.Component<Props, State> {
           <Typography gutterBottom variant="h5" component="h2">
             {data.name}
           </Typography>
-          {difficultyText(data)}
-          <div className="ski-popup-labels">
+          <Typography>{difficultyText(data)}</Typography>
+
+          <div>
             <GroomingLabel data={data} />
             {data.oneway === "yes" && type !== "downhill" ? (
-              <LabelWithIcon
-                appearance="info"
-                text="One Way"
-                icon="arrow-right"
+              <Chip
+                avatar={
+                  <Avatar>
+                    <ArrowForwardIcon />
+                  </Avatar>
+                }
+                label="One Way"
               />
             ) : null}
             {data.lit === "yes" ? (
-              <LabelWithIcon
-                appearance="night"
-                text="Night Lit"
-                icon="asterisk"
+              <Chip
+                avatar={
+                  <Avatar>
+                    <HighlightIcon />
+                  </Avatar>
+                }
+                label="Night Lit"
               />
             ) : null}
-            {data.gladed === "yes" ? (
-              <LabelWithIcon
-                appearance="success"
-                text="Gladed"
-                icon="tree-conifer"
-              />
-            ) : null}
+            {data.gladed === "yes" ? <Chip label="Gladed" /> : null}
             {data.patrolled === "yes" ? (
-              <LabelWithIcon appearance="info" text="Patrolled" icon="plus" />
+              <Chip
+                avatar={
+                  <Avatar>
+                    <LocalHospitalIcon />
+                  </Avatar>
+                }
+                label="Patrolled"
+              />
             ) : null}
             {data.patrolled === "no" ? (
-              <LabelWithIcon
-                appearance="danger"
-                text="Not Patrolled"
-                icon="plus"
+              <Chip
+                avatar={
+                  <Avatar>
+                    <WarningIcon />
+                  </Avatar>
+                }
+                label="Not Patrolled"
               />
             ) : null}
           </div>
-          <div className={"distance-and-elevation-info"}>
+          <Typography className={"distance-and-elevation-info"}>
             {distance ? <span>Distance: {Math.round(distance)}m</span> : null}
             {elevationData && elevationData.ascent > 1 ? (
               <span>Ascent: {Math.round(elevationData.ascent)}m</span>
@@ -139,21 +153,21 @@ export class SkiRunInfo extends React.Component<Props, State> {
             {elevationData && elevationData.descent > 1 ? (
               <span>Descent: {Math.round(elevationData.descent)}m</span>
             ) : null}
-          </div>
+          </Typography>
           {slopeInfo && (
-            <div className={"distance-and-elevation-info"}>
+            <Typography className={"distance-and-elevation-info"}>
               {slopeInfo.average !== null && (
                 <span>Average Slope: {formattedSlope(slopeInfo.average)}</span>
               )}
               {slopeInfo.max !== null && (
                 <span>Max Slope: {formattedSlope(slopeInfo.max)}</span>
               )}
-            </div>
+            </Typography>
           )}
           {data.note !== undefined && (
-            <div>
+            <Typography>
               <span>Notes: {data.note}</span>
-            </div>
+            </Typography>
           )}
           {feature !== null &&
           distance !== null &&
@@ -211,7 +225,7 @@ const GroomingLabel: React.SFC<GroomingLabelProps> = props => {
       return null;
   }
 
-  return <LabelWithIcon appearance={appearance} text={text} />;
+  return <Chip label={text} />;
 };
 
 function formattedType(type: string) {
