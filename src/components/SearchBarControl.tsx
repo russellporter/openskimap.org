@@ -23,7 +23,7 @@ export class SearchBarControl implements mapboxgl.IControl {
       <SearchBar
         searchIndexURL={searchIndexURL}
         eventBus={this._eventBus}
-        width={400}
+        width={340}
       />,
       this._container
     );

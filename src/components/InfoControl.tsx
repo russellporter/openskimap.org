@@ -72,7 +72,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
       <Info
         lid={this._lid}
         eventBus={this._eventBus}
-        width={this._width}
+        width={this._width > 340 ? 340 : this._width}
         chartHighlightPosition={this._chartHighlightPosition}
         onHoverChartPosition={this._highlightManager!.hoveredChartPosition}
       />,
