@@ -24,7 +24,6 @@ interface Props {
 
 interface State {
   searchQuery: string;
-  results: Result[];
   searchIndex: SearchIndex | null;
 }
 
@@ -44,7 +43,7 @@ type Result = Feature<Geometry, SkiAreaData>;
 export default class SearchBar extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { searchQuery: "", results: [], searchIndex: null };
+    this.state = { searchQuery: "", searchIndex: null };
   }
 
   componentDidMount() {
@@ -65,6 +64,11 @@ export default class SearchBar extends React.Component<Props, State> {
 
   render() {
     const width = this.props.width;
+    const results = getResults(this.state.searchQuery, this.state.searchIndex);
+    const showResult = (result: Result) => {
+      this.setState({ searchQuery: "" });
+      this.props.eventBus.showInfo(infoDataForResult(result));
+    };
     return (
       <Paper className={styles.root} style={{ width: width }} elevation={1}>
         <div style={{ alignItems: "center", display: "flex" }}>
@@ -80,26 +84,33 @@ export default class SearchBar extends React.Component<Props, State> {
             placeholder="Search Ski Areas"
             onChange={e => {
               this.setState({
-                results: results(e.target.value, this.state.searchIndex)
+                searchQuery: e.target.value
               });
             }}
+            onKeyDown={e => {
+              if (e.keyCode === 13 && results.length > 0) {
+                showResult(results[0]);
+              }
+            }}
+            value={this.state.searchQuery}
           />
           <IconButton
             className={styles.iconButton}
             aria-label="Search"
             disabled={this.state.searchQuery.length == 0}
-            onClick={() => {}}
+            onClick={() => {
+              if (results.length > 0) {
+                showResult(results[0]);
+              }
+            }}
           >
             <SearchIcon />
           </IconButton>
         </div>
-        {this.state.results.length > 0 ? (
+        {results.length > 0 ? (
           <React.Fragment>
             <Divider />
-            <SearchResults
-              eventBus={this.props.eventBus}
-              results={this.state.results}
-            />
+            <SearchResults onSelect={showResult} results={results} />
           </React.Fragment>
         ) : null}
       </Paper>
@@ -107,8 +118,8 @@ export default class SearchBar extends React.Component<Props, State> {
   }
 }
 
-function results(text: string, searchIndex: SearchIndex | null): Result[] {
-  if (searchIndex) {
+function getResults(text: string, searchIndex: SearchIndex | null): Result[] {
+  if (searchIndex && text.length > 0) {
     const results = searchIndex.index.search(text);
     return results.map(result => searchIndex.data[result.ref]);
   }
@@ -116,7 +127,7 @@ function results(text: string, searchIndex: SearchIndex | null): Result[] {
 }
 
 export const SearchResults: React.FunctionComponent<{
-  eventBus: EventBus;
+  onSelect: (result: Result) => void;
   results: Result[];
 }> = props => {
   return (
@@ -125,7 +136,9 @@ export const SearchResults: React.FunctionComponent<{
         .map(result => {
           return (
             <SearchResult
-              eventBus={props.eventBus}
+              onSelect={() => {
+                props.onSelect(result);
+              }}
               key={result.properties.lid}
               result={result}
             />
@@ -136,23 +149,20 @@ export const SearchResults: React.FunctionComponent<{
   );
 };
 
+function infoDataForResult(result: Result) {
+  return {
+    lid: result.properties.lid,
+    panToPosition:
+      result.geometry.type == "Point" ? result.geometry.coordinates : null
+  };
+}
+
 const SearchResult: React.FunctionComponent<{
   result: Result;
-  eventBus: EventBus;
+  onSelect: () => void;
 }> = props => {
   return (
-    <ListItem
-      button
-      onClick={() => {
-        props.eventBus.showInfo({
-          lid: props.result.properties.lid,
-          panToPosition:
-            props.result.geometry.type == "Point"
-              ? props.result.geometry.coordinates
-              : null
-        });
-      }}
-    >
+    <ListItem button onClick={props.onSelect}>
       <ListItemText
         primary={props.result.properties.name}
         secondary={props.result.properties.activities
