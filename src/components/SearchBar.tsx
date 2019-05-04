@@ -1,10 +1,4 @@
-import {
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Paper
-} from "@material-ui/core";
+import { Divider, List, ListItem, ListItemText, Paper } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import MenuIcon from "@material-ui/icons/Menu";
@@ -147,6 +141,7 @@ export default class SearchBar extends React.Component<Props, State> {
 }
 
 function getResults(text: string, searchIndex: SearchIndex | null): Result[] {
+  text = text.trim()
   if (searchIndex && text.length > 0) {
     const results = searchIndex.index.search(text);
     return results.map(result => searchIndex.data[result.ref]);
