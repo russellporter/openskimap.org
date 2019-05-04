@@ -25,6 +25,7 @@ interface Props {
 interface State {
   searchQuery: string;
   searchIndex: SearchIndex | null;
+  selectedIndex: number;
 }
 
 interface SearchIndex {
@@ -43,7 +44,7 @@ type Result = Feature<Geometry, SkiAreaData>;
 export default class SearchBar extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { searchQuery: "", searchIndex: null };
+    this.state = { searchQuery: "", searchIndex: null, selectedIndex: 0 };
   }
 
   componentDidMount() {
@@ -62,13 +63,32 @@ export default class SearchBar extends React.Component<Props, State> {
       });
   }
 
+  private handleKeyNavigation = (e: React.KeyboardEvent) => {
+    if (e.keyCode == 38) {
+      e.preventDefault();
+      this.setState({
+        selectedIndex: Math.max(0, this.state.selectedIndex - 1)
+      });
+    } else if (e.keyCode == 40) {
+      e.preventDefault();
+      const resultsLength = getResults(
+        this.state.searchQuery,
+        this.state.searchIndex
+      ).length;
+      this.setState({
+        selectedIndex: Math.min(resultsLength - 1, this.state.selectedIndex + 1)
+      });
+    }
+  };
+
   render() {
     const width = this.props.width;
     const results = getResults(this.state.searchQuery, this.state.searchIndex);
     const showResult = (result: Result) => {
-      this.setState({ searchQuery: "" });
+      this.setState({ searchQuery: "", selectedIndex: 0 });
       this.props.eventBus.showInfo(infoDataForResult(result));
     };
+
     return (
       <Paper className={styles.root} style={{ width: width }} elevation={1}>
         <div style={{ alignItems: "center", display: "flex" }}>
@@ -88,8 +108,12 @@ export default class SearchBar extends React.Component<Props, State> {
               });
             }}
             onKeyDown={e => {
-              if (e.keyCode === 13 && results.length > 0) {
-                showResult(results[0]);
+              this.handleKeyNavigation(e);
+              if (
+                e.keyCode === 13 &&
+                results.length > this.state.selectedIndex
+              ) {
+                showResult(results[this.state.selectedIndex]);
               }
             }}
             value={this.state.searchQuery}
@@ -110,7 +134,11 @@ export default class SearchBar extends React.Component<Props, State> {
         {results.length > 0 ? (
           <React.Fragment>
             <Divider />
-            <SearchResults onSelect={showResult} results={results} />
+            <SearchResults
+              onSelect={showResult}
+              selectedIndex={this.state.selectedIndex}
+              results={results}
+            />
           </React.Fragment>
         ) : null}
       </Paper>
@@ -128,23 +156,33 @@ function getResults(text: string, searchIndex: SearchIndex | null): Result[] {
 
 export const SearchResults: React.FunctionComponent<{
   onSelect: (result: Result) => void;
+  selectedIndex: number;
   results: Result[];
 }> = props => {
+  let dividerIndex = 0;
   return (
     <List disablePadding={true}>
       {props.results
-        .map(result => {
+        .map((result, index) => {
           return (
             <SearchResult
               onSelect={() => {
                 props.onSelect(result);
               }}
+              selected={props.selectedIndex === index}
               key={result.properties.lid}
               result={result}
             />
           );
         })
-        .reduce((previous, current) => [previous, <Divider />, current] as any)}
+        .reduce(
+          (previous, current) =>
+            [
+              previous,
+              <Divider key={"divider-" + dividerIndex++} />,
+              current
+            ] as any
+        )}
     </List>
   );
 };
@@ -160,9 +198,10 @@ function infoDataForResult(result: Result) {
 const SearchResult: React.FunctionComponent<{
   result: Result;
   onSelect: () => void;
+  selected: boolean;
 }> = props => {
   return (
-    <ListItem button onClick={props.onSelect}>
+    <ListItem button onClick={props.onSelect} selected={props.selected}>
       <ListItemText
         primary={props.result.properties.name}
         secondary={props.result.properties.activities
