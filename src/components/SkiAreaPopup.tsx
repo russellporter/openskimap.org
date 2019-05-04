@@ -1,9 +1,17 @@
+import {
+  Card,
+  CardActions,
+  CardContent,
+  Tooltip,
+  Typography
+} from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import WarningIcon from "@material-ui/icons/Warning";
 import * as React from "react";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Activity, SkiAreaData } from "./MapData";
-import { OperatingStatusIcon } from "./OperatingStatusIcon";
 import { PointPopover } from "./PointPopover";
 import * as Popup from "./PopupComponents";
+import { StatusIcon } from "./StatusIcon";
 
 interface SkiAreaPopupProps {
   data: SkiAreaData;
@@ -11,42 +19,52 @@ interface SkiAreaPopupProps {
 
 const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
   return (
-    <Popup.Container>
-      <Popup.Header>
-        <Popup.Title title={props.data.name} />{" "}
-        <OperatingStatusIcon operatingStatus={props.data.status} />
-      </Popup.Header>
-      <div>
-        <a
+    <Card>
+      <CardContent>
+        <Typography variant="h5" component="h2">
+          <Popup.Title title={props.data.name} />{" "}
+          <StatusIcon
+            status={props.data.status}
+            entityName={"ski area"}
+            hideIfOperating={false}
+          />
+        </Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          {activitySummary(props.data)}
+        </Typography>
+      </CardContent>
+      <CardActions>
+        <Button
+          size="small"
+          color="primary"
           target="_blank"
           href={"https://skimap.org/SkiAreas/view/" + props.data.id}
         >
-          See maps at Skimap.org
-        </a>
-      </div>
-    </Popup.Container>
+          See Paper Maps
+        </Button>
+      </CardActions>
+    </Card>
   );
 };
 
 const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
-  const tooltip = (
-    <Tooltip>
-      This ski area information is generated from OpenStreetMap data
-    </Tooltip>
-  );
-
   return (
-    <Popup.Container>
-      <Popup.Header>
-        <Popup.Title title={generatedSkiAreaTitle(props.data)} />{" "}
-        <OverlayTrigger placement="top" overlay={tooltip}>
-          <span
-            className="glyphicon glyphicon-exclamation-sign"
-            aria-hidden="true"
-          />
-        </OverlayTrigger>
-      </Popup.Header>
-    </Popup.Container>
+    <Card>
+      <CardContent>
+        <Typography gutterBottom variant="h5" component="h2">
+          {activitySummary(props.data)}{" "}
+          <Tooltip
+            placement="right"
+            title="This ski area information is generated from OpenStreetMap data"
+          >
+            <WarningIcon
+              fontSize="inherit"
+              style={{ verticalAlign: "text-top" }}
+            />
+          </Tooltip>
+        </Typography>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -87,7 +105,7 @@ export class SkiAreaPopover extends PointPopover {
   }
 }
 
-function generatedSkiAreaTitle(data: SkiAreaData) {
+function activitySummary(data: SkiAreaData) {
   const downhill = data.activities.some(
     activity => activity == Activity.Downhill
   );

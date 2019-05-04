@@ -1,3 +1,4 @@
+import { Typography } from "@material-ui/core";
 import * as React from "react";
 import { SkiWayData } from "./MapData";
 
@@ -32,15 +33,19 @@ export const WithTitle: React.SFC<WithTitleProps> = props => {
 };
 
 export const Container: React.SFC<ContainerProps> = props => {
-  return <div className="ski-popup">{props.children}</div>;
+  return <React.Fragment>{props.children}</React.Fragment>;
 };
 
 export const Header: React.SFC<HeaderProps> = props => {
-  return <div className="ski-popup-header">{props.children}</div>;
+  return (
+    <Typography gutterBottom variant="h5" component="h2">
+      {props.children}
+    </Typography>
+  );
 };
 
 export const Title: React.SFC<TitleProps> = props => {
-  return <span className="ski-popup-title">{props.title}</span>;
+  return <React.Fragment>{props.title}</React.Fragment>;
 };
 
 interface BadgeProps {

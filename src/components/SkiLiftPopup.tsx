@@ -1,3 +1,4 @@
+import { CardContent } from "@material-ui/core";
 import turfLength from "@turf/length";
 import { Feature, Geometry, LineString } from "geojson";
 import * as React from "react";
@@ -85,36 +86,38 @@ export class SkiLiftInfo extends React.Component<Props, State> {
     const badge = badgeProps ? <Popup.Badge {...badgeProps} /> : null;
     return (
       <Popup.Container>
-        <Popup.Header>
-          {data.name_and_type && <Popup.Title title={data.name_and_type} />}
-          {badge && " "}
-          {badge && badge}
-          {data.status && " "}
-          {data.status && (
-            <StatusIcon
-              status={data.status}
-              entityName={"lift"}
-              hideIfOperating={true}
-            />
+        <CardContent>
+          <Popup.Header>
+            {data.name_and_type && <Popup.Title title={data.name_and_type} />}
+            {badge && " "}
+            {badge && badge}
+            {data.status && " "}
+            {data.status && (
+              <StatusIcon
+                status={data.status}
+                entityName={"lift"}
+                hideIfOperating={true}
+              />
+            )}
+          </Popup.Header>
+          {
+            <div className={"distance-and-elevation-info"}>
+              {distance && <span>Distance: {Math.round(distance)}m</span>}
+              {elevationData && elevationData.ascent > 1 && (
+                <span>Ascent: {Math.round(elevationData.ascent)}m</span>
+              )}
+              {elevationData && elevationData.descent > 1 && (
+                <span>Descent: {Math.round(elevationData.descent)}m</span>
+              )}
+              {speed && <span>Speed: {speed.toFixed(1)} m/s</span>}
+            </div>
+          }
+          {data.note && (
+            <div>
+              <span>Notes: {data.note}</span>
+            </div>
           )}
-        </Popup.Header>
-        {
-          <div className={"distance-and-elevation-info"}>
-            {distance && <span>Distance: {Math.round(distance)}m</span>}
-            {elevationData && elevationData.ascent > 1 && (
-              <span>Ascent: {Math.round(elevationData.ascent)}m</span>
-            )}
-            {elevationData && elevationData.descent > 1 && (
-              <span>Descent: {Math.round(elevationData.descent)}m</span>
-            )}
-            {speed && <span>Speed: {speed.toFixed(1)} m/s</span>}
-          </div>
-        }
-        {data.note && (
-          <div>
-            <span>Notes: {data.note}</span>
-          </div>
-        )}
+        </CardContent>
       </Popup.Container>
     );
   }

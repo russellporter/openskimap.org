@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@material-ui/core";
+import { Card } from "@material-ui/core";
 import { Feature, Geometry } from "geojson";
 import * as React from "react";
 import { useEffect, useState } from "react";
@@ -30,15 +30,13 @@ export const Info: React.FunctionComponent<{
 
   return (
     <Card style={{ width: props.width }}>
-      <CardContent>
-        {data && data.properties.type == FeatureType.Lift && (
-          <SkiLiftInfo data={data.properties} />
-        )}
-        {data && data.properties.type == FeatureType.Run && <div />}
-        {data && data.properties.type == FeatureType.SkiArea && (
-          <SkiAreaInfo data={data.properties} />
-        )}
-      </CardContent>
+      {data && data.properties.type == FeatureType.Lift && (
+        <SkiLiftInfo data={data.properties} />
+      )}
+      {data && data.properties.type == FeatureType.Run && <div />}
+      {data && data.properties.type == FeatureType.SkiArea && (
+        <SkiAreaInfo data={data.properties} />
+      )}
     </Card>
   );
 };

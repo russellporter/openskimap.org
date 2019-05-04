@@ -1,11 +1,13 @@
+import { Tooltip } from "@material-ui/core";
+import CancelIcon from "@material-ui/icons/Cancel";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import HelpIcon from "@material-ui/icons/Help";
 import * as React from "react";
-import * as OverlayTrigger from "react-bootstrap/lib/OverlayTrigger";
-import * as Tooltip from "react-bootstrap/lib/Tooltip";
 import { Status } from "./MapData";
 import "./PopupComponents";
 
 interface Props {
-  status: Status;
+  status: Status | null;
   entityName: string;
   hideIfOperating: Boolean;
 }
@@ -15,39 +17,50 @@ export const StatusIcon: React.SFC<Props> = props => {
     return null;
   }
 
-  const tooltip = (
-    <Tooltip>{tooltipText(props.status, props.entityName)}</Tooltip>
-  );
-
   return (
-    <OverlayTrigger placement="top" overlay={tooltip}>
-      <span
-        className={
-          "status-icon status-icon-" +
-          props.status +
-          " glyphicon " +
-          icon(props.status)
-        }
-      />
-    </OverlayTrigger>
+    <Tooltip
+      title={tooltipText(props.status, props.entityName)}
+      placement="right"
+    >
+      {icon(props.status)}
+    </Tooltip>
   );
 };
 
-function icon(status: Status) {
+function icon(status: Status | null) {
   switch (status) {
     case Status.Proposed:
     case Status.Planned:
     case Status.Construction:
-      return "glyphicon-info-sign";
+      return (
+        <HelpIcon
+          fontSize="inherit"
+          style={{ color: "purple", verticalAlign: "text-top" }}
+        />
+      );
     case Status.Operating:
-      return "glyphicon-ok-sign";
+      return (
+        <CheckCircleIcon
+          fontSize="inherit"
+          style={{ color: "green", verticalAlign: "text-top" }}
+        />
+      );
     case Status.Abandoned:
     case Status.Disused:
-      return "glyphicon-remove-sign";
+      return (
+        <CancelIcon
+          fontSize="inherit"
+          style={{ color: "red", verticalAlign: "text-top" }}
+        />
+      );
+    case null:
+      return (
+        <HelpIcon fontSize="inherit" style={{ verticalAlign: "text-top" }} />
+      );
   }
 }
 
-function tooltipText(status: Status, entityName: string) {
+function tooltipText(status: Status | null, entityName: string) {
   switch (status) {
     case Status.Proposed:
       return "This " + entityName + " is proposed to be built.";
