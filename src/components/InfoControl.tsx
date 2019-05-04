@@ -26,6 +26,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     this._map = map;
     this._highlightManager = new HighlightManager(this._map, this);
     this._map.on("resize", this._updateSize);
+    this.setSelected(true);
     this.render();
     return this._container;
   };
@@ -34,6 +35,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     this._map!.off("resize", this._updateSize);
     const parent = this._container.parentNode;
     parent && parent.removeChild(this._container);
+    this.setSelected(false);
     this._map = null;
   };
 
@@ -50,6 +52,19 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   setChartHighlightPosition(position: mapboxgl.LngLatLike | null): void {
     this._chartHighlightPosition = position;
     this.render();
+  }
+
+  private setSelected(selected: boolean) {
+    this._map!.setFilter("selected-run", [
+      "==",
+      "lid",
+      selected ? this._lid : "-1"
+    ]);
+    this._map!.setFilter("selected-lift", [
+      "==",
+      "lid",
+      selected ? this._lid : "-1"
+    ]);
   }
 
   private render() {
