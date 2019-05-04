@@ -4,6 +4,8 @@ import * as ReactDOM from "react-dom";
 import EventBus from "./EventBus";
 import SearchBar from "./SearchBar";
 
+const searchIndexURL = "https://tiles.skimap.org/search_index.json";
+
 export class SearchBarControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
   _map: mapboxgl.Map | null = null;
@@ -18,7 +20,11 @@ export class SearchBarControl implements mapboxgl.IControl {
   onAdd = (map: mapboxgl.Map) => {
     this._map = map;
     ReactDOM.render(
-      <SearchBar eventBus={this._eventBus} width={400} />,
+      <SearchBar
+        searchIndexURL={searchIndexURL}
+        eventBus={this._eventBus}
+        width={400}
+      />,
       this._container
     );
     this._map.on("resize", this._updateSize);
@@ -36,7 +42,11 @@ export class SearchBarControl implements mapboxgl.IControl {
     const margins = 20;
     const width = this._map!.getCanvasContainer().offsetWidth - margins;
     ReactDOM.render(
-      <SearchBar eventBus={this._eventBus} width={width > 340 ? 340 : width} />,
+      <SearchBar
+        searchIndexURL={searchIndexURL}
+        eventBus={this._eventBus}
+        width={width > 340 ? 340 : width}
+      />,
       this._container
     );
   };
