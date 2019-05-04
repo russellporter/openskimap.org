@@ -1,0 +1,44 @@
+import { Card, CardContent } from "@material-ui/core";
+import { Feature, Geometry } from "geojson";
+import * as React from "react";
+import { useEffect, useState } from "react";
+import EventBus from "./EventBus";
+import { loadGeoJSON } from "./GeoJSONLoader";
+import { FeatureType, SkiAreaData, SkiLiftData, SkiRunData } from "./MapData";
+import { SkiAreaInfo } from "./SkiAreaPopup";
+import { SkiLiftInfo } from "./SkiLiftPopup";
+
+type MapFeature = Feature<Geometry, SkiRunData | SkiLiftData | SkiAreaData>;
+
+export const Info: React.FunctionComponent<{
+  lid: string;
+  width: number;
+  eventBus: EventBus;
+}> = props => {
+  const [data, setData] = useState<MapFeature | null>(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await loadGeoJSON<SkiRunData | SkiLiftData | SkiAreaData>(
+        props.lid
+      );
+
+      setData(data);
+    };
+
+    fetchData();
+  }, [props.lid]);
+
+  return (
+    <Card style={{ width: props.width }}>
+      <CardContent>
+        {data && data.properties.type == FeatureType.Lift && (
+          <SkiLiftInfo data={data.properties} />
+        )}
+        {data && data.properties.type == FeatureType.Run && <div />}
+        {data && data.properties.type == FeatureType.SkiArea && (
+          <SkiAreaInfo data={data.properties} />
+        )}
+      </CardContent>
+    </Card>
+  );
+};

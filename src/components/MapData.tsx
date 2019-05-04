@@ -7,6 +7,12 @@ export enum Status {
   Abandoned = "abandoned"
 }
 
+export enum FeatureType {
+  Run = "run",
+  Lift = "lift",
+  SkiArea = "skiArea"
+}
+
 export enum Activity {
   Downhill = "downhill",
   Nordic = "nordic",
@@ -22,6 +28,7 @@ export interface SkiWayData {
 }
 
 export interface SkiLiftData extends SkiWayData {
+  type: FeatureType.Lift;
   name_and_type?: string;
   aerialway?: string;
   oneway?: string;
@@ -40,6 +47,7 @@ export interface SkiLiftData extends SkiWayData {
 }
 
 export interface SkiRunData extends SkiWayData {
+  type: FeatureType.Run;
   "piste:type": string;
   oneway: string;
   "piste:difficulty"?: string;
@@ -54,6 +62,7 @@ export interface SkiRunData extends SkiWayData {
 }
 
 export interface SkiAreaData {
+  type: FeatureType.SkiArea;
   id?: string;
   lid: string;
   name: string;

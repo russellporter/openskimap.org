@@ -1,5 +1,6 @@
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
+import { InfoData } from "./InfoData";
 import State, { StateChanges } from "./State";
 
 export default class StateStore implements EventBus {
@@ -36,6 +37,14 @@ export default class StateStore implements EventBus {
 
   setMapStyle(style: MapStyle): void {
     this.update({ mapStyle: style });
+  }
+
+  showInfo(info: InfoData): void {
+    this.update({ info: info });
+  }
+
+  hideInfo(): void {
+    this.update({ info: null });
   }
 
   private update(changes: StateChanges): void {

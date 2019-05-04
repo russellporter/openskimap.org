@@ -3,14 +3,16 @@ import "whatwg-fetch";
 import { SkiLiftData, SkiRunData } from "./MapData";
 
 export function loadRun(lid: string): Promise<Feature<Geometry, SkiRunData>> {
-  return load(lid);
+  return loadGeoJSON(lid);
 }
 
 export function loadLift(lid: string): Promise<Feature<Geometry, SkiLiftData>> {
-  return load(lid);
+  return loadGeoJSON(lid);
 }
 
-function load(entityLID: string): Promise<Feature<Geometry, any>> {
+export function loadGeoJSON<T>(
+  entityLID: string
+): Promise<Feature<Geometry, T>> {
   return fetch(
     "https://tiles.skimap.org/features/" + entityLID + ".geojson"
   ).then(response => {

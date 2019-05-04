@@ -31,7 +31,7 @@ interface GroomingLabelProps {
   data: SkiRunData;
 }
 
-export class SkiRunPopup extends React.Component<Props, State> {
+export class SkiRunInfo extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -284,7 +284,7 @@ export class SkiRunPopover extends PointPopover {
 
   protected render(): React.ReactElement<any> {
     return (
-      <SkiRunPopup
+      <SkiRunInfo
         data={this.data}
         chartHighlightPosition={this.highlightPosition}
         onHoverChartPosition={this._onHoverChartPosition}

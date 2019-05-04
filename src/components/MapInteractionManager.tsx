@@ -1,17 +1,16 @@
+import EventBus from "./EventBus";
 import { HighlightManager } from "./HighlightManager";
-import { SkiAreaData, SkiLiftData, SkiRunData } from "./MapData";
 import { PopoverManager } from "./PopoverManager";
-import { SkiAreaPopover } from "./SkiAreaPopup";
-import { SkiLiftPopover } from "./SkiLiftPopup";
-import { SkiRunPopover } from "./SkiRunPopup";
 
 export class MapInteractionManager {
   private popoverManager: PopoverManager;
   private highlightManager: HighlightManager;
   private map: mapboxgl.Map;
+  private eventBus: EventBus;
 
-  constructor(map: mapboxgl.Map) {
+  constructor(map: mapboxgl.Map, eventBus: EventBus) {
     this.map = map;
+    this.eventBus = eventBus;
     this.popoverManager = new PopoverManager(map);
     this.highlightManager = new HighlightManager(map, this.popoverManager);
 
@@ -45,9 +44,9 @@ export class MapInteractionManager {
 
     tappableLayers.forEach(layer => {
       if (layer.indexOf("lift") !== -1) {
-        this.map.on("click", layer, this._onClickSkiLift);
+        this.map.on("click", layer, this._onClickItem);
       } else {
-        this.map.on("click", layer, this._onClickSkiRun);
+        this.map.on("click", layer, this._onClickItem);
       }
     });
 
@@ -61,7 +60,7 @@ export class MapInteractionManager {
     });
 
     skiAreaLayers.forEach(layer => {
-      this.map.on("click", layer, this._onClickSkiArea);
+      this.map.on("click", layer, this._onClickItem);
     });
 
     this.map.on("zoomstart", () => {
@@ -69,19 +68,8 @@ export class MapInteractionManager {
     });
   }
 
-  _onClickSkiRun = (e: any) => {
-    const data = e.features[0].properties as SkiRunData;
-    this.popoverManager.show(new SkiRunPopover(e.lngLat, data));
-  };
-
-  _onClickSkiLift = (e: any) => {
-    const data = e.features[0].properties as SkiLiftData;
-    this.popoverManager.show(new SkiLiftPopover(e.lngLat, data));
-  };
-
-  _onClickSkiArea = (e: any) => {
-    const data = e.features[0].properties as SkiAreaData;
-    this.popoverManager.show(new SkiAreaPopover(e.lngLat, data));
+  _onClickItem = (e: any) => {
+    this.eventBus.showInfo({ lid: e.features[0].properties.lid });
   };
 }
 

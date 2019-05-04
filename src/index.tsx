@@ -17,7 +17,8 @@ function initialize() {
       editMapOpen: false,
       sidebarOpen: false,
       aboutInfoOpen: false,
-      mapStyle: MapStyle.Terrain
+      mapStyle: MapStyle.Terrain,
+      info: null
     },
     update
   );
@@ -68,6 +69,10 @@ function initialize() {
         <AboutModal eventBus={store} open={state.aboutInfoOpen} />,
         document.getElementById("about-modal")
       );
+    }
+
+    if (changes.info !== undefined) {
+      map!.setInfo(changes.info);
     }
   }
 }

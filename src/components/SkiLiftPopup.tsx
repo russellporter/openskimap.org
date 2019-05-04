@@ -22,7 +22,7 @@ interface State {
   elevationData: ElevationData | null;
 }
 
-export class SkiLiftPopup extends React.Component<Props, State> {
+export class SkiLiftInfo extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -165,6 +165,6 @@ export class SkiLiftPopover extends PointPopover {
   }
 
   protected render(): React.ReactElement<any> {
-    return <SkiLiftPopup data={this.data} />;
+    return <SkiLiftInfo data={this.data} />;
   }
 }

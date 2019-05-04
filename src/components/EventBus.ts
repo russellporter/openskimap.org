@@ -1,4 +1,5 @@
 import { MapStyle } from "../MapStyle";
+import { InfoData } from "./InfoData";
 
 export default interface EventBus {
   editMap(): void;
@@ -7,4 +8,6 @@ export default interface EventBus {
   openAboutInfo(): void;
   closeAboutInfo(): void;
   setMapStyle(style: MapStyle): void;
+  showInfo(info: InfoData): void;
+  hideInfo(): void;
 }

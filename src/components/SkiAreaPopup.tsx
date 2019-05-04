@@ -50,7 +50,7 @@ const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
   );
 };
 
-export const SkiAreaPopup: React.SFC<SkiAreaPopupProps> = props => {
+export const SkiAreaInfo: React.SFC<SkiAreaPopupProps> = props => {
   return props.data.generated ? (
     <GeneratedSkiArea {...props} />
   ) : (
@@ -67,7 +67,7 @@ export class SkiAreaPopover extends PointPopover {
   }
 
   protected render(): React.ReactElement<any> {
-    return <SkiAreaPopup data={this.data} />;
+    return <SkiAreaInfo data={this.data} />;
   }
 
   public addTo(map: mapboxgl.Map) {
