@@ -37,11 +37,7 @@ export class MapInteractionManager {
     const hoverableLayers = skiAreaLayers.concat(tappableLayers);
 
     tappableLayers.forEach(layer => {
-      if (layer.indexOf("lift") !== -1) {
-        this.map.on("click", layer, this._onClickItem);
-      } else {
-        this.map.on("click", layer, this._onClickItem);
-      }
+      this.map.on("click", layer, this._onClickItem);
     });
 
     hoverableLayers.forEach(layer => {
