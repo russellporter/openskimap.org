@@ -38,19 +38,24 @@ export class Map {
       new mapboxgl.ScaleControl({
         maxWidth: 80,
         unit: "metric"
-      })
+      }),
+      "bottom-left"
     );
 
-    this.map.addControl(new mapboxgl.AttributionControl({ compact: true }));
     this.map.addControl(new SearchBarControl(eventBus));
 
+    this.map.addControl(
+      new mapboxgl.AttributionControl({ compact: true }),
+      "bottom-left"
+    );
     this.map.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
           enableHighAccuracy: true
         },
         trackUserLocation: true
-      })
+      }),
+      "bottom-right"
     );
   }
 
