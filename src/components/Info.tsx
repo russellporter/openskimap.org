@@ -41,10 +41,11 @@ export const Info: React.FunctionComponent<{
           data={data.properties}
           chartHighlightPosition={props.chartHighlightPosition}
           onHoverChartPosition={props.onHoverChartPosition}
+          eventBus={props.eventBus}
         />
       )}
       {data && data.properties.type == FeatureType.SkiArea && (
-        <SkiAreaInfo data={data.properties} />
+        <SkiAreaInfo data={data.properties} eventBus={props.eventBus} />
       )}
     </Card>
   );

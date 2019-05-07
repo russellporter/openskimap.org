@@ -10,16 +10,19 @@ import loadElevationProfile, {
   ElevationData,
   extractPoints
 } from "./ElevationProfileLoader";
+import EventBus from "./EventBus";
 import { loadRun } from "./GeoJSONLoader";
 import {
   HeightProfile,
   HeightProfileHighlightProps,
   HeightProfilePlaceholder
 } from "./HeightProfile";
+import { InfoHeader } from "./InfoHeader";
 import { SkiRunData } from "./MapData";
 
 interface Props extends HeightProfileHighlightProps {
   data: SkiRunData;
+  eventBus: EventBus;
 }
 
 interface State {
@@ -91,14 +94,18 @@ export class SkiRunInfo extends React.Component<Props, State> {
     const distance = this.state.distance;
     const elevationData = this.state.elevationData;
     const slopeInfo = elevationData && elevationData.slopeInfo;
-
+    const summary = difficultyText(data);
+    const title = data.name || summary;
+    const subtitle = data.name ? summary : null;
     return (
       <Card>
         <CardContent>
-          <Typography gutterBottom variant="h5" component="h2">
-            {data.name}
-          </Typography>
-          <Typography>{difficultyText(data)}</Typography>
+          <InfoHeader onClose={this.props.eventBus.hideInfo}>
+            <Typography gutterBottom variant="h5" component="h2">
+              {title}
+            </Typography>
+          </InfoHeader>
+          {subtitle && <Typography>{subtitle}</Typography>}
 
           <div>
             <GroomingLabel data={data} />
