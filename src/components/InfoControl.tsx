@@ -1,7 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import controlWidth from "./ControlWidth";
+import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import HighlightManager, { ChartHighlighter } from "./HighlightManager";
 import { Info } from "./Info";
