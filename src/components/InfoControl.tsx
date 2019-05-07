@@ -1,6 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import controlWidth from "./ControlWidth";
 import EventBus from "./EventBus";
 import HighlightManager, { ChartHighlighter } from "./HighlightManager";
 import { Info } from "./Info";
@@ -12,7 +13,6 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _eventBus: EventBus;
   _lid: string;
   _highlightManager: HighlightManager | null = null;
-  _width: number = 400;
   _chartHighlightPosition: mapboxgl.LngLatLike | null = null;
 
   constructor(info: InfoData, eventBus: EventBus) {
@@ -25,25 +25,18 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   onAdd = (map: mapboxgl.Map) => {
     this._map = map;
     this._highlightManager = new HighlightManager(this._map, this);
-    this._updateSize();
-    this._map.on("resize", this._updateSize);
-    this.setSelected(true);
     this.render();
+    this._map.on("resize", this.render);
+    this.setSelected(true);
     return this._container;
   };
 
   onRemove = () => {
-    this._map!.off("resize", this._updateSize);
+    this._map!.off("resize", this.render);
     const parent = this._container.parentNode;
     parent && parent.removeChild(this._container);
     this.setSelected(false);
     this._map = null;
-  };
-
-  _updateSize = () => {
-    const margins = 20;
-    this._width = this._map!.getCanvasContainer().offsetWidth - margins;
-    this.render();
   };
 
   getDefaultPosition = (): string => {
@@ -69,11 +62,15 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   }
 
   private render() {
+    const map = this._map;
+    if (!map) {
+      return;
+    }
     ReactDOM.render(
       <Info
         lid={this._lid}
         eventBus={this._eventBus}
-        width={this._width > 340 ? 340 : this._width}
+        width={controlWidth(map)}
         chartHighlightPosition={this._chartHighlightPosition}
         onHoverChartPosition={this._highlightManager!.hoveredChartPosition}
       />,

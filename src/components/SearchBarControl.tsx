@@ -1,6 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import controlWidth from "./ControlWidth";
 import EventBus from "./EventBus";
 import SearchBar from "./SearchBar";
 
@@ -19,34 +20,24 @@ export class SearchBarControl implements mapboxgl.IControl {
 
   onAdd = (map: mapboxgl.Map) => {
     this._map = map;
-    ReactDOM.render(
-      <SearchBar
-        searchIndexURL={searchIndexURL}
-        eventBus={this._eventBus}
-        width={340}
-      />,
-      this._container
-    );
-    this._updateSize();
-    this._map.on("resize", this._updateSize);
+    this.render();
+    this._map.on("resize", this.render);
     return this._container;
   };
 
   onRemove = () => {
-    this._map!.off("resize", this._updateSize);
+    this._map!.off("resize", this.render);
     const parent = this._container.parentNode;
     parent && parent.removeChild(this._container);
     this._map = null;
   };
 
-  _updateSize = () => {
-    const margins = 20;
-    const width = this._map!.getCanvasContainer().offsetWidth - margins;
+  private render = () => {
     ReactDOM.render(
       <SearchBar
         searchIndexURL={searchIndexURL}
         eventBus={this._eventBus}
-        width={width > 340 ? 340 : width}
+        width={controlWidth(this._map!)}
       />,
       this._container
     );
