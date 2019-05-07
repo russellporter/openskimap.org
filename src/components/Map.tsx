@@ -80,17 +80,3 @@ export class Map {
     return this.map.getZoom();
   };
 }
-
-function skiAreaFeature(data: any) {
-  return {
-    center: data.coordinates,
-    geometry: {
-      type: "Point",
-      coordinates: data.coordinates
-    },
-    place_name: data.name, // eslint-disable-line camelcase
-    place_type: ["coordinate"], // eslint-disable-line camelcase
-    properties: {},
-    type: "Feature"
-  };
-}
