@@ -10,7 +10,6 @@ import WarningIcon from "@material-ui/icons/Warning";
 import * as React from "react";
 import { Activity, SkiAreaData } from "./MapData";
 import { PointPopover } from "./PointPopover";
-import * as Popup from "./PopupComponents";
 import { StatusIcon } from "./StatusIcon";
 
 interface SkiAreaPopupProps {
@@ -22,7 +21,7 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
     <Card>
       <CardContent>
         <Typography variant="h5" component="h2">
-          <Popup.Title title={props.data.name} />{" "}
+          {props.data.name}{" "}
           <StatusIcon
             status={props.data.status}
             entityName={"ski area"}

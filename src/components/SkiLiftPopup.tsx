@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from "@material-ui/core";
+import { Avatar, Card, CardContent, Typography } from "@material-ui/core";
 import turfLength from "@turf/length";
 import { Feature, Geometry, LineString } from "geojson";
 import * as React from "react";
@@ -9,7 +9,6 @@ import loadElevationProfile, {
 import { loadLift } from "./GeoJSONLoader";
 import { SkiLiftData } from "./MapData";
 import { PointPopover } from "./PointPopover";
-import * as Popup from "./PopupComponents";
 import { StatusIcon } from "./StatusIcon";
 
 interface Props {
@@ -82,24 +81,31 @@ export class SkiLiftInfo extends React.Component<Props, State> {
     const distance = this.state.distance;
     const elevationData = this.state.elevationData;
     const speed = this.state.speed;
-    const badgeProps = Popup.refBadgeFromData(data);
-    const badge = badgeProps ? <Popup.Badge {...badgeProps} /> : null;
+    const badge = data.ref;
     return (
       <Card>
         <CardContent>
-          <Typography gutterBottom variant="h5" component="h2">
-            {data.name_and_type && <Popup.Title title={data.name_and_type} />}
-            {badge && " "}
-            {badge && badge}
-            {data.status && " "}
-            {data.status && (
-              <StatusIcon
-                status={data.status}
-                entityName={"lift"}
-                hideIfOperating={true}
-              />
+          <span style={{ display: "inline-flex" }}>
+            <Typography variant="h5" component="h2">
+              {data.name_and_type}
+            </Typography>
+            {badge && (
+              <Avatar
+                style={{ backgroundColor: data.color, width: 31, height: 31 }}
+              >
+                {badge}
+              </Avatar>
             )}
-          </Typography>
+            {data.status && (
+              <div style={{ paddingLeft: "5px" }}>
+                <StatusIcon
+                  status={data.status}
+                  entityName={"lift"}
+                  hideIfOperating={true}
+                />
+              </div>
+            )}
+          </span>
           {
             <div className={"distance-and-elevation-info"}>
               {distance && <span>Distance: {Math.round(distance)}m</span>}

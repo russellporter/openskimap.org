@@ -4,7 +4,6 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import HelpIcon from "@material-ui/icons/Help";
 import * as React from "react";
 import { Status } from "./MapData";
-import "./PopupComponents";
 
 interface Props {
   status: Status | null;
