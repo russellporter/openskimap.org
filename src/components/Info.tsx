@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import EventBus from "./EventBus";
 import { loadGeoJSON } from "./GeoJSONLoader";
 import { FeatureType, SkiAreaData, SkiLiftData, SkiRunData } from "./MapData";
-import { SkiAreaInfo } from "./SkiAreaPopup";
-import { SkiLiftInfo } from "./SkiLiftPopup";
-import { SkiRunInfo } from "./SkiRunPopup";
+import { SkiAreaInfo } from "./SkiAreaInfo";
+import { SkiLiftInfo } from "./SkiLiftInfo";
+import { SkiRunInfo } from "./SkiRunInfo";
 
 type MapFeature = Feature<Geometry, SkiRunData | SkiLiftData | SkiAreaData>;
 

@@ -61,11 +61,3 @@ export class MapInteractionManager {
     });
   };
 }
-
-function firstLatLng(nestedArray: any): number[] {
-  while (nestedArray instanceof Array && nestedArray[0] instanceof Array) {
-    nestedArray = nestedArray[0];
-  }
-
-  return nestedArray;
-}
