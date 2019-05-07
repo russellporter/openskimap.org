@@ -27,6 +27,7 @@ export class SearchBarControl implements mapboxgl.IControl {
       />,
       this._container
     );
+    this._updateSize();
     this._map.on("resize", this._updateSize);
     return this._container;
   };

@@ -6,9 +6,16 @@ import WarningIcon from "@material-ui/icons/Warning";
 import turfLength from "@turf/length";
 import { Feature, Geometry } from "geojson";
 import * as React from "react";
-import loadElevationProfile, { ElevationData, extractPoints } from "./ElevationProfileLoader";
+import loadElevationProfile, {
+  ElevationData,
+  extractPoints
+} from "./ElevationProfileLoader";
 import { loadRun } from "./GeoJSONLoader";
-import { HeightProfile, HeightProfileHighlightProps, HeightProfilePlaceholder } from "./HeightProfile";
+import {
+  HeightProfile,
+  HeightProfileHighlightProps,
+  HeightProfilePlaceholder
+} from "./HeightProfile";
 import { SkiRunData } from "./MapData";
 
 interface Props extends HeightProfileHighlightProps {

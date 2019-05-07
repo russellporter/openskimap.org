@@ -25,6 +25,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   onAdd = (map: mapboxgl.Map) => {
     this._map = map;
     this._highlightManager = new HighlightManager(this._map, this);
+    this._updateSize();
     this._map.on("resize", this._updateSize);
     this.setSelected(true);
     this.render();
