@@ -280,34 +280,3 @@ function difficultyText(data: SkiRunData) {
     return type;
   }
 }
-
-export class SkiRunPopover extends PointPopover {
-  private data: SkiRunData;
-
-  constructor(position: mapboxgl.LngLatLike, data: SkiRunData) {
-    super(position);
-    this.data = data;
-  }
-
-  public addTo(map: mapboxgl.Map) {
-    super.addTo(map);
-
-    map.setFilter("selected-run", ["==", "lid", this.data.lid]);
-  }
-
-  public remove(map: mapboxgl.Map) {
-    super.remove(map);
-
-    map.setFilter("selected-run", ["==", "lid", -1]);
-  }
-
-  protected render(): React.ReactElement<any> {
-    return (
-      <SkiRunInfo
-        data={this.data}
-        chartHighlightPosition={this.highlightPosition}
-        onHoverChartPosition={this._onHoverChartPosition}
-      />
-    );
-  }
-}

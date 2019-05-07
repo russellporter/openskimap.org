@@ -8,7 +8,6 @@ import loadElevationProfile, {
 } from "./ElevationProfileLoader";
 import { loadLift } from "./GeoJSONLoader";
 import { SkiLiftData } from "./MapData";
-import { PointPopover } from "./PointPopover";
 import { StatusIcon } from "./StatusIcon";
 
 interface Props {
@@ -151,29 +150,4 @@ function normalizeDuration(string: string | undefined): number | null {
   }
 
   return null;
-}
-
-export class SkiLiftPopover extends PointPopover {
-  private data: SkiLiftData;
-
-  constructor(position: mapboxgl.LngLatLike, data: SkiLiftData) {
-    super(position);
-    this.data = data;
-  }
-
-  public addTo(map: mapboxgl.Map) {
-    super.addTo(map);
-
-    map.setFilter("selected-lift", ["==", "lid", this.data.lid]);
-  }
-
-  public remove(map: mapboxgl.Map) {
-    super.remove(map);
-
-    map.setFilter("selected-lift", ["==", "lid", -1]);
-  }
-
-  protected render(): React.ReactElement<any> {
-    return <SkiLiftInfo data={this.data} />;
-  }
 }

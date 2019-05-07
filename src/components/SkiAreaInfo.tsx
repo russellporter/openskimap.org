@@ -9,7 +9,6 @@ import Button from "@material-ui/core/Button";
 import WarningIcon from "@material-ui/icons/Warning";
 import * as React from "react";
 import { Activity, SkiAreaData } from "./MapData";
-import { PointPopover } from "./PointPopover";
 import { StatusIcon } from "./StatusIcon";
 
 interface SkiAreaPopupProps {
@@ -74,35 +73,6 @@ export const SkiAreaInfo: React.SFC<SkiAreaPopupProps> = props => {
     <CrowdsourcedSkiArea {...props} />
   );
 };
-
-export class SkiAreaPopover extends PointPopover {
-  private data: SkiAreaData;
-
-  constructor(position: mapboxgl.LngLatLike, data: SkiAreaData) {
-    super(position);
-    this.data = data;
-  }
-
-  protected render(): React.ReactElement<any> {
-    return <SkiAreaInfo data={this.data} />;
-  }
-
-  public addTo(map: mapboxgl.Map) {
-    super.addTo(map);
-
-    const filter = ["has", "skiArea-" + this.data.id];
-    map.setFilter("selected-lift", filter);
-    map.setFilter("selected-run", filter);
-  }
-
-  public remove(map: mapboxgl.Map) {
-    super.remove(map);
-
-    const filter = ["==", "lid", -1];
-    map.setFilter("selected-lift", filter);
-    map.setFilter("selected-run", filter);
-  }
-}
 
 function activitySummary(data: SkiAreaData) {
   const downhill = data.activities.some(
