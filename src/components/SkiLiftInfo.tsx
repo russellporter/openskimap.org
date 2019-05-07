@@ -2,15 +2,18 @@ import { Avatar, Card, CardContent, Typography } from "@material-ui/core";
 import turfLength from "@turf/length";
 import { Feature, Geometry, LineString } from "geojson";
 import * as React from "react";
+import { TopRightCloseButton } from "./CloseButton";
 import loadElevationProfile, {
   ElevationData,
   extractEndpoints
 } from "./ElevationProfileLoader";
+import EventBus from "./EventBus";
 import { loadLift } from "./GeoJSONLoader";
 import { SkiLiftData } from "./MapData";
 import { StatusIcon } from "./StatusIcon";
 
 interface Props {
+  eventBus: EventBus;
   data: SkiLiftData;
 }
 
@@ -84,27 +87,41 @@ export class SkiLiftInfo extends React.Component<Props, State> {
     return (
       <Card>
         <CardContent>
-          <span style={{ display: "inline-flex" }}>
-            <Typography variant="h5" component="h2">
-              {data.name_and_type}
-            </Typography>
-            {badge && (
-              <Avatar
-                style={{ backgroundColor: data.color, width: 31, height: 31 }}
-              >
-                {badge}
-              </Avatar>
-            )}
-            {data.status && (
-              <div style={{ paddingLeft: "5px" }}>
-                <StatusIcon
-                  status={data.status}
-                  entityName={"lift"}
-                  hideIfOperating={true}
-                />
-              </div>
-            )}
-          </span>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start"
+            }}
+          >
+            <span style={{ display: "inline-flex" }}>
+              <Typography variant="h5" component="h2">
+                {data.name_and_type}
+              </Typography>
+              {badge && (
+                <Avatar
+                  style={{
+                    backgroundColor: data.color,
+                    width: 31,
+                    height: 31,
+                    marginLeft: "5px"
+                  }}
+                >
+                  {badge}
+                </Avatar>
+              )}
+              {data.status && (
+                <div style={{ marginLeft: "5px" }}>
+                  <StatusIcon
+                    status={data.status}
+                    entityName={"lift"}
+                    hideIfOperating={true}
+                  />
+                </div>
+              )}
+            </span>
+            <TopRightCloseButton onClick={this.props.eventBus.hideInfo} />
+          </div>
           {
             <div className={"distance-and-elevation-info"}>
               {distance && <span>Distance: {Math.round(distance)}m</span>}

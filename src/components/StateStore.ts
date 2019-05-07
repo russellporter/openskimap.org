@@ -35,17 +35,17 @@ export default class StateStore implements EventBus {
     this.update({ aboutInfoOpen: false });
   };
 
-  setMapStyle(style: MapStyle): void {
+  setMapStyle = (style: MapStyle) {
     this.update({ mapStyle: style });
   }
 
-  showInfo(info: InfoData): void {
+  showInfo = (info: InfoData) => {
     this.update({ info: info });
-  }
+  };
 
-  hideInfo(): void {
+  hideInfo = () => {
     this.update({ info: null });
-  }
+  };
 
   private update(changes: StateChanges): void {
     Object.keys(changes).forEach(key => {

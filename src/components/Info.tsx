@@ -34,7 +34,7 @@ export const Info: React.FunctionComponent<{
   return (
     <Card style={{ width: props.width }}>
       {data && data.properties.type == FeatureType.Lift && (
-        <SkiLiftInfo data={data.properties} />
+        <SkiLiftInfo data={data.properties} eventBus={props.eventBus} />
       )}
       {data && data.properties.type == FeatureType.Run && (
         <SkiRunInfo
