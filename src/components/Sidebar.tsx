@@ -1,11 +1,4 @@
-import {
-  Divider,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText
-} from "@material-ui/core";
+import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import BookmarkIcon from "@material-ui/icons/Bookmark";
 import EditIcon from "@material-ui/icons/Edit";
 import InfoIcon from "@material-ui/icons/Info";
@@ -14,6 +7,7 @@ import TerrainIcon from "@material-ui/icons/Terrain";
 import * as React from "react";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
+import * as ExternalURLOpener from "./ExternalURLOpener";
 
 interface Props {
   eventBus: EventBus;
@@ -87,10 +81,7 @@ export default class Sidebar extends React.Component<Props, {}> {
             <List>
               <ListItem
                 button
-                key={"skimap.org"}
-                onClick={() => {
-                  window.location.href = "https://skimap.org";
-                }}
+                onClick={ExternalURLOpener.openSkimapOrg}
               >
                 <ListItemIcon>
                   <BookmarkIcon />

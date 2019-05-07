@@ -48,7 +48,10 @@ export default class About extends React.Component<Props> {
 
             <p>
               Want to see the world's largest collection of traditional ski
-              maps? Visit <Link href="http://www.skimap.org">skimap.org</Link>
+              maps? Visit{" "}
+              <Link href="http://www.skimap.org" target="_blank">
+                skimap.org
+              </Link>
             </p>
 
             <p>

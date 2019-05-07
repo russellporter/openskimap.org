@@ -2,6 +2,7 @@ import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import AboutModal from "./components/AboutModal";
+import * as ExternalURLOpener from "./components/ExternalURLOpener";
 import { Map } from "./components/Map";
 import Sidebar from "./components/Sidebar";
 import State, { StateChanges } from "./components/State";
@@ -50,7 +51,7 @@ function initialize() {
     }
 
     if (changes.editMapOpen === true) {
-      editMap();
+      ExternalURLOpener.editMap(map!);
     }
 
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
@@ -75,17 +76,6 @@ function initialize() {
       map!.setInfo(changes.info);
     }
   }
-}
-
-function editMap() {
-  var center = map!.getCenter().wrap();
-  window.location.href =
-    "https://www.openstreetmap.org/edit?editor=id#map=" +
-    map!.getZoom() +
-    "/" +
-    center.lat +
-    "/" +
-    center.lng;
 }
 
 function unload() {
