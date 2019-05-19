@@ -1,7 +1,7 @@
 import { lineString } from "@turf/helpers";
 import turfLength from "@turf/length";
 import turfLineChunk from "@turf/line-chunk";
-import { LineString } from "geojson";
+import { LineString, MultiLineString } from "geojson";
 
 const heightProfileResolution = 0.1; // 0.1km
 
@@ -150,11 +150,9 @@ export function extractEndpoints(line: LineString): [Longitude, Latitude][] {
   return [[first[0], first[1]], [last[0], last[1]]];
 }
 
-export function extractPoints(feature: any): [Latitude, Longitude][] {
-  if (feature.type !== "Feature") {
-    return [];
-  }
-
+export function extractPoints(
+  feature: GeoJSON.Feature<LineString | MultiLineString>
+): [Latitude, Longitude][] {
   const subfeatures = turfLineChunk(feature, heightProfileResolution).features;
   const points: [Latitude, Longitude][] = [];
   for (let subline of subfeatures) {

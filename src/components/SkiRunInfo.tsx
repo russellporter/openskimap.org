@@ -4,7 +4,7 @@ import HighlightIcon from "@material-ui/icons/Highlight";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import WarningIcon from "@material-ui/icons/Warning";
 import turfLength from "@turf/length";
-import { LineString } from "geojson";
+import { Feature, LineString } from "geojson";
 import {
   RunFeature,
   RunGrooming,
@@ -14,7 +14,7 @@ import {
 import * as React from "react";
 import loadElevationProfile, {
   ElevationData,
-  extractEndpoints
+  extractPoints
 } from "./ElevationProfileLoader";
 import EventBus from "./EventBus";
 import {
@@ -50,9 +50,9 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
   }, [geometry]);
 
   React.useEffect(() => {
-    if (geometry.type === "LineString") {
+    if (feature.geometry.type === "LineString") {
       setTerrainData({ isLoading: true, elevationData: null });
-      loadElevationProfile(extractEndpoints(geometry as LineString)).then(
+      loadElevationProfile(extractPoints(feature as Feature<LineString>)).then(
         elevationData => {
           setTerrainData({ isLoading: false, elevationData: elevationData });
         },
@@ -61,7 +61,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
         }
       );
     }
-  }, [geometry]);
+  }, [feature]);
 
   const showHeightProfile =
     feature !== null && feature.geometry.type === "LineString";
