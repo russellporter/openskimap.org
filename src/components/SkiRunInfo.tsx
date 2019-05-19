@@ -4,227 +4,194 @@ import HighlightIcon from "@material-ui/icons/Highlight";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import WarningIcon from "@material-ui/icons/Warning";
 import turfLength from "@turf/length";
-import { Feature, Geometry } from "geojson";
+import { LineString } from "geojson";
+import {
+  RunFeature,
+  RunGrooming,
+  RunProperties,
+  RunUse
+} from "openskidata-format";
 import * as React from "react";
 import loadElevationProfile, {
   ElevationData,
-  extractPoints
+  extractEndpoints
 } from "./ElevationProfileLoader";
 import EventBus from "./EventBus";
-import { loadRun } from "./GeoJSONLoader";
 import {
   HeightProfile,
   HeightProfileHighlightProps,
   HeightProfilePlaceholder
 } from "./HeightProfile";
 import { InfoHeader } from "./InfoHeader";
-import { SkiRunData } from "./MapData";
 
 interface Props extends HeightProfileHighlightProps {
-  data: SkiRunData;
+  feature: RunFeature;
   eventBus: EventBus;
 }
 
-interface State {
-  feature: Feature<Geometry, SkiRunData> | null;
-  distance: number | null;
-  elevationData: ElevationData | null;
-  loadingElevationData: boolean;
-}
+export const SkiRunInfo: React.FunctionComponent<Props> = props => {
+  const feature = props.feature;
+  const properties = feature.properties;
 
-interface GroomingLabelProps {
-  data: SkiRunData;
-}
+  const [terrainData, setTerrainData] = React.useState<{
+    isLoading: boolean;
+    elevationData: ElevationData | null;
+  }>({ isLoading: false, elevationData: null });
 
-export class SkiRunInfo extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
+  const geometry = props.feature.geometry;
 
-    this.state = {
-      feature: null,
-      distance: null,
-      elevationData: null,
-      loadingElevationData: true
-    };
-  }
+  const distance = React.useMemo(() => {
+    return geometry.type === "LineString"
+      ? turfLength(
+          { type: "Feature", geometry: geometry, properties: {} },
+          { units: "meters" }
+        )
+      : null;
+  }, [geometry]);
 
-  componentDidMount() {
-    loadRun(this.props.data.lid)
-      .then(feature => {
-        this.setState({
-          feature: feature,
-          distance:
-            feature.geometry.type === "LineString"
-              ? turfLength(feature, { units: "meters" })
-              : null
-        });
-        return feature;
-      })
-      .then(feature => {
-        if (feature.geometry.type === "LineString") {
-          return loadElevationProfile(extractPoints(feature));
-        }
-
-        return Promise.reject("no elevation profile to load");
-      })
-      .then(
+  React.useEffect(() => {
+    if (geometry.type === "LineString") {
+      setTerrainData({ isLoading: true, elevationData: null });
+      loadElevationProfile(extractEndpoints(geometry as LineString)).then(
         elevationData => {
-          this.setState({
-            elevationData: elevationData,
-            loadingElevationData: false
-          });
+          setTerrainData({ isLoading: false, elevationData: elevationData });
         },
         () => {
-          this.setState({ loadingElevationData: false });
+          setTerrainData({ isLoading: false, elevationData: null });
         }
       );
-  }
+    }
+  }, [geometry]);
 
-  showHeightProfile() {
-    return (
-      this.state.feature !== null &&
-      this.state.feature.geometry.type === "LineString"
-    );
-  }
+  const showHeightProfile =
+    feature !== null && feature.geometry.type === "LineString";
 
-  render() {
-    const data = this.props.data;
-    const type = data["piste:type"];
-    const feature = this.state.feature;
-    const distance = this.state.distance;
-    const elevationData = this.state.elevationData;
-    const slopeInfo = elevationData && elevationData.slopeInfo;
-    const summary = difficultyText(data);
-    const title = data.name || summary;
-    const subtitle = data.name ? summary : null;
-    return (
-      <Card>
-        <CardContent>
-          <InfoHeader onClose={this.props.eventBus.hideInfo}>
-            <Typography gutterBottom variant="h5" component="h2">
-              {title}
-            </Typography>
-          </InfoHeader>
-          {subtitle && <Typography>{subtitle}</Typography>}
-
-          <div>
-            <GroomingLabel data={data} />
-            {data.oneway === "yes" && type !== "downhill" ? (
-              <Chip
-                avatar={
-                  <Avatar>
-                    <ArrowForwardIcon />
-                  </Avatar>
-                }
-                label="One Way"
-              />
-            ) : null}
-            {data.lit === "yes" ? (
-              <Chip
-                avatar={
-                  <Avatar>
-                    <HighlightIcon />
-                  </Avatar>
-                }
-                label="Night Lit"
-              />
-            ) : null}
-            {data.gladed === "yes" ? <Chip label="Gladed" /> : null}
-            {data.patrolled === "yes" ? (
-              <Chip
-                avatar={
-                  <Avatar>
-                    <LocalHospitalIcon />
-                  </Avatar>
-                }
-                label="Patrolled"
-              />
-            ) : null}
-            {data.patrolled === "no" ? (
-              <Chip
-                avatar={
-                  <Avatar>
-                    <WarningIcon />
-                  </Avatar>
-                }
-                label="Not Patrolled"
-              />
-            ) : null}
-          </div>
-          <Typography className={"distance-and-elevation-info"}>
-            {distance ? <span>Distance: {Math.round(distance)}m</span> : null}
-            {elevationData && elevationData.ascent > 1 ? (
-              <span>Ascent: {Math.round(elevationData.ascent)}m</span>
-            ) : null}
-            {elevationData && elevationData.descent > 1 ? (
-              <span>Descent: {Math.round(elevationData.descent)}m</span>
-            ) : null}
+  const uses = properties.uses;
+  const elevationData = terrainData.elevationData;
+  const slopeInfo = elevationData && elevationData.slopeInfo;
+  const summary = difficultyText(properties);
+  const title = properties.name || summary;
+  const subtitle = properties.name ? summary : null;
+  return (
+    <Card>
+      <CardContent>
+        <InfoHeader onClose={props.eventBus.hideInfo}>
+          <Typography gutterBottom variant="h5" component="h2">
+            {title}
           </Typography>
-          {slopeInfo && (
-            <Typography className={"distance-and-elevation-info"}>
-              {slopeInfo.average !== null && (
-                <span>Average Slope: {formattedSlope(slopeInfo.average)}</span>
-              )}
-              {slopeInfo.max !== null && (
-                <span>Max Slope: {formattedSlope(slopeInfo.max)}</span>
-              )}
-            </Typography>
-          )}
-          {data.note !== undefined && (
-            <Typography>
-              <span>Notes: {data.note}</span>
-            </Typography>
-          )}
-          {feature !== null &&
-          distance !== null &&
-          elevationData !== null &&
-          this.showHeightProfile() ? (
-            <HeightProfile
-              feature={feature}
-              distance={distance}
-              elevationData={elevationData}
-              chartHighlightPosition={this.props.chartHighlightPosition}
-              onHoverChartPosition={this.props.onHoverChartPosition}
+        </InfoHeader>
+        {subtitle && <Typography>{subtitle}</Typography>}
+
+        <div>
+          <GroomingLabel feature={feature} />
+          {properties.oneway === true &&
+          !properties.uses.includes(RunUse.Downhill) ? (
+            <Chip
+              avatar={
+                <Avatar>
+                  <ArrowForwardIcon />
+                </Avatar>
+              }
+              label="One Way"
             />
-          ) : this.state.loadingElevationData ? (
-            <HeightProfilePlaceholder />
           ) : null}
-        </CardContent>
-      </Card>
-    );
-  }
-}
+          {properties.lit === true ? (
+            <Chip
+              avatar={
+                <Avatar>
+                  <HighlightIcon />
+                </Avatar>
+              }
+              label="Night Lit"
+            />
+          ) : null}
+          {properties.gladed === true ? <Chip label="Gladed" /> : null}
+          {properties.patrolled === true ? (
+            <Chip
+              avatar={
+                <Avatar>
+                  <LocalHospitalIcon />
+                </Avatar>
+              }
+              label="Patrolled"
+            />
+          ) : null}
+          {properties.patrolled === false ? (
+            <Chip
+              avatar={
+                <Avatar>
+                  <WarningIcon />
+                </Avatar>
+              }
+              label="Not Patrolled"
+            />
+          ) : null}
+        </div>
+        <Typography className={"distance-and-elevation-info"}>
+          {distance ? <span>Distance: {Math.round(distance)}m</span> : null}
+          {elevationData && elevationData.ascent > 1 ? (
+            <span>Ascent: {Math.round(elevationData.ascent)}m</span>
+          ) : null}
+          {elevationData && elevationData.descent > 1 ? (
+            <span>Descent: {Math.round(elevationData.descent)}m</span>
+          ) : null}
+        </Typography>
+        {slopeInfo && (
+          <Typography className={"distance-and-elevation-info"}>
+            {slopeInfo.average !== null && (
+              <span>Average Slope: {formattedSlope(slopeInfo.average)}</span>
+            )}
+            {slopeInfo.max !== null && (
+              <span>Max Slope: {formattedSlope(slopeInfo.max)}</span>
+            )}
+          </Typography>
+        )}
+        {properties.description !== undefined && (
+          <Typography>
+            <span>Notes: {properties.description}</span>
+          </Typography>
+        )}
+        {feature !== null &&
+        distance !== null &&
+        elevationData !== null &&
+        showHeightProfile ? (
+          <HeightProfile
+            feature={feature}
+            distance={distance}
+            elevationData={elevationData}
+            chartHighlightPosition={props.chartHighlightPosition}
+            onHoverChartPosition={props.onHoverChartPosition}
+          />
+        ) : terrainData.isLoading ? (
+          <HeightProfilePlaceholder />
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+};
 
-const GroomingLabel: React.SFC<GroomingLabelProps> = props => {
-  const grooming = props.data["piste:grooming"];
-  const type = props.data["piste:type"];
+const GroomingLabel: React.SFC<{ feature: RunFeature }> = props => {
+  const grooming = props.feature.properties.grooming;
+  const isNordic = props.feature.properties.uses.includes(RunUse.Nordic);
 
-  let appearance;
   let text;
   switch (grooming) {
-    case "classic":
-      appearance = "primary";
-      text = type === "nordic" ? "Classic" : "Groomed";
+    case RunGrooming.Classic:
+      text = isNordic ? "Classic" : "Groomed";
       break;
-    case "skating":
-      appearance = "primary";
+    case RunGrooming.Skating:
       text = "Skate";
       break;
-    case "classic;skating":
-    case "classic+skating":
-      appearance = "primary";
+    case RunGrooming.ClassicAndSkating:
       text = "Classic & Skate";
       break;
-    case "mogul":
-      appearance = "warning";
+    case RunGrooming.Mogul:
       text = "Moguls";
       break;
-    case "scooter":
-      appearance = "primary";
-      text = type === "nordic" ? "Classic (narrow)" : "Groomed (narrow)";
+    case RunGrooming.Scooter:
+      text = isNordic ? "Classic (narrow)" : "Groomed (narrow)";
       break;
-    case "backcountry":
-      appearance = "warning";
+    case RunGrooming.Backcountry:
       text = "Ungroomed";
       break;
     default:
@@ -234,35 +201,34 @@ const GroomingLabel: React.SFC<GroomingLabelProps> = props => {
   return <Chip label={text} />;
 };
 
-function formattedType(type: string) {
-  const subTypes = type.split(";");
-  const formattedTypes = subTypes.map(value => {
-    switch (value.trim()) {
-      case "downhill":
+function formattedType(uses: RunUse[]) {
+  const formattedUses = uses.map(use => {
+    switch (use) {
+      case RunUse.Downhill:
         return "Downhill ski run";
-      case "nordic":
+      case RunUse.Nordic:
         return "Nordic ski trail";
-      case "skitour":
+      case RunUse.Skitour:
         return "Ski touring route";
-      case "sled":
+      case RunUse.Sled:
         return "Sledding trail";
-      case "hike":
+      case RunUse.Hike:
         return "Hiking trail";
-      case "sleigh":
+      case RunUse.Sleigh:
         return "Sleigh route";
-      case "ice_skate":
+      case RunUse.IceSkate:
         return "Ice skating route";
-      case "snow_park":
+      case RunUse.SnowPark:
         return "Terrain park";
-      case "playground":
+      case RunUse.Playground:
         return "Ski playground";
-      case "ski_jump":
-        return "Ski jump";
+      case RunUse.Connection:
+        return "Connector trail";
       default:
         return null;
     }
   });
-  return formattedTypes.join(", ");
+  return formattedUses.filter(use => use !== null).join(", ");
 }
 
 function formattedSlope(slopePercent: number) {
@@ -272,12 +238,11 @@ function formattedSlope(slopePercent: number) {
   return degrees + " (" + percent + ")";
 }
 
-function difficultyText(data: SkiRunData) {
-  let difficulty = data["piste:difficulty"];
-  if (difficulty) {
-    difficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
-  }
-  const type = formattedType(data["piste:type"]);
+function difficultyText(data: RunProperties) {
+  const difficulty = data.difficulty
+    ? data.difficulty.charAt(0).toUpperCase() + data.difficulty.slice(1)
+    : null;
+  const type = formattedType(data.uses);
   if (difficulty && type) {
     return difficulty + " " + type.toLowerCase();
   } else if (difficulty) {

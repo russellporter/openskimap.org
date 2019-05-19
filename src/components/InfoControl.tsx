@@ -11,12 +11,12 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _container: HTMLDivElement;
   _map: mapboxgl.Map | null = null;
   _eventBus: EventBus;
-  _lid: string;
+  _id: string;
   _highlightManager: HighlightManager | null = null;
   _chartHighlightPosition: mapboxgl.LngLatLike | null = null;
 
   constructor(info: InfoData, eventBus: EventBus) {
-    this._lid = info.lid;
+    this._id = info.id;
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
@@ -51,13 +51,13 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   private setSelected(selected: boolean) {
     this._map!.setFilter("selected-run", [
       "==",
-      "lid",
-      selected ? this._lid : "-1"
+      "id",
+      selected ? this._id : "-1"
     ]);
     this._map!.setFilter("selected-lift", [
       "==",
-      "lid",
-      selected ? this._lid : "-1"
+      "id",
+      selected ? this._id : "-1"
     ]);
   }
 
@@ -68,7 +68,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     }
     ReactDOM.render(
       <Info
-        lid={this._lid}
+        id={this._id}
         eventBus={this._eventBus}
         width={controlWidth(map)}
         chartHighlightPosition={this._chartHighlightPosition}

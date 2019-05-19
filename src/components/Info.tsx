@@ -1,51 +1,59 @@
 import { Card } from "@material-ui/core";
-import { Feature, Geometry } from "geojson";
+import {
+  FeatureType,
+  LiftFeature,
+  RunFeature,
+  SkiAreaFeature
+} from "openskidata-format";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import EventBus from "./EventBus";
 import { loadGeoJSON } from "./GeoJSONLoader";
-import { FeatureType, SkiAreaData, SkiLiftData, SkiRunData } from "./MapData";
 import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";
 
-type MapFeature = Feature<Geometry, SkiRunData | SkiLiftData | SkiAreaData>;
+type MapFeature = RunFeature | LiftFeature | SkiAreaFeature;
 
 export const Info: React.FunctionComponent<{
-  lid: string;
+  id: string;
   width: number;
   eventBus: EventBus;
   chartHighlightPosition: mapboxgl.LngLatLike | null;
   onHoverChartPosition: (position: mapboxgl.LngLatLike | null) => void;
 }> = props => {
-  const [data, setData] = useState<MapFeature | null>(null);
+  const [feature, setFeature] = useState<MapFeature | null>(null);
   useEffect(() => {
     const fetchData = async () => {
-      const data = await loadGeoJSON<SkiRunData | SkiLiftData | SkiAreaData>(
-        props.lid
-      );
+      const data = await loadGeoJSON<MapFeature>(props.id);
 
-      setData(data);
+      setFeature(data);
     };
 
     fetchData();
-  }, [props.lid]);
+  }, [props.id]);
 
   return (
     <Card style={{ width: props.width }}>
-      {data && data.properties.type == FeatureType.Lift && (
-        <SkiLiftInfo data={data.properties} eventBus={props.eventBus} />
+      {feature && feature.properties.type == FeatureType.Lift && (
+        <SkiLiftInfo
+          feature={feature as LiftFeature}
+          eventBus={props.eventBus}
+        />
       )}
-      {data && data.properties.type == FeatureType.Run && (
+      {feature && feature.properties.type == FeatureType.Run && (
         <SkiRunInfo
-          data={data.properties}
+          feature={feature as RunFeature}
           chartHighlightPosition={props.chartHighlightPosition}
           onHoverChartPosition={props.onHoverChartPosition}
           eventBus={props.eventBus}
         />
       )}
-      {data && data.properties.type == FeatureType.SkiArea && (
-        <SkiAreaInfo data={data.properties} eventBus={props.eventBus} />
+      {feature && feature.properties.type == FeatureType.SkiArea && (
+        <SkiAreaInfo
+          feature={feature as SkiAreaFeature}
+          eventBus={props.eventBus}
+        />
       )}
     </Card>
   );

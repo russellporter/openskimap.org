@@ -9,11 +9,10 @@ import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
-import { Feature, Geometry } from "geojson";
 import * as lunr from "lunr";
+import { SkiAreaFeature } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
-import { SkiAreaData } from "./MapData";
 import * as styles from "./SearchBar.css";
 
 interface Props {
@@ -39,7 +38,7 @@ enum Activity {
   Backcountry = "backcountry"
 }
 
-type Result = Feature<Geometry, SkiAreaData>;
+type Result = SkiAreaFeature;
 
 export default class SearchBar extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -171,7 +170,7 @@ export const SearchResults: React.FunctionComponent<{
                 props.onSelect(result);
               }}
               selected={props.selectedIndex === index}
-              key={result.properties.lid}
+              key={result.properties.id}
               result={result}
             />
           );
@@ -190,7 +189,7 @@ export const SearchResults: React.FunctionComponent<{
 
 function infoDataForResult(result: Result) {
   return {
-    lid: result.properties.lid,
+    id: result.properties.id,
     panToPosition:
       result.geometry.type == "Point" ? result.geometry.coordinates : null
   };

@@ -8,9 +8,14 @@
     "target": "es5",
     "jsx": "react",
     "importHelpers": true,
-    "lib": ["dom", "es5", "es2015.promise", "es2015.collection"],
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise",
+      "es2015.collection",
+      "es2016.array.include"
+    ],
     "typeRoots": ["./node_modules/@types", "./definitions"]
   },
-  "include": ["./src/**/*"],
-  "files": ["./definitions/index.d.ts"]
+  "include": ["./src/**/*"]
 }

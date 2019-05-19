@@ -26,6 +26,7 @@
     "chart.js": "^2.7.3",
     "lunr": "^2.3.5",
     "memoize-one": "^4.0.3",
+    "openskidata-format": "0.1.4",
     "react": "^16.8.6",
     "react-chartjs-2": "^2.7.4",
     "react-dom": "^16.6.1",

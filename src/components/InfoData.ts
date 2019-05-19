@@ -1,4 +1,4 @@
 export interface InfoData {
-  lid: string;
+  id: string;
   panToPosition: mapboxgl.LngLatLike | null;
 }

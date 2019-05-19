@@ -2,8 +2,8 @@ import { Tooltip } from "@material-ui/core";
 import CancelIcon from "@material-ui/icons/Cancel";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import HelpIcon from "@material-ui/icons/Help";
+import { Status } from "openskidata-format";
 import * as React from "react";
-import { Status } from "./MapData";
 
 interface Props {
   status: Status | null;

@@ -7,33 +7,38 @@ import {
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import WarningIcon from "@material-ui/icons/Warning";
+import {
+  Activity,
+  SkiAreaFeature,
+  SkiAreaProperties
+} from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
-import { Activity, SkiAreaData } from "./MapData";
 import { StatusIcon } from "./StatusIcon";
 
 interface SkiAreaPopupProps {
-  data: SkiAreaData;
+  feature: SkiAreaFeature;
   eventBus: EventBus;
 }
 
 const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
+  const properties = props.feature.properties;
   return (
     <Card>
       <CardContent>
         <InfoHeader onClose={props.eventBus.hideInfo}>
           <Typography variant="h5" component="h2">
-            {props.data.name}{" "}
+            {properties.name}{" "}
             <StatusIcon
-              status={props.data.status}
+              status={properties.status}
               entityName={"ski area"}
               hideIfOperating={false}
             />
           </Typography>
         </InfoHeader>
         <Typography variant="subtitle1" color="textSecondary">
-          {activitySummary(props.data)}
+          {activitySummary(properties)}
         </Typography>
       </CardContent>
       <CardActions>
@@ -41,7 +46,7 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
           size="small"
           color="primary"
           target="_blank"
-          href={"https://skimap.org/SkiAreas/view/" + props.data.id}
+          href={"https://skimap.org/SkiAreas/view/" + properties.id}
         >
           See Paper Maps
         </Button>
@@ -51,12 +56,13 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
 };
 
 const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
+  const properties = props.feature.properties;
   return (
     <Card>
       <CardContent>
         <InfoHeader onClose={props.eventBus.hideInfo}>
           <Typography gutterBottom variant="h5" component="h2">
-            {activitySummary(props.data)}{" "}
+            {activitySummary(properties)}{" "}
             <Tooltip
               placement="right"
               title="This ski area information is generated from OpenStreetMap data"
@@ -74,18 +80,17 @@ const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
 };
 
 export const SkiAreaInfo: React.SFC<SkiAreaPopupProps> = props => {
-  return props.data.generated ? (
+  const properties = props.feature.properties;
+  return properties.generated ? (
     <GeneratedSkiArea {...props} />
   ) : (
     <CrowdsourcedSkiArea {...props} />
   );
 };
 
-function activitySummary(data: SkiAreaData) {
-  const downhill = data.activities.some(
-    activity => activity == Activity.Downhill
-  );
-  const nordic = data.activities.some(activity => activity == Activity.Nordic);
+function activitySummary(properties: SkiAreaProperties) {
+  const downhill = properties.activities.includes(Activity.Downhill);
+  const nordic = properties.activities.includes(Activity.Nordic);
   if (downhill && nordic) {
     return "Downhill & Nordic Ski Area";
   } else if (downhill) {
