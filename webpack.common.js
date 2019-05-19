@@ -47,8 +47,7 @@ module.exports = {
   externals: {
     "mapbox-gl": "mapboxgl",
     react: "React",
-    "react-dom": "ReactDOM",
-    MapboxGeocoder: "MapboxGeocoder"
+    "react-dom": "ReactDOM"
   },
 
   plugins: [
