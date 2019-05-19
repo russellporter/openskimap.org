@@ -1,18 +1,18 @@
-:global html {
+html {
   height: 100%;
 }
-:global body {
+body {
   height: 100%;
   margin: 0px;
   padding: 0px;
 }
 
-:global #map {
+#map {
   width: 100%;
   height: 100%;
 }
 
-:global #settings-box {
+#settings-box {
   display: flex;
   position: absolute;
   top: 0;
@@ -24,92 +24,97 @@
   font-family: Helvetica;
   font-size: x-small;
 }
-:global .openskimap-style-control > button {
+.openskimap-style-control > button {
   font-weight: bold;
   width: auto;
   padding: 0 8px 0 8px;
 }
-:global .openskimap-style-enabled {
+.openskimap-style-enabled {
   color: #3cb6e3;
 }
 
-:global .ski-area-cluster-popup {
+.ski-area-cluster-popup {
   margin: -5px;
   font-weight: 500;
 }
 
-:global .ski-popup {
+.ski-popup {
   max-width: 300px;
 }
 
-:global .ski-popup-header {
+.ski-popup-header {
   font-size: 14px;
   margin-right: 4px;
 }
 
-:global .ski-popup-title {
+.ski-popup-title {
   font-weight: 500;
 }
 
-:global .ski-popup-labels {
+.ski-popup-labels {
   margin-top: 4px;
   position: flex;
 }
 
-:global .height-profile {
+.height-profile {
   margin-top: 20px;
 }
 
-:global .label-night {
+.label-night {
   background-color: #000000;
 }
 
-:global .ski-popup-labels > * {
+.ski-popup-labels > * {
   margin-right: 4px;
 }
 
-:global .operating-status-icon {
+.operating-status-icon {
   vertical-align: text-top;
   color: grey;
 }
 
-:global(.operating-status-icon-operating, .status-icon-operating) {
+.operating-status-icon-operating,
+.status-icon-operating {
   color: green;
 }
 
-:global(.operating-status-icon-closed, .status-icon-disused, .status-icon-abandoned) {
+.operating-status-icon-closed,
+.status-icon-disused,
+.status-icon-abandoned {
   color: red;
 }
 
-:global(.status-icon-construction, .status-icon-planned, .status-icon-proposed) {
+.status-icon-construction,
+.status-icon-planned,
+.status-icon-proposed {
   color: purple;
 }
 
-:global .tooltip-inner {
+.tooltip-inner {
   max-width: 250px !important;
 }
 
-:global .mapboxgl-popup-content {
+.mapboxgl-popup-content {
   padding: 10px;
 }
 
-:global .distance-and-elevation-info {
+.distance-and-elevation-info {
   margin-top: 4px;
 }
 
-:global .distance-and-elevation-info > * {
+.distance-and-elevation-info > * {
   margin-right: 8px;
 }
 
 /* Loading spinner */
 
-:global .lds-ring {
+.lds-ring {
   display: inline-block;
   position: relative;
   width: 64px;
   height: 64px;
 }
-:global .lds-ring div {
+.lds-ring div {
   box-sizing: border-box;
   display: block;
   position: absolute;
@@ -121,16 +126,16 @@
   animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: grey transparent transparent transparent;
 }
-:global .lds-ring div:nth-child(1) {
+.lds-ring div:nth-child(1) {
   animation-delay: -0.45s;
 }
-:global .lds-ring div:nth-child(2) {
+.lds-ring div:nth-child(2) {
   animation-delay: -0.3s;
 }
-:global .lds-ring div:nth-child(3) {
+.lds-ring div:nth-child(3) {
   animation-delay: -0.15s;
 }
-@keyframes :global(lds-ring) {
+@keyframes lds-ring {
   0% {
     transform: rotate(0deg);
   }

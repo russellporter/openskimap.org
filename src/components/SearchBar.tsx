@@ -13,7 +13,6 @@ import * as lunr from "lunr";
 import { SkiAreaFeature } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
-import * as styles from "./SearchBar.css";
 
 interface Props {
   eventBus: EventBus;
@@ -89,17 +88,17 @@ export default class SearchBar extends React.Component<Props, State> {
     };
 
     return (
-      <Paper className={styles.root} style={{ width: width }} elevation={1}>
+      <Paper style={{ width: width }} elevation={1}>
         <div style={{ alignItems: "center", display: "flex" }}>
           <IconButton
-            className={styles.iconButton}
+            style={{ padding: "10" }}
             aria-label="Menu"
             onClick={this.props.eventBus.openSidebar}
           >
             <MenuIcon />
           </IconButton>
           <InputBase
-            className={styles.input}
+            style={{ marginLeft: "8", flex: "1" }}
             placeholder="Search Ski Areas"
             onChange={e => {
               this.setState({
@@ -118,7 +117,7 @@ export default class SearchBar extends React.Component<Props, State> {
             value={this.state.searchQuery}
           />
           <IconButton
-            className={styles.iconButton}
+            style={{ padding: "10" }}
             aria-label="Search"
             disabled={this.state.searchQuery.length == 0}
             onClick={() => {
