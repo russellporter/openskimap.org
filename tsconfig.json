@@ -5,12 +5,12 @@
     "strict": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "es6",
     "jsx": "react",
     "importHelpers": true,
     "lib": [
       "dom",
-      "es5",
+      "es6",
       "es2015.promise",
       "es2015.collection",
       "es2016.array.include"

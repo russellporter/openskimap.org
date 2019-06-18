@@ -10,7 +10,8 @@ import WarningIcon from "@material-ui/icons/Warning";
 import {
   Activity,
   SkiAreaFeature,
-  SkiAreaProperties
+  SkiAreaProperties,
+  SourceType
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
@@ -24,6 +25,9 @@ interface SkiAreaPopupProps {
 
 const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
   const properties = props.feature.properties;
+  const skimapOrgSource = properties.sources.find(
+    s => s.type === SourceType.SKIMAP_ORG
+  );
   return (
     <Card>
       <CardContent>
@@ -41,16 +45,18 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
           {activitySummary(properties)}
         </Typography>
       </CardContent>
-      <CardActions>
-        <Button
-          size="small"
-          color="primary"
-          target="_blank"
-          href={"https://skimap.org/SkiAreas/view/" + properties.id}
-        >
-          See Paper Maps
-        </Button>
-      </CardActions>
+      {skimapOrgSource && (
+        <CardActions>
+          <Button
+            size="small"
+            color="primary"
+            target="_blank"
+            href={"https://skimap.org/SkiAreas/view/" + skimapOrgSource.id}
+          >
+            See Paper Maps
+          </Button>
+        </CardActions>
+      )}
     </Card>
   );
 };
