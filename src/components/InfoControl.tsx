@@ -49,16 +49,11 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   }
 
   private setSelected(selected: boolean) {
-    this._map!.setFilter("selected-run", [
-      "==",
-      "id",
-      selected ? this._id : "-1"
-    ]);
-    this._map!.setFilter("selected-lift", [
-      "==",
-      "id",
-      selected ? this._id : "-1"
-    ]);
+    const filter = selected
+      ? ["any", ["==", "id", this._id], ["has", "skiArea-" + this._id]]
+      : ["==", "id", "-1"];
+    this._map!.setFilter("selected-run", filter);
+    this._map!.setFilter("selected-lift", filter);
   }
 
   private render() {
