@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node_modules/.bin/webpack-dev-server --open --config webpack.dev.js --mode development",
-    "build": "node_modules/.bin/webpack --config webpack.prod.js",
+    "postinstall": "node_modules/.bin/webpack --config webpack.prod.js",
     "pull": "git pull; npm install",
-    "deploy": "git pull; npm install; npm run-script build"
+    "deploy": "git pull; npm install"
   },
   "author": "Russell Porter",
   "license": "ISC",
