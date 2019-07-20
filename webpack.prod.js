@@ -5,5 +5,8 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 
 module.exports = merge(common, {
-  plugins: [new UglifyJSPlugin(), new BundleAnalyzerPlugin()]
+  plugins: [
+    new UglifyJSPlugin(),
+    new BundleAnalyzerPlugin({ analyzerMode: "disabled" })
+  ]
 });
