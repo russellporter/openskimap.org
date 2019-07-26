@@ -9,26 +9,20 @@ import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
-import * as lunr from "lunr";
 import { SkiAreaFeature } from "openskidata-format";
 import * as React from "react";
+import { debounce, throttle } from "throttle-debounce";
 import EventBus from "./EventBus";
 
 interface Props {
   eventBus: EventBus;
   width: number;
-  searchIndexURL: string;
 }
 
 interface State {
   searchQuery: string;
-  searchIndex: SearchIndex | null;
   selectedIndex: number;
-}
-
-interface SearchIndex {
-  index: lunr.Index;
-  data: any;
+  results: Result[];
 }
 
 enum Activity {
@@ -40,26 +34,39 @@ enum Activity {
 type Result = SkiAreaFeature;
 
 export default class SearchBar extends React.Component<Props, State> {
+  searchDebounced: debounce<(query: string) => void>;
+  searchThrottled: throttle<(query: string) => void>;
+
   constructor(props: Props) {
     super(props);
-    this.state = { searchQuery: "", searchIndex: null, selectedIndex: 0 };
+    this.state = { searchQuery: "", selectedIndex: 0, results: [] };
+    this.searchDebounced = debounce(500, this.search);
+    this.searchThrottled = throttle(500, this.search);
   }
 
-  componentDidMount() {
-    // TODO: Move to a server side search index
-    fetch(this.props.searchIndexURL)
-      .then(response => {
-        return response.json();
-      })
-      .then(json => {
-        this.setState({
-          searchIndex: {
-            index: lunr.Index.load(json.index),
-            data: json.skiAreas
-          }
+  private updateSearchQuery = (query: string) => {
+    this.setState({ searchQuery: query }, () => {
+      // If the query term is short or ends with a
+      // space, trigger the more impatient version.
+      if (query.length < 5 || query.endsWith(" ")) {
+        this.searchThrottled(query);
+      } else {
+        this.searchDebounced(query);
+      }
+    });
+  };
+
+  private search = (query: string) => {
+    fetch(
+      "https://api.openskimap.org/search?query=" + encodeURIComponent(query)
+    ).then(response => {
+      if (this.state.searchQuery === query) {
+        response.json().then(results => {
+          this.setState({ results: results });
         });
-      });
-  }
+      }
+    });
+  };
 
   private handleKeyNavigation = (e: React.KeyboardEvent) => {
     if (e.keyCode == 38) {
@@ -69,21 +76,23 @@ export default class SearchBar extends React.Component<Props, State> {
       });
     } else if (e.keyCode == 40) {
       e.preventDefault();
-      const resultsLength = getResults(
-        this.state.searchQuery,
-        this.state.searchIndex
-      ).length;
       this.setState({
-        selectedIndex: Math.min(resultsLength - 1, this.state.selectedIndex + 1)
+        selectedIndex: Math.min(
+          this.state.results.length - 1,
+          this.state.selectedIndex + 1
+        )
       });
     }
   };
 
   render() {
     const width = this.props.width;
-    const results = getResults(this.state.searchQuery, this.state.searchIndex);
+    const results = this.state.results;
     const showResult = (result: Result) => {
-      this.setState({ searchQuery: "", selectedIndex: 0 });
+      this.setState({
+        searchQuery: "",
+        selectedIndex: this.state.results.indexOf(result) || 0
+      });
       this.props.eventBus.showInfo(infoDataForResult(result));
     };
 
@@ -101,9 +110,7 @@ export default class SearchBar extends React.Component<Props, State> {
             style={{ marginLeft: "8", flex: "1" }}
             placeholder="Search Ski Areas"
             onChange={e => {
-              this.setState({
-                searchQuery: e.target.value
-              });
+              this.updateSearchQuery(e.target.value);
             }}
             onKeyDown={e => {
               this.handleKeyNavigation(e);
@@ -142,15 +149,6 @@ export default class SearchBar extends React.Component<Props, State> {
       </Paper>
     );
   }
-}
-
-function getResults(text: string, searchIndex: SearchIndex | null): Result[] {
-  text = text.trim();
-  if (searchIndex && text.length > 0) {
-    const results = searchIndex.index.search(text);
-    return results.map(result => searchIndex.data[result.ref]);
-  }
-  return [];
 }
 
 export const SearchResults: React.FunctionComponent<{

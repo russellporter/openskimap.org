@@ -1,4 +1,3 @@
-import * as lunr from "lunr";
 import * as mapboxgl from "mapbox-gl";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
@@ -10,7 +9,6 @@ import { SearchBarControl } from "./SearchBarControl";
 export class Map {
   private map: mapboxgl.Map;
 
-  private index: lunr.Index | undefined;
   private data: any;
   private eventBus: EventBus;
   private infoControl: InfoControl | null = null;

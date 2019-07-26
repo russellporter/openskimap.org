@@ -5,8 +5,6 @@ import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import SearchBar from "./SearchBar";
 
-const searchIndexURL = "https://tiles.skimap.org/search_index.json";
-
 export class SearchBarControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
   _map: mapboxgl.Map | null = null;
@@ -34,11 +32,7 @@ export class SearchBarControl implements mapboxgl.IControl {
 
   private render = () => {
     ReactDOM.render(
-      <SearchBar
-        searchIndexURL={searchIndexURL}
-        eventBus={this._eventBus}
-        width={controlWidth(this._map!)}
-      />,
+      <SearchBar eventBus={this._eventBus} width={controlWidth(this._map!)} />,
       this._container
     );
   };
