@@ -14,6 +14,7 @@
   "dependencies": {
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
+    "@turf/centroid": "^6.0.2",
     "@turf/distance": "^6.0.0",
     "@turf/length": "^6.0.0",
     "@turf/line-chunk": "^5.1.5",

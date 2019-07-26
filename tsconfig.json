@@ -15,7 +15,11 @@
       "es2015.collection",
       "es2016.array.include"
     ],
-    "typeRoots": ["./node_modules/@types", "./definitions"]
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "*": ["types/*"]
+    },
+    "baseUrl": "."
   },
   "include": ["./src/**/*"]
 }

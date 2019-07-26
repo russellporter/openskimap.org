@@ -1,18 +1,15 @@
-import {
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Paper
-} from "@material-ui/core";
+import { Divider, List, ListItem, ListItemText, Paper } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
-import { SkiAreaFeature } from "openskidata-format";
+import centroid from "@turf/centroid";
+import { FeatureType, getLiftNameAndType, LiftFeature, LiftProperties, RunFeature, RunProperties, SkiAreaFeature, SkiAreaProperties } from "openskidata-format";
 import * as React from "react";
 import { debounce, throttle } from "throttle-debounce";
 import EventBus from "./EventBus";
+import { formattedRunUse } from "./Formatters";
+import { InfoData } from "./InfoData";
 
 interface Props {
   eventBus: EventBus;
@@ -31,7 +28,7 @@ enum Activity {
   Backcountry = "backcountry"
 }
 
-type Result = SkiAreaFeature;
+type Result = SkiAreaFeature | LiftFeature | RunFeature;
 
 export default class SearchBar extends React.Component<Props, State> {
   searchDebounced: debounce<(query: string) => void>;
@@ -108,7 +105,7 @@ export default class SearchBar extends React.Component<Props, State> {
           </IconButton>
           <InputBase
             style={{ marginLeft: "8", flex: "1" }}
-            placeholder="Search Ski Areas"
+            placeholder="Search Ski Areas, Lifts, and Runs"
             onChange={e => {
               this.updateSearchQuery(e.target.value);
             }}
@@ -184,11 +181,11 @@ export const SearchResults: React.FunctionComponent<{
   );
 };
 
-function infoDataForResult(result: Result) {
+function infoDataForResult(result: Result): InfoData {
+  const geometry = centroid(result).geometry;
   return {
     id: result.properties.id,
-    panToPosition:
-      result.geometry.type == "Point" ? result.geometry.coordinates : null
+    panToPosition: geometry && geometry.coordinates
   };
 }
 
@@ -201,7 +198,19 @@ const SearchResult: React.FunctionComponent<{
     <ListItem button onClick={props.onSelect} selected={props.selected}>
       <ListItemText
         primary={props.result.properties.name}
-        secondary={props.result.properties.activities
+        secondary={getSecondaryText(props.result.properties)}
+      />
+    </ListItem>
+  );
+};
+
+function getSecondaryText(
+  properties: SkiAreaProperties | LiftProperties | RunProperties
+) {
+  switch (properties.type) {
+    case FeatureType.SkiArea:
+      return (
+        properties.activities
           .map(activity => {
             switch (activity) {
               case Activity.Downhill:
@@ -212,8 +221,11 @@ const SearchResult: React.FunctionComponent<{
                 return "Backcountry";
             }
           })
-          .join(" and ")}
-      />
-    </ListItem>
-  );
-};
+          .join(" and ") + " Ski Area"
+      ).trim();
+    case FeatureType.Run:
+      return formattedRunUse(properties.uses);
+    case FeatureType.Lift:
+      return getLiftNameAndType(properties) + " lift";
+  }
+}
