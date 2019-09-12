@@ -1,5 +1,7 @@
+import * as mapboxgl from "mapbox-gl";
+
 export interface ChartHighlighter {
-  setChartHighlightPosition(position: mapboxgl.LngLatLike | null): void;
+  setChartHighlightPosition(position: mapboxgl.LngLat | null): void;
 }
 
 // Syncs highlighted position between a chart displayed and the map.
@@ -42,7 +44,7 @@ export default class HighlightManager {
     }
   };
 
-  _onHover = (e: any) => {
+  _onHover = (e: mapboxgl.MapMouseEvent) => {
     this.chartHighlighter.setChartHighlightPosition(e.lngLat);
   };
 

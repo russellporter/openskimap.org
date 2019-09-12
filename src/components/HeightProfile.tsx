@@ -1,5 +1,6 @@
 import turfLineSliceAlong from "@turf/line-slice-along";
 import turfNearestPointOnLine from "@turf/nearest-point-on-line";
+import * as mapboxgl from "mapbox-gl";
 import memoize from "memoize-one";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
@@ -7,8 +8,8 @@ import "whatwg-fetch";
 import { ElevationData } from "./ElevationProfileLoader";
 
 export interface HeightProfileHighlightProps {
-  chartHighlightPosition: mapboxgl.LngLatLike | null;
-  onHoverChartPosition: (position: mapboxgl.LngLatLike | null) => void;
+  chartHighlightPosition: mapboxgl.LngLat | null;
+  onHoverChartPosition: (position: mapboxgl.LngLat | null) => void;
 }
 
 interface HeightProfileProps extends HeightProfileHighlightProps {
@@ -67,7 +68,10 @@ export class HeightProfile extends React.Component<
       return;
     }
 
-    this.props.onHoverChartPosition(geometry.coordinates[0]);
+    const firstPoint = geometry.coordinates[0];
+    this.props.onHoverChartPosition(
+      new mapboxgl.LngLat(firstPoint[0], firstPoint[1])
+    );
   }
 
   render() {
@@ -193,7 +197,7 @@ function pointRadiusesWithHighlightAt(index: number | null, length: number) {
 }
 
 function convertChartHighlightPosition(
-  chartHighlightPosition: mapboxgl.LngLatLike | null,
+  chartHighlightPosition: mapboxgl.LngLat | null,
   feature: any
 ) {
   if (
@@ -204,13 +208,13 @@ function convertChartHighlightPosition(
     return null;
   }
 
-  if (chartHighlightPosition instanceof mapboxgl.LngLat) {
-    chartHighlightPosition = chartHighlightPosition.toArray();
-  }
-
-  const point = turfNearestPointOnLine(feature, chartHighlightPosition, {
-    units: "meters"
-  });
+  const point = turfNearestPointOnLine(
+    feature,
+    [chartHighlightPosition.lng, chartHighlightPosition.lat],
+    {
+      units: "meters"
+    }
+  );
 
   let index = point.properties.index;
   if (index !== undefined) {

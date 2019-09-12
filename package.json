@@ -38,7 +38,7 @@
     "@babel/core": "^7.1.5",
     "@babel/preset-env": "^7.1.5",
     "@types/geojson": "^7946.0.4",
-    "@types/mapbox-gl": "^0.44.4",
+    "@types/mapbox-gl": "^0.54.3",
     "@types/memoize-one": "^3.1.1",
     "@types/throttle-debounce": "^1.1.1",
     "awesome-typescript-loader": "^5.2.1",

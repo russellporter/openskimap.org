@@ -1,10 +1,25 @@
-import { Divider, List, ListItem, ListItemText, Paper } from "@material-ui/core";
+import {
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Paper
+} from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import centroid from "@turf/centroid";
-import { FeatureType, getLiftNameAndType, LiftFeature, LiftProperties, RunFeature, RunProperties, SkiAreaFeature, SkiAreaProperties } from "openskidata-format";
+import {
+  FeatureType,
+  getLiftNameAndType,
+  LiftFeature,
+  LiftProperties,
+  RunFeature,
+  RunProperties,
+  SkiAreaFeature,
+  SkiAreaProperties
+} from "openskidata-format";
 import * as React from "react";
 import { debounce, throttle } from "throttle-debounce";
 import EventBus from "./EventBus";
@@ -185,7 +200,10 @@ function infoDataForResult(result: Result): InfoData {
   const geometry = centroid(result).geometry;
   return {
     id: result.properties.id,
-    panToPosition: geometry && geometry.coordinates
+    panToPosition: geometry && [
+      geometry.coordinates[0],
+      geometry.coordinates[1]
+    ]
   };
 }
 

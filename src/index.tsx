@@ -27,11 +27,11 @@ function initialize() {
   (mapboxgl as any).accessToken =
     "pk.eyJ1IjoicnVzc2VsbCIsImEiOiJjaXUwYWE5NGYwMW94MnpydG5jaWxjOHJsIn0.oyWAcfWU5SMOOWevkrenlw";
   mapboxgl.setRTLTextPlugin(
-    "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.1.2/mapbox-gl-rtl-text.js",
+    "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js",
     () => {}
   );
 
-  let center: number[];
+  let center: mapboxgl.LngLatLike;
   let zoom: number;
   if (localStorage["slippy.lat"] != null) {
     center = [localStorage["slippy.lng"], localStorage["slippy.lat"]];

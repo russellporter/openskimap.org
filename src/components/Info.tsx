@@ -19,8 +19,8 @@ export const Info: React.FunctionComponent<{
   id: string;
   width: number;
   eventBus: EventBus;
-  chartHighlightPosition: mapboxgl.LngLatLike | null;
-  onHoverChartPosition: (position: mapboxgl.LngLatLike | null) => void;
+  chartHighlightPosition: mapboxgl.LngLat | null;
+  onHoverChartPosition: (position: mapboxgl.LngLat | null) => void;
 }> = props => {
   const [feature, setFeature] = useState<MapFeature | null>(null);
   useEffect(() => {

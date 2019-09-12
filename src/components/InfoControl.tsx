@@ -13,7 +13,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _eventBus: EventBus;
   _id: string;
   _highlightManager: HighlightManager | null = null;
-  _chartHighlightPosition: mapboxgl.LngLatLike | null = null;
+  _chartHighlightPosition: mapboxgl.LngLat | null = null;
 
   constructor(info: InfoData, eventBus: EventBus) {
     this._id = info.id;
@@ -43,7 +43,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     return "top-left";
   };
 
-  setChartHighlightPosition(position: mapboxgl.LngLatLike | null): void {
+  setChartHighlightPosition(position: mapboxgl.LngLat | null): void {
     this._chartHighlightPosition = position;
     this.render();
   }
