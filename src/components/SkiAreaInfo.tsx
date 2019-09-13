@@ -9,12 +9,17 @@ import Button from "@material-ui/core/Button";
 import WarningIcon from "@material-ui/icons/Warning";
 import {
   Activity,
+  getRunColor,
+  RunConvention,
+  RunDifficulty,
   SkiAreaFeature,
   SkiAreaProperties,
-  SourceType
+  SourceType,
+  Statistics
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
+import { formattedActivityName } from "./Formatters";
 import { InfoHeader } from "./InfoHeader";
 import { StatusIcon } from "./StatusIcon";
 
@@ -41,9 +46,9 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
             />
           </Typography>
         </InfoHeader>
-        <Typography variant="subtitle1" color="textSecondary">
-          {activitySummary(properties)}
-        </Typography>
+        {properties.statistics && (
+          <SkiAreaStatistics statistics={properties.statistics} />
+        )}
       </CardContent>
       {skimapOrgSource && (
         <CardActions>
@@ -80,6 +85,9 @@ const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
             </Tooltip>
           </Typography>
         </InfoHeader>
+        {properties.statistics && (
+          <SkiAreaStatistics statistics={properties.statistics} />
+        )}
       </CardContent>
     </Card>
   );
@@ -107,3 +115,100 @@ function activitySummary(properties: SkiAreaProperties) {
     return "Ski Area";
   }
 }
+
+const SkiAreaStatistics: React.SFC<{ statistics: Statistics }> = props => {
+  const activities: Activity[] = [
+    Activity.Downhill,
+    Activity.Nordic,
+    Activity.Backcountry
+  ];
+  const difficulties: (RunDifficulty | null)[] = [
+    RunDifficulty.NOVICE,
+    RunDifficulty.EASY,
+    RunDifficulty.INTERMEDIATE,
+    RunDifficulty.ADVANCED,
+    RunDifficulty.EXPERT,
+    RunDifficulty.FREERIDE,
+    RunDifficulty.EXTREME,
+    null
+  ];
+  const runStatistics: [
+    Activity,
+    [RunDifficulty | null, number][]
+  ][] = activities.flatMap(activity => {
+    const statisticsForActivity = props.statistics.runs.byActivity[activity];
+    if (statisticsForActivity !== undefined) {
+      return [
+        [
+          activity,
+          difficulties.flatMap(difficulty => {
+            const statisticsForDifficulty =
+              statisticsForActivity.byDifficulty[difficulty || "other"];
+            if (statisticsForDifficulty !== undefined) {
+              return [[difficulty, statisticsForDifficulty.lengthInKm]];
+            }
+            return [];
+          })
+        ]
+      ];
+    }
+    return [];
+  });
+
+  return (
+    <>
+      {runStatistics.map(activityStatistics => {
+        const totalRunKm = activityStatistics[1].reduce((previous, current) => {
+          return previous + current[1];
+        }, 0);
+
+        const roundedTotalKm = Math.round(totalRunKm);
+        if (roundedTotalKm === 0) {
+          return null;
+        }
+
+        return (
+          <div key={activityStatistics[0]}>
+            <Typography variant="subtitle1" color="textSecondary">
+              {formattedActivityName(activityStatistics[0])}
+              {": "}
+              {roundedTotalKm} km
+            </Typography>
+            <RunDifficultyBarChart
+              activity={activityStatistics[0]}
+              totalRunKm={totalRunKm}
+              data={activityStatistics[1]}
+            />
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
+const RunDifficultyBarChart: React.SFC<{
+  activity: Activity;
+  totalRunKm: number;
+  data: [RunDifficulty | null, number][];
+}> = props => {
+  const parts = props.data.map(d => {
+    const percentage = (d[1] / props.totalRunKm) * 100.0;
+    const difficulty = d[0];
+
+    return (
+      <span
+        key={difficulty || "other"}
+        style={{
+          width: percentage + "%",
+          backgroundColor: getRunColor(RunConvention.JAPAN, difficulty)
+        }}
+      ></span>
+    );
+  });
+
+  return (
+    <div style={{ display: "flex", height: "10px", marginBottom: "12px" }}>
+      {parts}
+    </div>
+  );
+};

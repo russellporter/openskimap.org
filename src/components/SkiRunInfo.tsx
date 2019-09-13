@@ -17,7 +17,7 @@ import loadElevationProfile, {
   extractPoints
 } from "./ElevationProfileLoader";
 import EventBus from "./EventBus";
-import { formattedRunUse } from "./Formatters";
+import { formattedDifficultyName, formattedRunUse } from "./Formatters";
 import {
   HeightProfile,
   HeightProfileHighlightProps,
@@ -211,7 +211,7 @@ function formattedSlope(slopePercent: number) {
 
 function difficultyText(data: RunProperties) {
   const difficulty = data.difficulty
-    ? data.difficulty.charAt(0).toUpperCase() + data.difficulty.slice(1)
+    ? formattedDifficultyName(data.difficulty)
     : null;
   const type = formattedRunUse(data.uses);
   if (difficulty && type) {

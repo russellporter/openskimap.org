@@ -13,7 +13,8 @@
       "es6",
       "es2015.promise",
       "es2015.collection",
-      "es2016.array.include"
+      "es2016.array.include",
+      "es2019.array"
     ],
     "typeRoots": ["./node_modules/@types"],
     "paths": {

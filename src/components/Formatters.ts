@@ -29,3 +29,11 @@ export function formattedRunUse(uses: RunUse[]) {
   });
   return formattedUses.filter(use => use !== null).join(", ");
 }
+
+export function formattedDifficultyName(difficulty: RunDifficulty) {
+  return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+}
+
+export function formattedActivityName(activity: Activity) {
+  return activity.charAt(0).toUpperCase() + activity.slice(1);
+}
