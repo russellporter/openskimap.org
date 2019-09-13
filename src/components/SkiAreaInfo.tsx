@@ -47,7 +47,10 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
           </Typography>
         </InfoHeader>
         {properties.statistics && (
-          <SkiAreaStatistics statistics={properties.statistics} />
+          <SkiAreaStatistics
+            statistics={properties.statistics}
+            runConvention={properties.runConvention}
+          />
         )}
       </CardContent>
       {skimapOrgSource && (
@@ -86,7 +89,10 @@ const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
           </Typography>
         </InfoHeader>
         {properties.statistics && (
-          <SkiAreaStatistics statistics={properties.statistics} />
+          <SkiAreaStatistics
+            statistics={properties.statistics}
+            runConvention={properties.runConvention}
+          />
         )}
       </CardContent>
     </Card>
@@ -116,7 +122,10 @@ function activitySummary(properties: SkiAreaProperties) {
   }
 }
 
-const SkiAreaStatistics: React.SFC<{ statistics: Statistics }> = props => {
+const SkiAreaStatistics: React.SFC<{
+  statistics: Statistics;
+  runConvention: RunConvention;
+}> = props => {
   const activities: Activity[] = [
     Activity.Downhill,
     Activity.Nordic,
@@ -177,6 +186,7 @@ const SkiAreaStatistics: React.SFC<{ statistics: Statistics }> = props => {
             <RunDifficultyBarChart
               activity={activityStatistics[0]}
               totalRunKm={totalRunKm}
+              runConvention={props.runConvention}
               data={activityStatistics[1]}
             />
           </div>
@@ -187,6 +197,7 @@ const SkiAreaStatistics: React.SFC<{ statistics: Statistics }> = props => {
 };
 
 const RunDifficultyBarChart: React.SFC<{
+  runConvention: RunConvention;
   activity: Activity;
   totalRunKm: number;
   data: [RunDifficulty | null, number][];
@@ -200,7 +211,7 @@ const RunDifficultyBarChart: React.SFC<{
         key={difficulty || "other"}
         style={{
           width: percentage + "%",
-          backgroundColor: getRunColor(RunConvention.JAPAN, difficulty)
+          backgroundColor: getRunColor(props.runConvention, difficulty)
         }}
       ></span>
     );
