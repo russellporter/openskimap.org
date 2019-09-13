@@ -242,7 +242,7 @@ function getSecondaryText(
           .join(" and ") + " Ski Area"
       ).trim();
     case FeatureType.Run:
-      return formattedRunUse(properties.uses);
+      return formattedRunUse(properties.uses, properties.grooming);
     case FeatureType.Lift:
       return getLiftNameAndType(properties) + " lift";
   }

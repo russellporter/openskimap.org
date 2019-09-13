@@ -213,7 +213,7 @@ function difficultyText(data: RunProperties) {
   const difficulty = data.difficulty
     ? formattedDifficultyName(data.difficulty)
     : null;
-  const type = formattedRunUse(data.uses);
+  const type = formattedRunUse(data.uses, data.grooming);
   if (difficulty && type) {
     return difficulty + " " + type.toLowerCase();
   } else if (difficulty) {
