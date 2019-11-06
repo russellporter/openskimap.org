@@ -1,5 +1,34 @@
 <html>
   <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"
+      data-cfasync="false"
+    ></script>
+    <script>
+      window.cookieconsent.initialise({
+        location: true,
+        palette: {
+          popup: {
+            background: "#f4f4f4",
+            text: "#000000"
+          },
+          button: {
+            background: "transparent",
+            text: "#000000",
+            border: "#e0e0e0"
+          }
+        },
+        content: {
+          message:
+            "This website stores data such as cookies to enable important site functionality including analytics, and personalization. By remaining on this web site you indicate your consent."
+        }
+      });
+    </script>
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=UA-2618724-7"
