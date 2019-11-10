@@ -36,6 +36,7 @@ interface State {
   searchQuery: string;
   selectedIndex: number;
   results: Result[];
+  hideResults: boolean;
 }
 
 enum Activity {
@@ -52,7 +53,12 @@ export default class SearchBar extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { searchQuery: "", selectedIndex: 0, results: [] };
+    this.state = {
+      searchQuery: "",
+      selectedIndex: 0,
+      results: [],
+      hideResults: true
+    };
     this.searchDebounced = debounce(500, this.search);
     this.searchThrottled = throttle(500, this.search);
   }
@@ -101,11 +107,13 @@ export default class SearchBar extends React.Component<Props, State> {
   render() {
     const width = this.props.width;
     const results = this.state.results;
+    const hideResults = this.state.hideResults;
     const showResult = (result: Result) => {
       this.setState({
         searchQuery: "",
         selectedIndex: 0,
-        results: []
+        results: [],
+        hideResults: true
       });
       this.props.eventBus.showInfo(infoDataForResult(result));
     };
@@ -113,7 +121,7 @@ export default class SearchBar extends React.Component<Props, State> {
     return (
       <OutsideClickHandler
         onOutsideClick={() => {
-          this.setState({ results: [], selectedIndex: 0 });
+          this.setState({ hideResults: true });
         }}
       >
         <Paper style={{ width: width }} elevation={1}>
@@ -126,9 +134,13 @@ export default class SearchBar extends React.Component<Props, State> {
               <MenuIcon />
             </IconButton>
             <InputBase
+              onFocus={() => {
+                this.setState({ hideResults: false });
+              }}
               style={{ marginLeft: "8", flex: "1" }}
               placeholder="Search Ski Areas, Lifts, and Runs"
               onChange={e => {
+                this.setState({ hideResults: false });
                 this.updateSearchQuery(e.target.value);
               }}
               onKeyDown={e => {
@@ -155,7 +167,7 @@ export default class SearchBar extends React.Component<Props, State> {
               <SearchIcon />
             </IconButton>
           </div>
-          {results.length > 0 ? (
+          {results.length > 0 && !hideResults ? (
             <React.Fragment>
               <Divider />
               <SearchResults
