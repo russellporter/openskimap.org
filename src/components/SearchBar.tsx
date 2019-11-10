@@ -21,6 +21,7 @@ import {
   SkiAreaProperties
 } from "openskidata-format";
 import * as React from "react";
+import OutsideClickHandler from "react-outside-click-handler";
 import { debounce, throttle } from "throttle-debounce";
 import EventBus from "./EventBus";
 import { formattedRunUse } from "./Formatters";
@@ -103,62 +104,69 @@ export default class SearchBar extends React.Component<Props, State> {
     const showResult = (result: Result) => {
       this.setState({
         searchQuery: "",
-        selectedIndex: this.state.results.indexOf(result) || 0
+        selectedIndex: 0,
+        results: []
       });
       this.props.eventBus.showInfo(infoDataForResult(result));
     };
 
     return (
-      <Paper style={{ width: width }} elevation={1}>
-        <div style={{ alignItems: "center", display: "flex" }}>
-          <IconButton
-            style={{ padding: "10" }}
-            aria-label="Menu"
-            onClick={this.props.eventBus.openSidebar}
-          >
-            <MenuIcon />
-          </IconButton>
-          <InputBase
-            style={{ marginLeft: "8", flex: "1" }}
-            placeholder="Search Ski Areas, Lifts, and Runs"
-            onChange={e => {
-              this.updateSearchQuery(e.target.value);
-            }}
-            onKeyDown={e => {
-              this.handleKeyNavigation(e);
-              if (
-                e.keyCode === 13 &&
-                results.length > this.state.selectedIndex
-              ) {
-                showResult(results[this.state.selectedIndex]);
-              }
-            }}
-            value={this.state.searchQuery}
-          />
-          <IconButton
-            style={{ padding: "10" }}
-            aria-label="Search"
-            disabled={this.state.searchQuery.length == 0}
-            onClick={() => {
-              if (results.length > 0) {
-                showResult(results[0]);
-              }
-            }}
-          >
-            <SearchIcon />
-          </IconButton>
-        </div>
-        {results.length > 0 ? (
-          <React.Fragment>
-            <Divider />
-            <SearchResults
-              onSelect={showResult}
-              selectedIndex={this.state.selectedIndex}
-              results={results}
+      <OutsideClickHandler
+        onOutsideClick={() => {
+          this.setState({ results: [], selectedIndex: 0 });
+        }}
+      >
+        <Paper style={{ width: width }} elevation={1}>
+          <div style={{ alignItems: "center", display: "flex" }}>
+            <IconButton
+              style={{ padding: "10" }}
+              aria-label="Menu"
+              onClick={this.props.eventBus.openSidebar}
+            >
+              <MenuIcon />
+            </IconButton>
+            <InputBase
+              style={{ marginLeft: "8", flex: "1" }}
+              placeholder="Search Ski Areas, Lifts, and Runs"
+              onChange={e => {
+                this.updateSearchQuery(e.target.value);
+              }}
+              onKeyDown={e => {
+                this.handleKeyNavigation(e);
+                if (
+                  e.keyCode === 13 &&
+                  results.length > this.state.selectedIndex
+                ) {
+                  showResult(results[this.state.selectedIndex]);
+                }
+              }}
+              value={this.state.searchQuery}
             />
-          </React.Fragment>
-        ) : null}
-      </Paper>
+            <IconButton
+              style={{ padding: "10" }}
+              aria-label="Search"
+              disabled={this.state.searchQuery.length == 0}
+              onClick={() => {
+                if (results.length > 0) {
+                  showResult(results[0]);
+                }
+              }}
+            >
+              <SearchIcon />
+            </IconButton>
+          </div>
+          {results.length > 0 ? (
+            <React.Fragment>
+              <Divider />
+              <SearchResults
+                onSelect={showResult}
+                selectedIndex={this.state.selectedIndex}
+                results={results}
+              />
+            </React.Fragment>
+          ) : null}
+        </Paper>
+      </OutsideClickHandler>
     );
   }
 }
