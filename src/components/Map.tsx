@@ -27,7 +27,8 @@ export class Map {
       center: center, // starting position [lng, lat]
       zoom: zoom, // starting zoom,
       hash: true,
-      attributionControl: false
+      attributionControl: false,
+      pitchWithRotate: false
     });
 
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
@@ -52,6 +53,14 @@ export class Map {
           enableHighAccuracy: true
         },
         trackUserLocation: true
+      }),
+      "bottom-right"
+    );
+
+    this.map.addControl(
+      new mapboxgl.NavigationControl({
+        showCompass: true,
+        showZoom: false
       }),
       "bottom-right"
     );
