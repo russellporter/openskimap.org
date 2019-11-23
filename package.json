@@ -12,8 +12,8 @@
   "author": "Russell Porter",
   "license": "ISC",
   "dependencies": {
-    "@material-ui/core": "^3.9.3",
-    "@material-ui/icons": "^3.0.2",
+    "@material-ui/core": "^4.7.0",
+    "@material-ui/icons": "^4.5.1",
     "@turf/centroid": "^6.0.2",
     "@turf/distance": "^6.0.0",
     "@turf/length": "^6.0.0",

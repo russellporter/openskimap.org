@@ -14,10 +14,10 @@ export default class About extends React.Component<Props> {
       <div
         style={{
           position: "absolute",
-          maxWidth: theme.spacing.unit * 50,
+          maxWidth: theme.spacing(50),
           backgroundColor: theme.palette.background.paper,
           boxShadow: theme.shadows[5],
-          padding: theme.spacing.unit * 4,
+          padding: theme.spacing(4),
           outline: "none",
           top: "50%",
           left: "50%",
