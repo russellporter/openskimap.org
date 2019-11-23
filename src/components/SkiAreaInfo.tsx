@@ -180,7 +180,7 @@ const SkiAreaStatistics: React.SFC<{
           <div key={activityStatistics[0]}>
             <Typography variant="subtitle1" color="textSecondary">
               {formattedActivityName(activityStatistics[0])}
-              {": "}
+              {" runs: "}
               {roundedTotalKm} km
             </Typography>
             <RunDifficultyBarChart
