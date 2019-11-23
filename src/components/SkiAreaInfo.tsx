@@ -19,7 +19,7 @@ import {
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
-import { formattedActivityName } from "./Formatters";
+import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { InfoHeader } from "./InfoHeader";
 import { StatusIcon } from "./StatusIcon";
 
@@ -203,17 +203,41 @@ const RunDifficultyBarChart: React.SFC<{
   data: [RunDifficulty | null, number][];
 }> = props => {
   const parts = props.data.map(d => {
-    const percentage = (d[1] / props.totalRunKm) * 100.0;
+    const runKm = d[1];
+    const percentage = (runKm / props.totalRunKm) * 100.0;
     const difficulty = d[0];
 
+    const difficultyText = difficulty
+      ? formattedDifficultyName(difficulty)
+      : "Other";
+    const distanceText = Math.round(runKm * 10) / 10 + "km";
     return (
-      <span
-        key={difficulty || "other"}
-        style={{
-          width: percentage + "%",
-          backgroundColor: getRunColor(props.runConvention, difficulty)
+      <Tooltip
+        title={difficultyText + " (" + distanceText + ")"}
+        placement="bottom"
+        PopperProps={{
+          popperOptions: {
+            modifiers: {
+              offset: {
+                enabled: true,
+                offset: "0px, -8px"
+              },
+              flip: {
+                enabled: false,
+                padding: 0
+              }
+            }
+          }
         }}
-      ></span>
+      >
+        <span
+          key={difficulty || "other"}
+          style={{
+            width: percentage + "%",
+            backgroundColor: getRunColor(props.runConvention, difficulty)
+          }}
+        ></span>
+      </Tooltip>
     );
   });
 
