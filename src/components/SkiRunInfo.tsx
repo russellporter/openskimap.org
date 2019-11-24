@@ -147,7 +147,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
             )}
           </Typography>
         )}
-        {properties.description !== undefined && (
+        {properties.description && (
           <Typography>
             <span>Notes: {properties.description}</span>
           </Typography>
