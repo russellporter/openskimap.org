@@ -1,9 +1,8 @@
 import { lineString } from "@turf/helpers";
 import turfLength from "@turf/length";
 import turfLineChunk from "@turf/line-chunk";
-import { LineString, MultiLineString } from "geojson";
-
-const heightProfileResolution = 0.1; // 0.1km
+import { LineString } from "geojson";
+import { ElevationProfile } from "openskidata-format";
 
 export type CoordinatesWithElevation = [Longitude, Latitude, Elevation][];
 
@@ -31,35 +30,25 @@ type Latitude = number;
 type Longitude = number;
 type Elevation = number;
 
-export default function load(
-  points: [Longitude, Latitude][]
-): Promise<ElevationData> {
-  const body = JSON.stringify(elevationRequestData(points));
-  return fetch("https://elevation.racemap.com/api", {
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json"
-    },
-    method: "POST",
-    body: body
-  })
-    .then(response => {
-      return response.json();
-    })
-    .then(json => {
-      const coordinatesWithElevation = elevationRequestResults(json, points);
-      const { ascent, descent } = ascentDescent(coordinatesWithElevation);
-      return {
-        ascent: ascent,
-        descent: descent,
-        slopeInfo: slopeInfo(coordinatesWithElevation),
-        coordinatesWithElevation: coordinatesWithElevation,
-        heightProfileResolution: heightProfileResolution * 1000
-      };
-    });
+export default function getElevationData(
+  geometry: LineString,
+  elevationProfile: ElevationProfile
+): ElevationData {
+  const coordinatesWithElevation = addCoordinatesToElevationProfile(
+    geometry,
+    elevationProfile
+  );
+  const { ascent, descent } = getAscentAndDescent(coordinatesWithElevation);
+  return {
+    ascent: ascent,
+    descent: descent,
+    slopeInfo: slopeInfo(coordinatesWithElevation),
+    coordinatesWithElevation: coordinatesWithElevation,
+    heightProfileResolution: elevationProfile.resolution
+  };
 }
 
-function ascentDescent(
+export function getAscentAndDescent(
   coordinatesWithElevation: CoordinatesWithElevation
 ): AscentDescentInfo {
   if (coordinatesWithElevation.length === 0) {
@@ -117,43 +106,27 @@ function slopeInfo(
   return { average: averageSlope, max: maxSlope };
 }
 
-function elevationRequestData(points: [Longitude, Latitude][]) {
-  return points.map(point => [point[1], point[0]]);
-}
-
-function elevationRequestResults(
-  results: any,
-  points: [Longitude, Latitude][]
+function addCoordinatesToElevationProfile(
+  geometry: LineString,
+  elevationProfile: ElevationProfile
 ): CoordinatesWithElevation {
-  if (results) {
-    return results.map((elevation: number, index: number) => [
-      points[index][0],
-      points[index][1],
-      elevation
-    ]);
+  const points = extractPoints(geometry, elevationProfile.resolution);
+  const heights = elevationProfile.heights;
+  if (points.length !== heights.length) {
+    throw "Mismatch of points & elevation profile. Did the backend elevation profile generation code change?";
   }
-  return [];
+
+  return points.map((point, index) => {
+    return [point[0], point[1], heights[index]];
+  });
 }
 
-export function extractEndpoints(line: LineString): [Longitude, Latitude][] {
-  const coordinates = line.coordinates;
-  if (coordinates.length === 0) {
-    return [];
-  }
-  const first = coordinates[0];
-  if (coordinates.length === 1) {
-    return [[first[0], first[1]]];
-  }
-
-  const last = coordinates[coordinates.length - 1];
-
-  return [[first[0], first[1]], [last[0], last[1]]];
-}
-
-export function extractPoints(
-  feature: GeoJSON.Feature<LineString | MultiLineString>
+function extractPoints(
+  geometry: LineString,
+  resolution: number
 ): [Latitude, Longitude][] {
-  const subfeatures = turfLineChunk(feature, heightProfileResolution).features;
+  const subfeatures = turfLineChunk(geometry, resolution, { units: "meters" })
+    .features;
   const points: [Latitude, Longitude][] = [];
   for (let subline of subfeatures) {
     const geometry = subline.geometry;

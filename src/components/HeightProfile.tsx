@@ -5,7 +5,7 @@ import memoize from "memoize-one";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
 import "whatwg-fetch";
-import { ElevationData } from "./ElevationProfileLoader";
+import { ElevationData } from "./ElevationData";
 
 export interface HeightProfileHighlightProps {
   chartHighlightPosition: mapboxgl.LngLat | null;
@@ -161,19 +161,6 @@ export class HeightProfile extends React.Component<
     );
   }
 }
-
-export const HeightProfilePlaceholder: React.SFC = () => {
-  return (
-    <div className={"height-profile"}>
-      <div className={"lds-ring"}>
-        <div />
-        <div />
-        <div />
-        <div />
-      </div>
-    </div>
-  );
-};
 
 function chartLabels(elevations: number[], heightProfileResolution: number) {
   let distance = 0;

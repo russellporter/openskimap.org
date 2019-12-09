@@ -4,7 +4,6 @@ import HighlightIcon from "@material-ui/icons/Highlight";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import WarningIcon from "@material-ui/icons/Warning";
 import turfLength from "@turf/length";
-import { Feature, LineString } from "geojson";
 import {
   RunFeature,
   RunGrooming,
@@ -12,18 +11,12 @@ import {
   RunUse
 } from "openskidata-format";
 import * as React from "react";
-import loadElevationProfile, {
-  ElevationData,
-  extractPoints
-} from "./ElevationProfileLoader";
+import getElevationData from "./ElevationData";
 import EventBus from "./EventBus";
 import { formattedDifficultyName, formattedRunUse } from "./Formatters";
-import {
-  HeightProfile,
-  HeightProfileHighlightProps,
-  HeightProfilePlaceholder
-} from "./HeightProfile";
+import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
 import { InfoHeader } from "./InfoHeader";
+import getInclinedLengthInMeters from "./utils/InclinedLength";
 
 interface Props extends HeightProfileHighlightProps {
   feature: RunFeature;
@@ -33,13 +26,8 @@ interface Props extends HeightProfileHighlightProps {
 export const SkiRunInfo: React.FunctionComponent<Props> = props => {
   const feature = props.feature;
   const properties = feature.properties;
-
-  const [terrainData, setTerrainData] = React.useState<{
-    isLoading: boolean;
-    elevationData: ElevationData | null;
-  }>({ isLoading: false, elevationData: null });
-
   const geometry = props.feature.geometry;
+  const elevationProfile = feature.properties.elevationProfile;
 
   const distance = React.useMemo(() => {
     return geometry.type === "LineString"
@@ -50,25 +38,17 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
       : null;
   }, [geometry]);
 
-  React.useEffect(() => {
-    if (feature.geometry.type === "LineString") {
-      setTerrainData({ isLoading: true, elevationData: null });
-      loadElevationProfile(extractPoints(feature as Feature<LineString>)).then(
-        elevationData => {
-          setTerrainData({ isLoading: false, elevationData: elevationData });
-        },
-        () => {
-          setTerrainData({ isLoading: false, elevationData: null });
-        }
-      );
-    }
-  }, [feature]);
+  const inclinedDistance = React.useMemo(() => {
+    return geometry.type === "LineString"
+      ? getInclinedLengthInMeters(geometry)
+      : null;
+  }, [geometry]);
 
-  const showHeightProfile =
-    feature !== null && feature.geometry.type === "LineString";
-
-  const uses = properties.uses;
-  const elevationData = terrainData.elevationData;
+  const elevationData = React.useMemo(() => {
+    return geometry.type === "LineString" && elevationProfile
+      ? getElevationData(geometry, elevationProfile)
+      : null;
+  }, [geometry, elevationProfile]);
   const slopeInfo = elevationData && elevationData.slopeInfo;
   const summary = difficultyText(properties);
   const title = properties.name || summary;
@@ -129,7 +109,9 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
           ) : null}
         </div>
         <Typography className={"distance-and-elevation-info"}>
-          {distance ? <span>Distance: {Math.round(distance)}m</span> : null}
+          {inclinedDistance ? (
+            <span>Distance: {Math.round(inclinedDistance)}m</span>
+          ) : null}
           {elevationData && elevationData.ascent > 1 ? (
             <span>Ascent: {Math.round(elevationData.ascent)}m</span>
           ) : null}
@@ -152,10 +134,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
             <span>Notes: {properties.description}</span>
           </Typography>
         )}
-        {feature !== null &&
-        distance !== null &&
-        elevationData !== null &&
-        showHeightProfile ? (
+        {feature !== null && distance !== null && elevationData !== null && (
           <HeightProfile
             feature={feature}
             distance={distance}
@@ -163,9 +142,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
             chartHighlightPosition={props.chartHighlightPosition}
             onHoverChartPosition={props.onHoverChartPosition}
           />
-        ) : terrainData.isLoading ? (
-          <HeightProfilePlaceholder />
-        ) : null}
+        )}
       </CardContent>
     </Card>
   );

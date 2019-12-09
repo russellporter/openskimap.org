@@ -14,8 +14,8 @@ import {
   RunDifficulty,
   SkiAreaFeature,
   SkiAreaProperties,
-  SourceType,
-  Statistics
+  SkiAreaStatistics,
+  SourceType
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
@@ -47,7 +47,7 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
           </Typography>
         </InfoHeader>
         {properties.statistics && (
-          <SkiAreaStatistics
+          <SkiAreaStatisticsSummary
             statistics={properties.statistics}
             runConvention={properties.runConvention}
           />
@@ -89,7 +89,7 @@ const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
           </Typography>
         </InfoHeader>
         {properties.statistics && (
-          <SkiAreaStatistics
+          <SkiAreaStatisticsSummary
             statistics={properties.statistics}
             runConvention={properties.runConvention}
           />
@@ -122,8 +122,8 @@ function activitySummary(properties: SkiAreaProperties) {
   }
 }
 
-const SkiAreaStatistics: React.SFC<{
-  statistics: Statistics;
+const SkiAreaStatisticsSummary: React.SFC<{
+  statistics: SkiAreaStatistics;
   runConvention: RunConvention;
 }> = props => {
   const activities: Activity[] = [

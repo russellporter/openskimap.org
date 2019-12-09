@@ -1,62 +1,33 @@
 import { Avatar, Card, CardContent, Typography } from "@material-ui/core";
-import turfLength from "@turf/length";
-import { LineString } from "geojson";
 import { getLiftNameAndType, LiftFeature } from "openskidata-format";
 import * as React from "react";
-import loadElevationProfile, {
-  ElevationData,
-  extractEndpoints
-} from "./ElevationProfileLoader";
+import { CoordinatesWithElevation, getAscentAndDescent } from "./ElevationData";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
 import { StatusIcon } from "./StatusIcon";
+import getInclinedLengthInMeters from "./utils/InclinedLength";
 export const SkiLiftInfo: React.FunctionComponent<{
   eventBus: EventBus;
   feature: LiftFeature;
 }> = props => {
   const properties = props.feature.properties;
-
-  const [data, setData] = React.useState<{
-    speed: number | null;
-    elevationData: ElevationData | null;
-  }>({ speed: null, elevationData: null });
-
   const geometry = props.feature.geometry;
   const durationInSeconds = props.feature.properties.duration;
 
   const distance = React.useMemo(() => {
     return geometry.type === "LineString"
-      ? turfLength(
-          { type: "Feature", geometry: geometry, properties: {} },
-          { units: "meters" }
-        )
+      ? getInclinedLengthInMeters(geometry)
       : null;
   }, [geometry]);
 
-  React.useEffect(() => {
-    if (geometry.type === "LineString") {
-      loadElevationProfile(extractEndpoints(geometry as LineString)).then(
-        elevationData => {
-          const elevationChange = Math.max(
-            elevationData.ascent,
-            elevationData.descent
-          );
-          let speed = null;
-          if (distance !== null && durationInSeconds !== null) {
-            const slopeDistance = Math.sqrt(
-              Math.pow(distance, 2) + Math.pow(elevationChange, 2)
-            );
-            speed = slopeDistance / durationInSeconds;
-          }
+  const ascentAndDescent = React.useMemo(() => {
+    return geometry.type === "LineString" && geometry.coordinates[0].length >= 3
+      ? getAscentAndDescent(geometry.coordinates as CoordinatesWithElevation)
+      : null;
+  }, [geometry]);
 
-          setData({ elevationData: elevationData, speed: speed });
-        }
-      );
-    }
-  }, [durationInSeconds, geometry]);
-
-  const elevationData = data.elevationData;
-  const speed = data.speed;
+  const speed =
+    distance && durationInSeconds ? distance / durationInSeconds : null;
   const badge = properties.ref;
   return (
     <Card>
@@ -90,11 +61,11 @@ export const SkiLiftInfo: React.FunctionComponent<{
         {
           <div className={"distance-and-elevation-info"}>
             {distance && <span>Distance: {Math.round(distance)}m</span>}
-            {elevationData && elevationData.ascent > 1 && (
-              <span>Ascent: {Math.round(elevationData.ascent)}m</span>
+            {ascentAndDescent && ascentAndDescent.ascent > 1 && (
+              <span>Ascent: {Math.round(ascentAndDescent.ascent)}m</span>
             )}
-            {elevationData && elevationData.descent > 1 && (
-              <span>Descent: {Math.round(elevationData.descent)}m</span>
+            {ascentAndDescent && ascentAndDescent.descent > 1 && (
+              <span>Descent: {Math.round(ascentAndDescent.descent)}m</span>
             )}
             {speed && <span>Speed: {speed.toFixed(1)} m/s</span>}
           </div>
