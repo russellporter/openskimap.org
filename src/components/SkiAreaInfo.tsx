@@ -48,6 +48,7 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
         </InfoHeader>
         {properties.statistics && (
           <SkiAreaStatisticsSummary
+            activities={properties.activities}
             statistics={properties.statistics}
             runConvention={properties.runConvention}
           />
@@ -90,6 +91,7 @@ const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
         </InfoHeader>
         {properties.statistics && (
           <SkiAreaStatisticsSummary
+            activities={properties.activities}
             statistics={properties.statistics}
             runConvention={properties.runConvention}
           />
@@ -122,11 +124,35 @@ function activitySummary(properties: SkiAreaProperties) {
   }
 }
 
+function elevationSummary(
+  statistics: SkiAreaStatistics,
+  activities: Activity[]
+) {
+  const minElevation = statistics.minElevation;
+  const maxElevation = statistics.maxElevation;
+
+  if (!maxElevation || !minElevation) {
+    return null;
+  }
+
+  const vertical = maxElevation - minElevation;
+  const minAndMaxElevation =
+    Math.round(minElevation) + "m - " + Math.round(maxElevation) + "m";
+  return (
+    <Typography variant="subtitle1" color="textSecondary">
+      {activities.includes(Activity.Downhill)
+        ? "Vertical: " + Math.round(vertical) + "m (" + minAndMaxElevation + ")"
+        : "Elevation: " + minAndMaxElevation}
+    </Typography>
+  );
+}
+
 const SkiAreaStatisticsSummary: React.SFC<{
+  activities: Activity[];
   statistics: SkiAreaStatistics;
   runConvention: RunConvention;
 }> = props => {
-  const activities: Activity[] = [
+  const allActivities: Activity[] = [
     Activity.Downhill,
     Activity.Nordic,
     Activity.Backcountry
@@ -144,7 +170,7 @@ const SkiAreaStatisticsSummary: React.SFC<{
   const runStatistics: [
     Activity,
     [RunDifficulty | null, number][]
-  ][] = activities.flatMap(activity => {
+  ][] = allActivities.flatMap(activity => {
     const statisticsForActivity = props.statistics.runs.byActivity[activity];
     if (statisticsForActivity !== undefined) {
       return [
@@ -166,6 +192,7 @@ const SkiAreaStatisticsSummary: React.SFC<{
 
   return (
     <>
+      {elevationSummary(props.statistics, props.activities)}
       {runStatistics.map(activityStatistics => {
         const totalRunKm = activityStatistics[1].reduce((previous, current) => {
           return previous + current[1];
