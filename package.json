@@ -27,7 +27,7 @@
     "@types/react-outside-click-handler": "^1.2.0",
     "chart.js": "^2.7.3",
     "memoize-one": "^4.0.3",
-    "openskidata-format": "0.3.0",
+    "openskidata-format": "0.3.1",
     "react": "^16.8.6",
     "react-chartjs-2": "^2.7.4",
     "react-dom": "^16.8.6",
