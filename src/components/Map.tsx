@@ -1,8 +1,11 @@
 import * as mapboxgl from "mapbox-gl";
+import MapFilters from "../MapFilters";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
+import { FilterControl } from "./FilterControl";
 import { InfoControl } from "./InfoControl";
 import { InfoData } from "./InfoData";
+import MapFilterManager from "./MapFilterManager";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
 
@@ -12,8 +15,10 @@ export class Map {
   private data: any;
   private eventBus: EventBus;
   private infoControl: InfoControl | null = null;
+  private filterControl: FilterControl;
 
   private interactionManager: MapInteractionManager;
+  private filterManager: MapFilterManager;
 
   constructor(
     center: mapboxgl.LngLatLike,
@@ -30,8 +35,10 @@ export class Map {
       attributionControl: false,
       pitchWithRotate: false
     });
+    this.filterControl = new FilterControl(eventBus);
 
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
+    this.filterManager = new MapFilterManager(this.map);
 
     this.map.addControl(
       new mapboxgl.ScaleControl({
@@ -42,6 +49,8 @@ export class Map {
     );
 
     this.map.addControl(new SearchBarControl(eventBus));
+
+    this.map.addControl(this.filterControl);
 
     this.map.addControl(
       new mapboxgl.AttributionControl({ compact: true }),
@@ -82,6 +91,11 @@ export class Map {
 
   setStyle = (style: MapStyle) => {
     this.map.setStyle(style);
+  };
+
+  setFilters = (filters: MapFilters) => {
+    this.filterControl.setFilters(filters);
+    this.filterManager.setFilters(filters);
   };
 
   getCenter = () => {

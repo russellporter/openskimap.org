@@ -19,6 +19,7 @@ function initialize() {
       sidebarOpen: false,
       aboutInfoOpen: false,
       mapStyle: MapStyle.Terrain,
+      mapFilters: { hiddenActivities: [] },
       info: null
     },
     update
@@ -74,6 +75,10 @@ function initialize() {
 
     if (changes.info !== undefined) {
       map!.setInfo(changes.info);
+    }
+
+    if (changes.mapFilters !== undefined) {
+      map!.setFilters(state.mapFilters);
     }
   }
 }

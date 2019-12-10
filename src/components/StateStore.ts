@@ -1,3 +1,4 @@
+import { Activity } from "openskidata-format";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import { InfoData } from "./InfoData";
@@ -45,6 +46,21 @@ export default class StateStore implements EventBus {
 
   hideInfo = () => {
     this.update({ info: null });
+  };
+
+  toggleActivity = (activity: Activity) => {
+    let hiddenActivities = this._state.mapFilters.hiddenActivities || [];
+    if (hiddenActivities.includes(activity)) {
+      hiddenActivities = hiddenActivities.filter(a => a !== activity);
+    } else {
+      hiddenActivities.push(activity);
+    }
+    this.update({
+      mapFilters: {
+        ...this._state.mapFilters,
+        hiddenActivities: hiddenActivities
+      }
+    });
   };
 
   private update(changes: StateChanges): void {

@@ -1,3 +1,4 @@
+import MapFilters from "../MapFilters";
 import { MapStyle } from "../MapStyle";
 import { InfoData } from "./InfoData";
 
@@ -6,6 +7,7 @@ export default interface State {
   sidebarOpen: boolean;
   aboutInfoOpen: boolean;
   mapStyle: MapStyle;
+  mapFilters: MapFilters;
   info: InfoData | null;
 }
 
@@ -14,5 +16,6 @@ export interface StateChanges {
   sidebarOpen?: boolean;
   aboutInfoOpen?: boolean;
   mapStyle?: MapStyle;
+  mapFilters?: MapFilters;
   info?: InfoData | null;
 }
