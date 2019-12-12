@@ -1,4 +1,5 @@
 import * as mapboxgl from "mapbox-gl";
+import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
@@ -93,18 +94,24 @@ export class Map {
     this.map.setStyle(style);
   };
 
-  setFilters = (filters: MapFilters) => {
+  private setFiltersUnthrottled = (filters: MapFilters) => {
     this.filterControl.setFilters(filters);
     this.filterManager.setFilters(filters);
+    this.updateVisibleSkiAreasCountUnthrottled();
   };
+
+  setFilters = throttle(100, this.setFiltersUnthrottled);
 
   setFiltersVisible = (visible: boolean) => {
     this.searchBarControl.setFiltersShown(visible);
     if (visible) {
       this.map.addControl(this.filterControl);
+      this.map.on("render", this.updateVisibleSkiAreasCount);
     } else {
       this.map.removeControl(this.filterControl);
+      this.map.off("render", this.updateVisibleSkiAreasCount);
     }
+    this.updateVisibleSkiAreasCountUnthrottled();
   };
 
   getCenter = () => {
@@ -114,4 +121,15 @@ export class Map {
   getZoom = () => {
     return this.map.getZoom();
   };
+
+  private updateVisibleSkiAreasCountUnthrottled = () => {
+    this.filterControl.setVisibleSkiAreasCount(
+      this.filterManager.getVisibleSkiAreasCount()
+    );
+  };
+
+  private updateVisibleSkiAreasCount = throttle(
+    1000,
+    this.updateVisibleSkiAreasCountUnthrottled
+  );
 }

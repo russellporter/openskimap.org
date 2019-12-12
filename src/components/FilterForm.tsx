@@ -21,6 +21,7 @@ export const FilterForm: React.FunctionComponent<{
   eventBus: EventBus;
   filters: MapFilters;
   width: number;
+  visibleSkiAreasCount: number;
 }> = props => {
   const isDownhillEnabled = !props.filters.hiddenActivities.includes(
     Activity.Downhill
@@ -31,7 +32,6 @@ export const FilterForm: React.FunctionComponent<{
 
   const sliderMargins = { marginLeft: "8px", marginRight: "8px" };
   const formSectionStyle = { marginBottom: "16px" };
-  const lastFormSectionStyle = {};
 
   return (
     <MuiThemeProvider theme={theme}>
@@ -101,7 +101,7 @@ export const FilterForm: React.FunctionComponent<{
               />
             </FormGroup>
           </div>
-          <div style={lastFormSectionStyle}>
+          <div style={formSectionStyle}>
             <FormLabel component="legend">Run Length (km)</FormLabel>
             <FormGroup style={sliderMargins}>
               <Slider
@@ -117,6 +117,9 @@ export const FilterForm: React.FunctionComponent<{
               />
             </FormGroup>
           </div>
+          <Typography variant="subtitle2">
+            {props.visibleSkiAreasCount} visible ski areas
+          </Typography>
         </CardContent>
       </Card>
     </MuiThemeProvider>

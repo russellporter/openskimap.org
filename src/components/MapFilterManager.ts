@@ -4,6 +4,7 @@ import MapFilters from "../MapFilters";
 export default class MapFiltersManager {
   private map: mapboxgl.Map;
   private originalFilters: Map<string, any[] | undefined> = new Map();
+  private activeRules: MapFilterRules = noRules();
 
   constructor(map: mapboxgl.Map) {
     this.map = map;
@@ -23,6 +24,20 @@ export default class MapFiltersManager {
     this.liftLayers().forEach(layer =>
       this.setFilterOverride(layer, rules.lifts)
     );
+
+    this.activeRules = rules;
+  };
+
+  getVisibleSkiAreasCount = () => {
+    const rules = this.activeRules.skiAreas;
+    if (rules === "hidden") {
+      return 0;
+    }
+
+    return this.map.querySourceFeatures("openskimap", {
+      sourceLayer: "skiareas",
+      filter: ["all"].concat(rules)
+    }).length;
   };
 
   private runLayers = () => {
