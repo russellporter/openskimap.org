@@ -8,6 +8,7 @@ import Sidebar from "./components/Sidebar";
 import State, { StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import "./index.css";
+import { defaultMapFilters } from "./MapFilters";
 import { MapStyle } from "./MapStyle";
 
 let map: Map | null = null;
@@ -19,7 +20,7 @@ function initialize() {
       sidebarOpen: false,
       aboutInfoOpen: false,
       mapStyle: MapStyle.Terrain,
-      mapFilters: { hiddenActivities: [] },
+      mapFilters: defaultMapFilters,
       info: null
     },
     update

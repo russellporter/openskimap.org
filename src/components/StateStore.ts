@@ -63,6 +63,35 @@ export default class StateStore implements EventBus {
     });
   };
 
+  setMinimumElevation(elevation: number) {
+    this.update({
+      mapFilters: {
+        ...this._state.mapFilters,
+        minElevation: elevation
+      }
+    });
+  }
+  setMinimumVertical(vertical: number) {
+    this.update({
+      mapFilters: {
+        ...this._state.mapFilters,
+        minVertical: vertical
+      }
+    });
+  }
+
+  setMinimumRunLength(runLength: number): void {
+    this.update({
+      mapFilters: {
+        ...this._state.mapFilters,
+        minRunLength: runLength
+      }
+    });
+  }
+
+  showFilters = () => {};
+  hideFilters = () => {};
+
   private update(changes: StateChanges): void {
     Object.keys(changes).forEach(key => {
       const change = (changes as { [key: string]: any })[key];

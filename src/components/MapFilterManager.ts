@@ -72,13 +72,42 @@ export default class MapFiltersManager {
   };
 }
 
+type ObjectFilterRules = any[] | "hidden";
+
 interface MapFilterRules {
-  runs: any[] | "hidden";
-  skiAreas: any[] | "hidden";
-  lifts: any[] | "hidden";
+  runs: ObjectFilterRules;
+  skiAreas: ObjectFilterRules;
+  lifts: ObjectFilterRules;
+}
+
+function noRules(): MapFilterRules {
+  return { runs: [], skiAreas: [], lifts: [] };
 }
 
 function getFilterRules(filters: MapFilters): MapFilterRules {
+  return [
+    getActivityFilterRules(filters),
+    getElevationFilterRules(filters),
+    getVerticalFilterRules(filters),
+    getRunLengthFilterRules(filters)
+  ].reduce((previous, rules) => {
+    return {
+      runs: combine(previous.runs, rules.runs),
+      lifts: combine(previous.lifts, rules.lifts),
+      skiAreas: combine(previous.skiAreas, rules.skiAreas)
+    };
+  }, noRules());
+}
+
+function combine(left: ObjectFilterRules, right: ObjectFilterRules) {
+  if (left === "hidden" || right === "hidden") {
+    return "hidden";
+  }
+
+  return left.concat(right);
+}
+
+function getActivityFilterRules(filters: MapFilters): MapFilterRules {
   const hasDownhill = !filters.hiddenActivities.includes(Activity.Downhill);
   const hasNordic = !filters.hiddenActivities.includes(Activity.Nordic);
   if (!hasDownhill && !hasNordic) {
@@ -100,10 +129,53 @@ function getFilterRules(filters: MapFilters): MapFilterRules {
       runs: [["in", "use", RunUse.Nordic]]
     };
   } else {
+    return noRules();
+  }
+}
+
+function getElevationFilterRules(filters: MapFilters): MapFilterRules {
+  if (filters.minElevation) {
     return {
-      skiAreas: [],
+      skiAreas: [[">", "maxElevation", filters.minElevation]],
       lifts: [],
       runs: []
     };
+  } else {
+    return noRules();
   }
+}
+
+function getVerticalFilterRules(filters: MapFilters): MapFilterRules {
+  if (filters.minVertical) {
+    return {
+      skiAreas: [[">", "vertical", filters.minVertical]],
+      lifts: [],
+      runs: []
+    };
+  } else {
+    return noRules();
+  }
+}
+
+function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
+  if (!filters.minRunLength) {
+    return noRules();
+  }
+
+  const hasDownhill = !filters.hiddenActivities.includes(Activity.Downhill);
+  const hasNordic = !filters.hiddenActivities.includes(Activity.Nordic);
+
+  const rules: any[] = [];
+  if (hasDownhill) {
+    rules.push([">", "downhillDistance", filters.minRunLength]);
+  }
+  if (hasNordic) {
+    rules.push([">", "nordicDistance", filters.minRunLength]);
+  }
+
+  return {
+    skiAreas: rules.length > 1 ? [["any"].concat(rules)] : rules,
+    lifts: [],
+    runs: []
+  };
 }

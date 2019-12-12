@@ -1,7 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import MapFilters from "../MapFilters";
+import MapFilters, { defaultMapFilters } from "../MapFilters";
 import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import { FilterForm } from "./FilterForm";
@@ -10,7 +10,7 @@ export class FilterControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
   _map: mapboxgl.Map | null = null;
   _eventBus: EventBus;
-  _filters: MapFilters = { hiddenActivities: [] };
+  _filters: MapFilters = defaultMapFilters;
 
   constructor(eventBus: EventBus) {
     this._eventBus = eventBus;
