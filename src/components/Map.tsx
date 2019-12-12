@@ -16,6 +16,7 @@ export class Map {
   private eventBus: EventBus;
   private infoControl: InfoControl | null = null;
   private filterControl: FilterControl;
+  private searchBarControl: SearchBarControl;
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
@@ -36,6 +37,7 @@ export class Map {
       pitchWithRotate: false
     });
     this.filterControl = new FilterControl(eventBus);
+    this.searchBarControl = new SearchBarControl(eventBus);
 
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
     this.filterManager = new MapFilterManager(this.map);
@@ -48,9 +50,7 @@ export class Map {
       "bottom-left"
     );
 
-    this.map.addControl(new SearchBarControl(eventBus));
-
-    this.map.addControl(this.filterControl);
+    this.map.addControl(this.searchBarControl);
 
     this.map.addControl(
       new mapboxgl.AttributionControl({ compact: true }),
@@ -96,6 +96,15 @@ export class Map {
   setFilters = (filters: MapFilters) => {
     this.filterControl.setFilters(filters);
     this.filterManager.setFilters(filters);
+  };
+
+  setFiltersVisible = (visible: boolean) => {
+    this.searchBarControl.setFiltersShown(visible);
+    if (visible) {
+      this.map.addControl(this.filterControl);
+    } else {
+      this.map.removeControl(this.filterControl);
+    }
   };
 
   getCenter = () => {

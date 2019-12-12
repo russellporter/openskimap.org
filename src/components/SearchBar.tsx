@@ -7,6 +7,7 @@ import {
 } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
+import FilterListIcon from "@material-ui/icons/FilterList";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import centroid from "@turf/centroid";
@@ -30,6 +31,7 @@ import { InfoData } from "./InfoData";
 interface Props {
   eventBus: EventBus;
   width: number;
+  filtersShown: boolean;
 }
 
 interface State {
@@ -165,6 +167,17 @@ export default class SearchBar extends React.Component<Props, State> {
               }}
             >
               <SearchIcon />
+            </IconButton>
+            <Divider orientation="vertical" />
+            <IconButton
+              style={{ padding: "10" }}
+              color={this.props.filtersShown ? "primary" : "default"}
+              aria-label="Filters"
+              onClick={() => {
+                this.props.eventBus.showFilters();
+              }}
+            >
+              <FilterListIcon />
             </IconButton>
           </div>
           {results.length > 0 && !hideResults ? (

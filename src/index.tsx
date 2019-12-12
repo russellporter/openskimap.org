@@ -5,26 +5,14 @@ import AboutModal from "./components/AboutModal";
 import * as ExternalURLOpener from "./components/ExternalURLOpener";
 import { Map } from "./components/Map";
 import Sidebar from "./components/Sidebar";
-import State, { StateChanges } from "./components/State";
+import State, { defaultState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import "./index.css";
-import { defaultMapFilters } from "./MapFilters";
-import { MapStyle } from "./MapStyle";
 
 let map: Map | null = null;
 
 function initialize() {
-  const store = new StateStore(
-    {
-      editMapOpen: false,
-      sidebarOpen: false,
-      aboutInfoOpen: false,
-      mapStyle: MapStyle.Terrain,
-      mapFilters: defaultMapFilters,
-      info: null
-    },
-    update
-  );
+  const store = new StateStore(defaultState, update);
 
   (mapboxgl as any).accessToken =
     "pk.eyJ1IjoicnVzc2VsbCIsImEiOiJjaXUwYWE5NGYwMW94MnpydG5jaWxjOHJsIn0.oyWAcfWU5SMOOWevkrenlw";
@@ -72,6 +60,10 @@ function initialize() {
         <AboutModal eventBus={store} open={state.aboutInfoOpen} />,
         document.getElementById("about-modal")
       );
+    }
+
+    if (changes.mapFiltersOpen !== undefined) {
+      map!.setFiltersVisible(changes.mapFiltersOpen);
     }
 
     if (changes.info !== undefined) {

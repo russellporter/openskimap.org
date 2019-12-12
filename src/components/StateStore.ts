@@ -89,8 +89,12 @@ export default class StateStore implements EventBus {
     });
   }
 
-  showFilters = () => {};
-  hideFilters = () => {};
+  showFilters = () => {
+    this.update({ mapFiltersOpen: true });
+  };
+  hideFilters = () => {
+    this.update({ mapFiltersOpen: false });
+  };
 
   private update(changes: StateChanges): void {
     Object.keys(changes).forEach(key => {

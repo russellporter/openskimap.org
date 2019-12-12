@@ -13,6 +13,7 @@ import * as React from "react";
 import MapFilters from "../MapFilters";
 import { DownhillCheckbox, NordicCheckbox } from "./Checkbox";
 import EventBus from "./EventBus";
+import { InfoHeader } from "./InfoHeader";
 import { theme } from "./Theme";
 import ValueLabel from "./ValueLabel";
 
@@ -36,9 +37,11 @@ export const FilterForm: React.FunctionComponent<{
     <MuiThemeProvider theme={theme}>
       <Card style={{ width: props.width }}>
         <CardContent>
-          <Typography gutterBottom variant="h6">
-            Filters
-          </Typography>
+          <InfoHeader onClose={() => props.eventBus.hideFilters()}>
+            <Typography gutterBottom variant="h6">
+              Filters
+            </Typography>
+          </InfoHeader>
           <div style={formSectionStyle}>
             <FormLabel component="legend">Activities</FormLabel>
             <FormGroup>

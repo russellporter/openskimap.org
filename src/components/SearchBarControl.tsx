@@ -9,6 +9,7 @@ export class SearchBarControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
   _map: mapboxgl.Map | null = null;
   _eventBus: EventBus;
+  _filtersShown: boolean = false;
 
   constructor(eventBus: EventBus) {
     this._eventBus = eventBus;
@@ -30,9 +31,18 @@ export class SearchBarControl implements mapboxgl.IControl {
     this._map = null;
   };
 
+  setFiltersShown = (shown: boolean) => {
+    this._filtersShown = shown;
+    this.render();
+  };
+
   private render = () => {
     ReactDOM.render(
-      <SearchBar eventBus={this._eventBus} width={controlWidth(this._map!)} />,
+      <SearchBar
+        eventBus={this._eventBus}
+        width={controlWidth(this._map!)}
+        filtersShown={this._filtersShown}
+      />,
       this._container
     );
   };
