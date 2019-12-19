@@ -35,7 +35,6 @@ export class FilterControl implements mapboxgl.IControl {
 
   setFilters = (filters: MapFilters) => {
     this._filters = filters;
-    this.render();
   };
 
   setVisibleSkiAreasCount = (count: number) => {
@@ -44,6 +43,9 @@ export class FilterControl implements mapboxgl.IControl {
   };
 
   private render = () => {
+    if (!this._container.isConnected) {
+      return;
+    }
     ReactDOM.render(
       <FilterForm
         eventBus={this._eventBus}

@@ -41,11 +41,17 @@ export default class StateStore implements EventBus {
   };
 
   showInfo = (info: InfoData) => {
-    this.update({ info: info });
+    this.update({
+      info: info,
+      mapFilters: { ...this._state.mapFilters, selectedObjectID: info.id }
+    });
   };
 
   hideInfo = () => {
-    this.update({ info: null });
+    this.update({
+      info: null,
+      mapFilters: { ...this._state.mapFilters, selectedObjectID: null }
+    });
   };
 
   toggleActivity = (activity: Activity) => {

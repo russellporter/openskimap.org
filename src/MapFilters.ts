@@ -5,11 +5,13 @@ export default interface MapFilters {
   minElevation: number | null;
   minVertical: number | null;
   minRunLength: number | null;
+  selectedObjectID: string | null;
 }
 
 export const defaultMapFilters = {
   hiddenActivities: [],
   minVertical: null,
   minElevation: null,
-  minRunLength: null
+  minRunLength: null,
+  selectedObjectID: null
 };
