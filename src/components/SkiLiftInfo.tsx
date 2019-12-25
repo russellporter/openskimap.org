@@ -1,6 +1,7 @@
-import { Avatar, Card, CardContent, Typography } from "@material-ui/core";
+import { Card, CardContent, Typography } from "@material-ui/core";
 import { getLiftNameAndType, LiftFeature } from "openskidata-format";
 import * as React from "react";
+import { Badge } from "./Badge";
 import { CoordinatesWithElevation, getAscentAndDescent } from "./ElevationData";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
@@ -28,7 +29,6 @@ export const SkiLiftInfo: React.FunctionComponent<{
 
   const speed =
     distance && durationInSeconds ? distance / durationInSeconds : null;
-  const badge = properties.ref;
   return (
     <Card>
       <CardContent>
@@ -36,17 +36,8 @@ export const SkiLiftInfo: React.FunctionComponent<{
           <Typography variant="h5" component="h2">
             {getLiftNameAndType(properties)}
           </Typography>
-          {badge && (
-            <Avatar
-              style={{
-                backgroundColor: properties.color,
-                width: 31,
-                height: 31,
-                marginLeft: "5px"
-              }}
-            >
-              {badge}
-            </Avatar>
+          {properties.ref && (
+            <Badge text={properties.ref} color={properties.color} />
           )}
           {properties.status && (
             <div style={{ marginLeft: "5px" }}>

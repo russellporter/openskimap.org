@@ -11,6 +11,7 @@ import {
   RunUse
 } from "openskidata-format";
 import * as React from "react";
+import { Badge } from "./Badge";
 import getElevationData from "./ElevationData";
 import EventBus from "./EventBus";
 import { formattedDifficultyName, formattedRunUse } from "./Formatters";
@@ -60,9 +61,11 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
           <Typography gutterBottom variant="h5" component="h2">
             {title}
           </Typography>
+          {properties.ref && (
+            <Badge text={properties.ref} color={properties.color} />
+          )}
         </InfoHeader>
         {subtitle && <Typography>{subtitle}</Typography>}
-
         <div>
           <GroomingLabel feature={feature} />
           {properties.oneway === true &&
