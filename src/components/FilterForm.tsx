@@ -4,7 +4,6 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
-  MuiThemeProvider,
   Slider,
   Typography
 } from "@material-ui/core";
@@ -14,7 +13,6 @@ import MapFilters from "../MapFilters";
 import { DownhillCheckbox, NordicCheckbox } from "./Checkbox";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
-import { theme } from "./Theme";
 import ValueLabel from "./ValueLabel";
 
 export const FilterForm: React.FunctionComponent<{
@@ -34,94 +32,92 @@ export const FilterForm: React.FunctionComponent<{
   const formSectionStyle = { marginBottom: "16px" };
 
   return (
-    <MuiThemeProvider theme={theme}>
-      <Card style={{ width: props.width }}>
-        <CardContent>
-          <InfoHeader onClose={() => props.eventBus.hideFilters()}>
-            <Typography gutterBottom variant="h6">
-              Filters
-            </Typography>
-          </InfoHeader>
-          <div style={formSectionStyle}>
-            <FormLabel component="legend">Activities</FormLabel>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <DownhillCheckbox
-                    checked={isDownhillEnabled}
-                    onChange={() =>
-                      props.eventBus.toggleActivity(Activity.Downhill)
-                    }
-                  />
-                }
-                label="Downhill &amp; Backcountry"
-              />
-              <FormControlLabel
-                control={
-                  <NordicCheckbox
-                    checked={isNordicEnabled}
-                    onChange={() =>
-                      props.eventBus.toggleActivity(Activity.Nordic)
-                    }
-                  />
-                }
-                label="Nordic"
-              />
-            </FormGroup>
-          </div>
-          <div style={formSectionStyle}>
-            <FormLabel component="legend">Minimum Elevation (m)</FormLabel>
-            <FormGroup style={sliderMargins}>
-              <Slider
-                defaultValue={props.filters.minElevation || 0}
-                min={0}
-                max={5000}
-                valueLabelDisplay="auto"
-                valueLabelFormat={value => value + " m"}
-                ValueLabelComponent={ValueLabel}
-                onChange={(_, value) =>
-                  props.eventBus.setMinimumElevation(value as number)
-                }
-              />
-            </FormGroup>
-          </div>
-          <div style={formSectionStyle}>
-            <FormLabel component="legend">Minimum Vertical (m)</FormLabel>
-            <FormGroup style={sliderMargins}>
-              <Slider
-                defaultValue={props.filters.minVertical || 0}
-                min={0}
-                max={2000}
-                valueLabelDisplay="auto"
-                valueLabelFormat={value => value + " m"}
-                ValueLabelComponent={ValueLabel}
-                onChange={(_, value) =>
-                  props.eventBus.setMinimumVertical(value as number)
-                }
-              />
-            </FormGroup>
-          </div>
-          <div style={formSectionStyle}>
-            <FormLabel component="legend">Run Length (km)</FormLabel>
-            <FormGroup style={sliderMargins}>
-              <Slider
-                defaultValue={props.filters.minRunLength || 0}
-                min={0}
-                max={500}
-                valueLabelDisplay="auto"
-                valueLabelFormat={value => value + " km"}
-                ValueLabelComponent={ValueLabel}
-                onChange={(_, value) =>
-                  props.eventBus.setMinimumRunLength(value as number)
-                }
-              />
-            </FormGroup>
-          </div>
-          <Typography variant="subtitle2">
-            {props.visibleSkiAreasCount} visible ski areas
+    <Card style={{ width: props.width }}>
+      <CardContent>
+        <InfoHeader onClose={() => props.eventBus.hideFilters()}>
+          <Typography gutterBottom variant="h6">
+            Filters
           </Typography>
-        </CardContent>
-      </Card>
-    </MuiThemeProvider>
+        </InfoHeader>
+        <div style={formSectionStyle}>
+          <FormLabel component="legend">Activities</FormLabel>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <DownhillCheckbox
+                  checked={isDownhillEnabled}
+                  onChange={() =>
+                    props.eventBus.toggleActivity(Activity.Downhill)
+                  }
+                />
+              }
+              label="Downhill &amp; Backcountry"
+            />
+            <FormControlLabel
+              control={
+                <NordicCheckbox
+                  checked={isNordicEnabled}
+                  onChange={() =>
+                    props.eventBus.toggleActivity(Activity.Nordic)
+                  }
+                />
+              }
+              label="Nordic"
+            />
+          </FormGroup>
+        </div>
+        <div style={formSectionStyle}>
+          <FormLabel component="legend">Minimum Elevation (m)</FormLabel>
+          <FormGroup style={sliderMargins}>
+            <Slider
+              defaultValue={props.filters.minElevation || 0}
+              min={0}
+              max={5000}
+              valueLabelDisplay="auto"
+              valueLabelFormat={value => value + " m"}
+              ValueLabelComponent={ValueLabel}
+              onChange={(_, value) =>
+                props.eventBus.setMinimumElevation(value as number)
+              }
+            />
+          </FormGroup>
+        </div>
+        <div style={formSectionStyle}>
+          <FormLabel component="legend">Minimum Vertical (m)</FormLabel>
+          <FormGroup style={sliderMargins}>
+            <Slider
+              defaultValue={props.filters.minVertical || 0}
+              min={0}
+              max={2000}
+              valueLabelDisplay="auto"
+              valueLabelFormat={value => value + " m"}
+              ValueLabelComponent={ValueLabel}
+              onChange={(_, value) =>
+                props.eventBus.setMinimumVertical(value as number)
+              }
+            />
+          </FormGroup>
+        </div>
+        <div style={formSectionStyle}>
+          <FormLabel component="legend">Run Length (km)</FormLabel>
+          <FormGroup style={sliderMargins}>
+            <Slider
+              defaultValue={props.filters.minRunLength || 0}
+              min={0}
+              max={500}
+              valueLabelDisplay="auto"
+              valueLabelFormat={value => value + " km"}
+              ValueLabelComponent={ValueLabel}
+              onChange={(_, value) =>
+                props.eventBus.setMinimumRunLength(value as number)
+              }
+            />
+          </FormGroup>
+        </div>
+        <Typography variant="subtitle2">
+          {props.visibleSkiAreasCount} visible ski areas
+        </Typography>
+      </CardContent>
+    </Card>
   );
 };

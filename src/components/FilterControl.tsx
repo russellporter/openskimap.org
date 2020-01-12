@@ -5,6 +5,7 @@ import MapFilters, { defaultMapFilters } from "../MapFilters";
 import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import { FilterForm } from "./FilterForm";
+import { Themed } from "./Themed";
 
 export class FilterControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
@@ -27,7 +28,7 @@ export class FilterControl implements mapboxgl.IControl {
   };
 
   onRemove = () => {
-    this._map!.off("resize", this.render);
+    this._map && this._map.off("resize", this.render);
     const parent = this._container.parentNode;
     parent && parent.removeChild(this._container);
     this._map = null;
@@ -47,12 +48,14 @@ export class FilterControl implements mapboxgl.IControl {
       return;
     }
     ReactDOM.render(
-      <FilterForm
-        eventBus={this._eventBus}
-        filters={this._filters}
-        width={controlWidth(this._map!)}
-        visibleSkiAreasCount={this._visibleSkiAreasCount}
-      />,
+      <Themed>
+        <FilterForm
+          eventBus={this._eventBus}
+          filters={this._filters}
+          width={controlWidth(this._map!)}
+          visibleSkiAreasCount={this._visibleSkiAreasCount}
+        />
+      </Themed>,
       this._container
     );
   };

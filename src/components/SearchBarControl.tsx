@@ -4,6 +4,7 @@ import * as ReactDOM from "react-dom";
 import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import SearchBar from "./SearchBar";
+import { Themed } from "./Themed";
 
 export class SearchBarControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
@@ -38,11 +39,13 @@ export class SearchBarControl implements mapboxgl.IControl {
 
   private render = () => {
     ReactDOM.render(
-      <SearchBar
-        eventBus={this._eventBus}
-        width={controlWidth(this._map!)}
-        filtersShown={this._filtersShown}
-      />,
+      <Themed>
+        <SearchBar
+          eventBus={this._eventBus}
+          width={controlWidth(this._map!)}
+          filtersShown={this._filtersShown}
+        />
+      </Themed>,
       this._container
     );
   };

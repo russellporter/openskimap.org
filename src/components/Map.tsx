@@ -13,11 +13,11 @@ import { SearchBarControl } from "./SearchBarControl";
 export class Map {
   private map: mapboxgl.Map;
 
-  private data: any;
   private eventBus: EventBus;
   private infoControl: InfoControl | null = null;
   private filterControl: FilterControl;
   private searchBarControl: SearchBarControl;
+  private loaded: boolean = false;
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
@@ -74,20 +74,34 @@ export class Map {
       }),
       "bottom-right"
     );
+
+    this.map.once("load", () => {
+      this.loaded = true;
+    });
   }
 
+  private afterLoaded = (closure: () => void) => {
+    if (this.loaded) {
+      closure();
+    } else {
+      this.map.once("load", closure);
+    }
+  };
+
   setInfo = (info: InfoData | null) => {
-    if (info && info.panToPosition) {
-      this.map.panTo(info.panToPosition);
-    }
-    if (this.infoControl !== null) {
-      this.map.removeControl(this.infoControl);
-    }
-    this.infoControl =
-      info === null ? null : new InfoControl(info, this.eventBus);
-    if (this.infoControl !== null) {
-      this.map.addControl(this.infoControl);
-    }
+    this.afterLoaded(() => {
+      if (info && info.panToPosition) {
+        this.map.panTo(info.panToPosition);
+      }
+      if (this.infoControl !== null) {
+        this.map.removeControl(this.infoControl);
+      }
+      this.infoControl =
+        info === null ? null : new InfoControl(info, this.eventBus);
+      if (this.infoControl !== null) {
+        this.map.addControl(this.infoControl);
+      }
+    });
   };
 
   setStyle = (style: MapStyle) => {
@@ -95,23 +109,27 @@ export class Map {
   };
 
   private setFiltersUnthrottled = (filters: MapFilters) => {
-    this.filterControl.setFilters(filters);
-    this.filterManager.setFilters(filters);
-    this.updateVisibleSkiAreasCountUnthrottled();
+    this.afterLoaded(() => {
+      this.filterControl.setFilters(filters);
+      this.filterManager.setFilters(filters);
+      this.updateVisibleSkiAreasCountUnthrottled();
+    });
   };
 
   setFilters = throttle(100, this.setFiltersUnthrottled);
 
   setFiltersVisible = (visible: boolean) => {
-    this.searchBarControl.setFiltersShown(visible);
-    if (visible) {
-      this.map.addControl(this.filterControl);
-      this.map.on("render", this.updateVisibleSkiAreasCount);
-    } else {
-      this.map.removeControl(this.filterControl);
-      this.map.off("render", this.updateVisibleSkiAreasCount);
-    }
-    this.updateVisibleSkiAreasCountUnthrottled();
+    this.afterLoaded(() => {
+      this.searchBarControl.setFiltersShown(visible);
+      if (visible) {
+        this.map.addControl(this.filterControl);
+        this.map.on("render", this.updateVisibleSkiAreasCount);
+      } else {
+        this.map.removeControl(this.filterControl);
+        this.map.off("render", this.updateVisibleSkiAreasCount);
+      }
+      this.updateVisibleSkiAreasCountUnthrottled();
+    });
   };
 
   getCenter = () => {

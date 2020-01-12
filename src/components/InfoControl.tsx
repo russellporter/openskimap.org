@@ -6,6 +6,7 @@ import EventBus from "./EventBus";
 import HighlightManager, { ChartHighlighter } from "./HighlightManager";
 import { Info } from "./Info";
 import { InfoData } from "./InfoData";
+import { Themed } from "./Themed";
 
 export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _container: HTMLDivElement;
@@ -52,13 +53,15 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
       return;
     }
     ReactDOM.render(
-      <Info
-        id={this._id}
-        eventBus={this._eventBus}
-        width={controlWidth(map)}
-        chartHighlightPosition={this._chartHighlightPosition}
-        onHoverChartPosition={this._highlightManager!.hoveredChartPosition}
-      />,
+      <Themed>
+        <Info
+          id={this._id}
+          eventBus={this._eventBus}
+          width={controlWidth(map)}
+          chartHighlightPosition={this._chartHighlightPosition}
+          onHoverChartPosition={this._highlightManager!.hoveredChartPosition}
+        />
+      </Themed>,
       this._container
     );
   }

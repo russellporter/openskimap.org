@@ -1,12 +1,13 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import AboutModal from "./components/AboutModal";
+import { AboutModal } from "./components/AboutModal";
 import * as ExternalURLOpener from "./components/ExternalURLOpener";
 import { Map } from "./components/Map";
 import Sidebar from "./components/Sidebar";
 import State, { defaultState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
+import { Themed } from "./components/Themed";
 import "./index.css";
 
 let map: Map | null = null;
@@ -46,18 +47,22 @@ function initialize() {
 
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
       ReactDOM.render(
-        <Sidebar
-          eventBus={store}
-          open={state.sidebarOpen}
-          selectedMapStyle={state.mapStyle}
-        />,
+        <Themed>
+          <Sidebar
+            eventBus={store}
+            open={state.sidebarOpen}
+            selectedMapStyle={state.mapStyle}
+          />
+        </Themed>,
         document.getElementById("sidebar")
       );
     }
 
     if (changes.aboutInfoOpen !== undefined) {
       ReactDOM.render(
-        <AboutModal eventBus={store} open={state.aboutInfoOpen} />,
+        <Themed>
+          <AboutModal eventBus={store} open={state.aboutInfoOpen} />
+        </Themed>,
         document.getElementById("about-modal")
       );
     }
