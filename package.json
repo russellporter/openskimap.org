@@ -7,7 +7,8 @@
     "start": "node_modules/.bin/webpack-dev-server --open --config webpack.dev.js --mode development",
     "postinstall": "node_modules/.bin/webpack --config webpack.prod.js",
     "pull": "git pull; npm install",
-    "deploy": "git pull; npm install"
+    "deploy": "git pull; npm install",
+    "check-types": "tsc"
   },
   "author": "Russell Porter",
   "license": "ISC",
