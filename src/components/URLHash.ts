@@ -7,8 +7,10 @@ export interface URLHashState {
 export function updateURLHash(state: URLHashState) {
   const query = queryString.parse(location.hash);
   // Add about param to URL if it is opened.
-  query["about"] = state.aboutInfoOpen ? null : undefined;
-  location.hash = queryString.stringify(query);
+  location.hash = queryString.stringify({
+    about: state.aboutInfoOpen ? null : undefined,
+    map: query.map
+  });
 }
 
 export function getURLHash(): URLHashState {
