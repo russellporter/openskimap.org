@@ -1,6 +1,7 @@
 import { Link, Typography } from "@material-ui/core";
 import * as React from "react";
 import EventBus from "./EventBus";
+import { InfoHeader } from "./InfoHeader";
 
 interface Props {
   eventBus: EventBus;
@@ -10,9 +11,11 @@ export default class About extends React.Component<Props> {
   render() {
     return (
       <>
-        <Typography variant="h5" id="modal-title">
-          About
-        </Typography>
+        <InfoHeader onClose={() => this.props.eventBus.closeAboutInfo()}>
+          <Typography variant="h5" id="modal-title">
+            About
+          </Typography>
+        </InfoHeader>
         <Typography>
           <p>
             This map uses OpenStreetMap and Skimap.org data to show ski areas,
