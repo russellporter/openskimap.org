@@ -25,7 +25,7 @@ export class Map {
   constructor(
     center: mapboxgl.LngLatLike,
     zoom: number,
-    containerID: string | Element,
+    containerID: string | HTMLElement,
     eventBus: EventBus
   ) {
     this.eventBus = eventBus;
