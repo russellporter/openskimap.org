@@ -103,9 +103,15 @@ export default class StateStore implements EventBus {
   };
 
   private update(changes: StateChanges): void {
+    const state = this._state as { [key: string]: any };
     Object.keys(changes).forEach(key => {
       const change = (changes as { [key: string]: any })[key];
-      (this._state as { [key: string]: any })[key] = change;
+
+      if (state[key] !== change) {
+        state[key] = change;
+      } else {
+        delete (changes as { [key: string]: any })[key];
+      }
     });
     this.updateHandler(this._state, changes);
   }

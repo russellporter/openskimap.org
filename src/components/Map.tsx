@@ -33,7 +33,7 @@ export class Map {
       container: containerID, // container id
       center: center, // starting position [lng, lat]
       zoom: zoom, // starting zoom,
-      hash: true,
+      hash: "map",
       attributionControl: false,
       pitchWithRotate: false
     });

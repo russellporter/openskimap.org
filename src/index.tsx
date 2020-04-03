@@ -5,15 +5,29 @@ import { AboutModal } from "./components/AboutModal";
 import * as ExternalURLOpener from "./components/ExternalURLOpener";
 import { Map } from "./components/Map";
 import Sidebar from "./components/Sidebar";
-import State, { defaultState, StateChanges } from "./components/State";
+import State, { getInitialState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import { Themed } from "./components/Themed";
+import { getURLHash, updateURLHash } from "./components/URLHash";
 import "./index.css";
 
 let map: Map | null = null;
 
 function initialize() {
-  const store = new StateStore(defaultState, update);
+  const store = new StateStore(getInitialState(getURLHash()), update);
+
+  window.addEventListener(
+    "hashchange",
+    () => {
+      const hashState = getURLHash();
+      if (hashState.aboutInfoOpen) {
+        store.openAboutInfo();
+      } else {
+        store.closeAboutInfo();
+      }
+    },
+    false
+  );
 
   (mapboxgl as any).accessToken =
     "pk.eyJ1IjoicnVzc2VsbCIsImEiOiJjaXUwYWE5NGYwMW94MnpydG5jaWxjOHJsIn0.oyWAcfWU5SMOOWevkrenlw";
@@ -59,6 +73,8 @@ function initialize() {
     }
 
     if (changes.aboutInfoOpen !== undefined) {
+      updateURLHash({ aboutInfoOpen: changes.aboutInfoOpen });
+
       ReactDOM.render(
         <Themed>
           <AboutModal eventBus={store} open={state.aboutInfoOpen} />
