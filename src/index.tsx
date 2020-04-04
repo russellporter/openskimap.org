@@ -8,23 +8,18 @@ import Sidebar from "./components/Sidebar";
 import State, { getInitialState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import { Themed } from "./components/Themed";
-import { getURLHash, updateURLHash } from "./components/URLHash";
+import { getURLState, updateURL } from "./components/URLHistory";
 import "./index.css";
 
 let map: Map | null = null;
 
 function initialize() {
-  const store = new StateStore(getInitialState(getURLHash()), update);
+  const store = new StateStore(getInitialState(), update);
 
   window.addEventListener(
-    "hashchange",
+    "popstate",
     () => {
-      const hashState = getURLHash();
-      if (hashState.aboutInfoOpen) {
-        store.openAboutInfo();
-      } else {
-        store.closeAboutInfo();
-      }
+      store.urlUpdate(getURLState());
     },
     false
   );
@@ -48,9 +43,16 @@ function initialize() {
 
   map = new Map(center, zoom, "map", store);
 
+  store.urlUpdate(getURLState());
+
   update(store._state, store._state);
 
   function update(state: State, changes: StateChanges) {
+    updateURL({
+      aboutInfoOpen: state.aboutInfoOpen,
+      selectedObjectID: state.info?.id ?? null
+    });
+
     if (changes.mapStyle !== undefined) {
       map!.setStyle(state.mapStyle);
     }
@@ -73,8 +75,6 @@ function initialize() {
     }
 
     if (changes.aboutInfoOpen !== undefined) {
-      updateURLHash({ aboutInfoOpen: changes.aboutInfoOpen });
-
       ReactDOM.render(
         <Themed>
           <AboutModal eventBus={store} open={state.aboutInfoOpen} />

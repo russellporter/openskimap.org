@@ -3,6 +3,7 @@ import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import { InfoData } from "./InfoData";
 import State, { StateChanges } from "./State";
+import { URLState } from "./URLHistory";
 
 export default class StateStore implements EventBus {
   _state: State;
@@ -38,6 +39,15 @@ export default class StateStore implements EventBus {
 
   setMapStyle = (style: MapStyle) => {
     this.update({ mapStyle: style });
+  };
+
+  urlUpdate = (state: URLState) => {
+    this.update({
+      aboutInfoOpen: state.aboutInfoOpen,
+      info: state.selectedObjectID
+        ? { id: state.selectedObjectID, panToPosition: null }
+        : null
+    });
   };
 
   showInfo = (info: InfoData) => {

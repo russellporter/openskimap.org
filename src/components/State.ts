@@ -1,7 +1,6 @@
 import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapStyle } from "../MapStyle";
 import { InfoData } from "./InfoData";
-import { URLHashState } from "./URLHash";
 
 export default interface State {
   editMapOpen: boolean;
@@ -23,11 +22,11 @@ export interface StateChanges {
   info?: InfoData | null;
 }
 
-export function getInitialState(urlHash: URLHashState) {
+export function getInitialState() {
   return {
     editMapOpen: false,
     sidebarOpen: false,
-    aboutInfoOpen: urlHash.aboutInfoOpen,
+    aboutInfoOpen: false,
     mapFiltersOpen: false,
     mapStyle: MapStyle.Terrain,
     mapFilters: defaultMapFilters,
