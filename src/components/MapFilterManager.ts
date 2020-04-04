@@ -250,6 +250,8 @@ function getSelectedObjectFilterRules(filters: MapFilters): MapFilterRules {
         ["has", "skiArea-" + filters.selectedObjectID]
       ]
     ];
+  } else {
+    rules.selected = "hidden";
   }
 
   return rules;
