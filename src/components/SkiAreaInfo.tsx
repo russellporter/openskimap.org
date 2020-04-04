@@ -240,6 +240,7 @@ const RunDifficultyBarChart: React.SFC<{
     const distanceText = Math.round(runKm * 10) / 10 + "km";
     return (
       <Tooltip
+        key={difficulty || "other"}
         title={difficultyText + " (" + distanceText + ")"}
         placement="bottom"
         PopperProps={{
@@ -258,7 +259,6 @@ const RunDifficultyBarChart: React.SFC<{
         }}
       >
         <span
-          key={difficulty || "other"}
           style={{
             width: percentage + "%",
             backgroundColor: getRunColor(props.runConvention, difficulty)
