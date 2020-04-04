@@ -37,13 +37,13 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
     <Card>
       <CardContent>
         <InfoHeader onClose={props.eventBus.hideInfo}>
+          <StatusIcon
+            status={properties.status}
+            entityName={"ski area"}
+            hideIfOperating={true}
+          />
           <Typography variant="h5" component="h2">
-            {properties.name}{" "}
-            <StatusIcon
-              status={properties.status}
-              entityName={"ski area"}
-              hideIfOperating={false}
-            />
+            {properties.name}
           </Typography>
         </InfoHeader>
         {properties.statistics && (

@@ -33,21 +33,19 @@ export const SkiLiftInfo: React.FunctionComponent<{
     <Card>
       <CardContent>
         <InfoHeader onClose={props.eventBus.hideInfo}>
-          <Typography variant="h5" component="h2">
-            {getLiftNameAndType(properties)}
-          </Typography>
           {properties.ref && (
             <Badge text={properties.ref} color={properties.color} />
           )}
           {properties.status && (
-            <div style={{ marginLeft: "5px" }}>
-              <StatusIcon
-                status={properties.status}
-                entityName={"lift"}
-                hideIfOperating={true}
-              />
-            </div>
-          )}
+            <StatusIcon
+              status={properties.status}
+              entityName={"lift"}
+              hideIfOperating={true}
+            />
+          )}{" "}
+          <Typography variant="h5" component="h2">
+            {getLiftNameAndType(properties)}
+          </Typography>
         </InfoHeader>
         {
           <div className={"distance-and-elevation-info"}>

@@ -17,45 +17,31 @@ export const StatusIcon: React.SFC<Props> = props => {
   }
 
   return (
-    <Tooltip
-      title={tooltipText(props.status, props.entityName)}
-      placement="right"
-    >
-      {icon(props.status)}
-    </Tooltip>
+    <span style={{ flexShrink: 0 }}>
+      <Tooltip
+        title={tooltipText(props.status, props.entityName)}
+        placement="right"
+      >
+        {icon(props.status)}
+      </Tooltip>
+    </span>
   );
 };
 
 function icon(status: Status | null) {
+  const commonStyle = { verticalAlign: "text-top", fontSize: "32px" };
   switch (status) {
     case Status.Proposed:
     case Status.Planned:
     case Status.Construction:
-      return (
-        <HelpIcon
-          fontSize="inherit"
-          style={{ color: "purple", verticalAlign: "text-top" }}
-        />
-      );
+      return <HelpIcon style={{ ...commonStyle, color: "purple" }} />;
     case Status.Operating:
-      return (
-        <CheckCircleIcon
-          fontSize="inherit"
-          style={{ color: "green", verticalAlign: "text-top" }}
-        />
-      );
+      return <CheckCircleIcon style={{ ...commonStyle, color: "green" }} />;
     case Status.Abandoned:
     case Status.Disused:
-      return (
-        <CancelIcon
-          fontSize="inherit"
-          style={{ color: "red", verticalAlign: "text-top" }}
-        />
-      );
+      return <CancelIcon style={{ ...commonStyle, color: "red" }} />;
     case null:
-      return (
-        <HelpIcon fontSize="inherit" style={{ verticalAlign: "text-top" }} />
-      );
+      return <HelpIcon style={commonStyle} />;
   }
 }
 

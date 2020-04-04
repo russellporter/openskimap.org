@@ -1,20 +1,35 @@
-import { Avatar } from "@material-ui/core";
+import { Chip, makeStyles } from "@material-ui/core";
 import * as React from "react";
+
+const useStyles = makeStyles(theme => ({
+  label: {
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+    color: "white",
+    fontSize: "1.25rem"
+  },
+  root: {
+    minWidth: "32px",
+    flexShrink: 0
+  }
+}));
 
 export const Badge: React.FunctionComponent<{
   text: string;
   color: string;
 }> = props => {
+  const classes = useStyles();
+
   return (
-    <Avatar
-      style={{
-        backgroundColor: props.color,
-        width: 31,
-        height: 31,
-        marginLeft: "5px"
+    <Chip
+      label={props.text}
+      classes={{
+        root: classes.root,
+        label: classes.label
       }}
-    >
-      {props.text}
-    </Avatar>
+      style={{
+        backgroundColor: props.color
+      }}
+    />
   );
 };

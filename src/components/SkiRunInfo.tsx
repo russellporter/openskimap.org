@@ -58,12 +58,12 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
     <Card>
       <CardContent>
         <InfoHeader onClose={props.eventBus.hideInfo}>
-          <Typography gutterBottom variant="h5" component="h2">
-            {title}
-          </Typography>
           {properties.ref && (
             <Badge text={properties.ref} color={properties.color} />
           )}
+          <Typography gutterBottom variant="h5" component="h2">
+            {title}
+          </Typography>
         </InfoHeader>
         {subtitle && <Typography>{subtitle}</Typography>}
         <div>
