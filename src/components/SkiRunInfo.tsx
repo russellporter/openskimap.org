@@ -24,10 +24,11 @@ import EventBus from "./EventBus";
 import { formattedDifficultyName, formattedRunUse } from "./Formatters";
 import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
 import { InfoHeader } from "./InfoHeader";
+import { FullRunFeature } from "./Model";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
 
 interface Props extends HeightProfileHighlightProps {
-  feature: RunFeature;
+  feature: FullRunFeature;
   eventBus: EventBus;
 }
 
@@ -76,7 +77,13 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
   return (
     <Card>
       <CardContent>
-        <InfoHeader onClose={props.eventBus.hideInfo}>
+        <InfoHeader
+          onClose={props.eventBus.hideInfo}
+          breadcrumbs={{
+            eventBus: props.eventBus,
+            feature: props.feature
+          }}
+        >
           {properties.ref && (
             <Badge text={properties.ref} color={properties.color} />
           )}

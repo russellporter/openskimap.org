@@ -36,7 +36,10 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
   return (
     <Card>
       <CardContent>
-        <InfoHeader onClose={props.eventBus.hideInfo}>
+        <InfoHeader
+          onClose={props.eventBus.hideInfo}
+          breadcrumbs={{ eventBus: props.eventBus, feature: props.feature }}
+        >
           <StatusIcon
             status={properties.status}
             entityName={"ski area"}

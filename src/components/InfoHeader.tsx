@@ -1,6 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import * as React from "react";
 import { TopRightCloseButton } from "./CloseButton";
+import { InfoBreadcrumbs, InfoBreadcrumbsProps } from "./InfoBreadcrumbs";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -8,6 +9,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "space-between",
     alignItems: "flex-start"
   },
+  breadcrumbsAndContent: {},
   content: {
     display: "inline-flex",
     "&:last-child": {
@@ -21,11 +23,15 @@ const useStyles = makeStyles(theme => ({
 
 export const InfoHeader: React.FunctionComponent<{
   onClose: () => void;
+  breadcrumbs?: InfoBreadcrumbsProps;
 }> = props => {
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      <span className={classes.content}>{props.children}</span>
+      <div className={classes.breadcrumbsAndContent}>
+        {props.breadcrumbs && <InfoBreadcrumbs {...props.breadcrumbs} />}
+        <span className={classes.content}>{props.children}</span>
+      </div>
       <TopRightCloseButton onClick={props.onClose} />
     </div>
   );
