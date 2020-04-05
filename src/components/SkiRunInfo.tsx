@@ -1,4 +1,11 @@
-import { Avatar, Card, CardContent, Chip, Typography } from "@material-ui/core";
+import {
+  Avatar,
+  Card,
+  CardContent,
+  Chip,
+  makeStyles,
+  Typography
+} from "@material-ui/core";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import HighlightIcon from "@material-ui/icons/Highlight";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
@@ -24,7 +31,19 @@ interface Props extends HeightProfileHighlightProps {
   eventBus: EventBus;
 }
 
+const useStyles = makeStyles(theme => ({
+  chips: {
+    "&:last-child": {
+      marginRight: 0
+    },
+    "& > *": {
+      marginRight: theme.spacing(1)
+    }
+  }
+}));
+
 export const SkiRunInfo: React.FunctionComponent<Props> = props => {
+  const classes = useStyles();
   const feature = props.feature;
   const properties = feature.properties;
   const geometry = props.feature.geometry;
@@ -66,7 +85,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
           </Typography>
         </InfoHeader>
         {subtitle && <Typography>{subtitle}</Typography>}
-        <div>
+        <div className={classes.chips}>
           <GroomingLabel feature={feature} />
           {properties.oneway === true &&
           !properties.uses.includes(RunUse.Downhill) ? (
