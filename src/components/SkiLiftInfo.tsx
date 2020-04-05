@@ -49,14 +49,20 @@ export const SkiLiftInfo: React.FunctionComponent<{
         </InfoHeader>
         {
           <div className={"distance-and-elevation-info"}>
-            {distance && <span>Distance: {Math.round(distance)}m</span>}
+            {distance && (
+              <Typography>Distance: {Math.round(distance)}m</Typography>
+            )}
             {ascentAndDescent && ascentAndDescent.ascent > 1 && (
-              <span>Ascent: {Math.round(ascentAndDescent.ascent)}m</span>
+              <Typography>
+                Ascent: {Math.round(ascentAndDescent.ascent)}m
+              </Typography>
             )}
             {ascentAndDescent && ascentAndDescent.descent > 1 && (
-              <span>Descent: {Math.round(ascentAndDescent.descent)}m</span>
+              <Typography>
+                Descent: {Math.round(ascentAndDescent.descent)}m
+              </Typography>
             )}
-            {speed && <span>Speed: {speed.toFixed(1)} m/s</span>}
+            {speed && <Typography>Speed: {speed.toFixed(1)} m/s</Typography>}
           </div>
         }
       </CardContent>
