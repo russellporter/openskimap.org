@@ -72,6 +72,11 @@ export const SkiLiftInfo: React.FunctionComponent<{
             {speed && <Typography>Speed: {speed.toFixed(1)} m/s</Typography>}
           </div>
         }
+        {properties.description && (
+          <Typography>
+            <span>Notes: {properties.description}</span>
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
