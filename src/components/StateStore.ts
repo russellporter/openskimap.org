@@ -8,6 +8,7 @@ import { URLState } from "./URLHistory";
 export default class StateStore implements EventBus {
   _state: State;
   updateHandler: (state: State, changes: StateChanges) => void = () => {};
+  editMapHandler: (() => void) | null = null;
 
   constructor(
     state: State,
@@ -18,7 +19,7 @@ export default class StateStore implements EventBus {
   }
 
   editMap = () => {
-    this.update({ editMapOpen: true });
+    this.editMapHandler!();
   };
 
   openSidebar = () => {

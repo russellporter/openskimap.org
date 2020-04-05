@@ -3,7 +3,6 @@ import { MapStyle } from "../MapStyle";
 import { InfoData } from "./InfoData";
 
 export default interface State {
-  editMapOpen: boolean;
   sidebarOpen: boolean;
   aboutInfoOpen: boolean;
   mapFiltersOpen: boolean;
@@ -13,7 +12,6 @@ export default interface State {
 }
 
 export interface StateChanges {
-  editMapOpen?: boolean;
   sidebarOpen?: boolean;
   aboutInfoOpen?: boolean;
   mapFiltersOpen?: boolean;
@@ -24,7 +22,6 @@ export interface StateChanges {
 
 export function getInitialState() {
   return {
-    editMapOpen: false,
     sidebarOpen: false,
     aboutInfoOpen: false,
     mapFiltersOpen: false,

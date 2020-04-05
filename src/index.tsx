@@ -2,7 +2,7 @@ import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { AboutModal } from "./components/AboutModal";
-import * as ExternalURLOpener from "./components/ExternalURLOpener";
+import { editMap } from "./components/ExternalURLOpener";
 import { Map } from "./components/Map";
 import Sidebar from "./components/Sidebar";
 import State, { getInitialState, StateChanges } from "./components/State";
@@ -46,6 +46,10 @@ function initialize() {
 
   map = new Map(center, zoom, "map", store);
 
+  store.editMapHandler = () => {
+    editMap(map!);
+  };
+
   store.urlUpdate(getURLState());
 
   update(store._state, store._state);
@@ -58,10 +62,6 @@ function initialize() {
 
     if (changes.mapStyle !== undefined) {
       map!.setStyle(state.mapStyle);
-    }
-
-    if (changes.editMapOpen === true) {
-      ExternalURLOpener.editMap(map!);
     }
 
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
