@@ -9,11 +9,14 @@ import State, { getInitialState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import { Themed } from "./components/Themed";
 import { getURLState, updateURL } from "./components/URLHistory";
+import * as Config from "./Config";
 import "./index.css";
 
 let map: Map | null = null;
 
 function initialize() {
+  registerServiceWorker();
+
   const store = new StateStore(getInitialState(), update);
 
   window.addEventListener(
@@ -105,3 +108,24 @@ function unload() {
 
 window.addEventListener("load", initialize);
 window.addEventListener("unload", unload);
+
+async function registerServiceWorker(): Promise<void> {
+  // Check that service workers are supported
+  if ("serviceWorker" in navigator) {
+    if (Config.ENABLE_SERVICE_WORKER) {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then(registration => {
+          console.log("SW registered: ", registration);
+        })
+        .catch(registrationError => {
+          console.log("SW registration failed: ", registrationError);
+        });
+    } else {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      registrations.forEach(
+        async registration => await registration.unregister()
+      );
+    }
+  }
+}

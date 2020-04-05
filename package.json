@@ -62,6 +62,8 @@
     "webpack-cdn-plugin": "^2.3.3",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3",
-    "webpack-merge": "^4.2.2"
+    "webpack-merge": "^4.2.2",
+    "workbox-cli": "^5.1.2",
+    "workbox-webpack-plugin": "^5.1.2"
   }
 }
