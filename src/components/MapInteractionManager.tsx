@@ -36,13 +36,19 @@ export class MapInteractionManager {
       // If there are two objects on top of each other in two layers, the click on the object underneath will be ignored by to the debouncing below.
       .reverse();
 
+    let mouseLayerCount = 0;
+
     tappableLayers.forEach(layer => {
       this.map.on("click", layer, this._onClickItem);
       this.map.on("mouseenter", layer, () => {
+        mouseLayerCount += 1;
         this.map.getCanvas().style.cursor = "pointer";
       });
       this.map.on("mouseleave", layer, () => {
-        this.map.getCanvas().style.cursor = "";
+        mouseLayerCount -= 1;
+        if (mouseLayerCount === 0) {
+          this.map.getCanvas().style.cursor = "";
+        }
       });
     });
   }
