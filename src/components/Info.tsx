@@ -8,6 +8,7 @@ import { FullLiftFeature, FullRunFeature } from "./Model";
 import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";
+import { updatePageTitle } from "./utils/PageTitle";
 
 type MapFeature = FullRunFeature | FullLiftFeature | SkiAreaFeature;
 
@@ -31,6 +32,7 @@ export const Info: React.FunctionComponent<{
         return;
       }
 
+      let skiAreaNames: string[] = [];
       const properties = data.properties;
       if (
         properties.type === FeatureType.Lift ||
@@ -46,6 +48,7 @@ export const Info: React.FunctionComponent<{
         }
       }
 
+      updatePageTitle(data);
       setFeature(data);
       props.onLoadFeature(data);
     };

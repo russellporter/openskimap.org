@@ -3,6 +3,7 @@ import { country_reverse_geocoding } from "country-reverse-geocoding";
 import { FeatureType, SkiAreaFeature } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
+import { shortenedSkiAreaName } from "./Formatters";
 import { FullLiftFeature, FullRunFeature } from "./Model";
 import { getFirstPoint } from "./utils/GeoJSON";
 
@@ -70,7 +71,7 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = props => {
                       });
                     }}
                   >
-                    {shortenedName(skiArea.properties.name)}
+                    {shortenedSkiAreaName(skiArea.properties.name)}
                   </Link>
                 ))
                 .reduce(
@@ -110,8 +111,4 @@ function getCountryName(geometry: GeoJSON.Geometry): string | null {
     );
     return null;
   }
-}
-
-function shortenedName(name: string | null): string | null {
-  return name && name.length > 20 ? name.split("(")[0].trim() : name;
 }

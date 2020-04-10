@@ -11,21 +11,16 @@ import HighlightIcon from "@material-ui/icons/Highlight";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import WarningIcon from "@material-ui/icons/Warning";
 import turfLength from "@turf/length";
-import {
-  RunFeature,
-  RunGrooming,
-  RunProperties,
-  RunUse
-} from "openskidata-format";
+import { RunFeature, RunGrooming, RunUse } from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";
 import getElevationData from "./ElevationData";
 import EventBus from "./EventBus";
-import { formattedDifficultyName, formattedRunUse } from "./Formatters";
 import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
 import { InfoHeader } from "./InfoHeader";
 import { FullRunFeature } from "./Model";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
+import { getRunTitleAndSubtitle } from "./utils/PageTitle";
 
 interface Props extends HeightProfileHighlightProps {
   feature: FullRunFeature;
@@ -71,9 +66,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
       : null;
   }, [geometry, elevationProfile]);
   const slopeInfo = elevationData && elevationData.slopeInfo;
-  const summary = difficultyText(properties);
-  const title = properties.name || summary;
-  const subtitle = properties.name ? summary : null;
+  const { title, subtitle } = getRunTitleAndSubtitle(props.feature.properties);
   return (
     <Card>
       <CardContent>
@@ -213,18 +206,4 @@ function formattedSlope(slopePercent: number) {
   const degrees =
     Math.round(Math.abs((Math.atan(slopePercent) / Math.PI) * 180)) + "°";
   return degrees + " (" + percent + ")";
-}
-
-function difficultyText(data: RunProperties) {
-  const difficulty = data.difficulty
-    ? formattedDifficultyName(data.difficulty)
-    : null;
-  const type = formattedRunUse(data.uses, data.grooming);
-  if (difficulty && type) {
-    return difficulty + " " + type.toLowerCase();
-  } else if (difficulty) {
-    return difficulty;
-  } else {
-    return type;
-  }
 }

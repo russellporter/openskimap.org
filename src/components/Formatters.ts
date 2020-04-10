@@ -54,3 +54,7 @@ export function formattedDifficultyName(difficulty: RunDifficulty) {
 export function formattedActivityName(activity: Activity) {
   return activity.charAt(0).toUpperCase() + activity.slice(1);
 }
+
+export function shortenedSkiAreaName(name: string | null): string | null {
+  return name && name.length > 20 ? name.split("(")[0].trim() : name;
+}
