@@ -16,15 +16,22 @@ export const Info: React.FunctionComponent<{
   width: number;
   eventBus: EventBus;
   chartHighlightPosition: mapboxgl.LngLat | null;
+  onLoadFeature: (feature: MapFeature) => void;
   onHoverChartPosition: (position: mapboxgl.LngLat | null) => void;
 }> = props => {
   const [feature, setFeature] = useState<MapFeature | null>(null);
   useEffect(() => {
     const fetchData = async () => {
-      const data = await loadGeoJSON<MapFeature>(props.id);
+      let data: MapFeature;
+      try {
+        data = await loadGeoJSON<MapFeature>(props.id);
+      } catch (error) {
+        console.log(error);
+        props.eventBus.hideInfo();
+        return;
+      }
 
       const properties = data.properties;
-      let skiAreas = null;
       if (
         properties.type === FeatureType.Lift ||
         properties.type === FeatureType.Run
@@ -40,6 +47,7 @@ export const Info: React.FunctionComponent<{
       }
 
       setFeature(data);
+      props.onLoadFeature(data);
     };
 
     fetchData();

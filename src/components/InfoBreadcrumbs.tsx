@@ -4,6 +4,7 @@ import { FeatureType, SkiAreaFeature } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
 import { FullLiftFeature, FullRunFeature } from "./Model";
+import { getFirstPoint } from "./utils/GeoJSON";
 
 const useStyles = makeStyles(theme => ({
   breadcrumbs: {
@@ -96,7 +97,7 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = props => {
 };
 
 function getCountryName(geometry: GeoJSON.Geometry): string | null {
-  const point = getPoint(geometry);
+  const point = getFirstPoint(geometry);
   const country = country_reverse_geocoding().get_country(point[1], point[0]);
   if (country?.name !== undefined) {
     return country.name;
@@ -108,25 +109,6 @@ function getCountryName(geometry: GeoJSON.Geometry): string | null {
         JSON.stringify(point)
     );
     return null;
-  }
-}
-
-function getPoint(geometry: GeoJSON.Geometry): GeoJSON.Position {
-  switch (geometry.type) {
-    case "Point":
-      return geometry.coordinates;
-    case "MultiPoint":
-      return geometry.coordinates[0];
-    case "LineString":
-      return geometry.coordinates[0];
-    case "MultiLineString":
-      return geometry.coordinates[0][0];
-    case "Polygon":
-      return geometry.coordinates[0][0];
-    case "MultiPolygon":
-      return geometry.coordinates[0][0][0];
-    case "GeometryCollection":
-      return getPoint(geometry.geometries[0]);
   }
 }
 

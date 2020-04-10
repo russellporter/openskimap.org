@@ -9,6 +9,7 @@ import { InfoData } from "./InfoData";
 import MapFilterManager from "./MapFilterManager";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
+import { panToZoomLevel } from "./SkiAreaInfo";
 
 export class Map {
   private map: mapboxgl.Map;
@@ -80,7 +81,7 @@ export class Map {
     });
   }
 
-  private afterLoaded = (closure: () => void) => {
+  private waitForMapLoaded = (closure: () => void) => {
     if (this.loaded) {
       closure();
     } else {
@@ -89,9 +90,9 @@ export class Map {
   };
 
   setInfo = (info: InfoData | null) => {
-    this.afterLoaded(() => {
-      if (info && info.panToPosition) {
-        this.map.panTo(info.panToPosition);
+    this.waitForMapLoaded(() => {
+      if (info && info.panToPosition && info.panToPosition !== "afterLoad") {
+        this.map.flyTo({ center: info.panToPosition, zoom: panToZoomLevel });
       }
       if (this.infoControl !== null) {
         this.map.removeControl(this.infoControl);
@@ -109,7 +110,7 @@ export class Map {
   };
 
   private setFiltersUnthrottled = (filters: MapFilters) => {
-    this.afterLoaded(() => {
+    this.waitForMapLoaded(() => {
       this.filterControl.setFilters(filters);
       this.filterManager.setFilters(filters);
       this.updateVisibleSkiAreasCountUnthrottled();
@@ -119,7 +120,7 @@ export class Map {
   setFilters = throttle(100, this.setFiltersUnthrottled);
 
   setFiltersVisible = (visible: boolean) => {
-    this.afterLoaded(() => {
+    this.waitForMapLoaded(() => {
       this.searchBarControl.setFiltersShown(visible);
       if (visible) {
         this.map.addControl(this.filterControl);

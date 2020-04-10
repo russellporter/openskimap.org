@@ -6,7 +6,9 @@ import EventBus from "./EventBus";
 import HighlightManager, { ChartHighlighter } from "./HighlightManager";
 import { Info } from "./Info";
 import { InfoData } from "./InfoData";
+import { panToZoomLevel } from "./SkiAreaInfo";
 import { Themed } from "./Themed";
+import { getFirstPoint } from "./utils/GeoJSON";
 
 export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _container: HTMLDivElement;
@@ -15,9 +17,11 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _id: string;
   _highlightManager: HighlightManager | null = null;
   _chartHighlightPosition: mapboxgl.LngLat | null = null;
+  _panToPositionAfterLoad: boolean = false;
 
   constructor(info: InfoData, eventBus: EventBus) {
     this._id = info.id;
+    this._panToPositionAfterLoad = info.panToPosition === "afterLoad";
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
@@ -59,6 +63,15 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
           eventBus={this._eventBus}
           width={controlWidth(map)}
           chartHighlightPosition={this._chartHighlightPosition}
+          onLoadFeature={feature => {
+            if (this._panToPositionAfterLoad) {
+              const point = getFirstPoint(feature.geometry);
+              this._map?.flyTo({
+                center: [point[0], point[1]],
+                zoom: panToZoomLevel
+              });
+            }
+          }}
           onHoverChartPosition={this._highlightManager!.hoveredChartPosition}
         />
       </Themed>,

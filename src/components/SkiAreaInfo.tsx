@@ -27,6 +27,8 @@ import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { InfoHeader } from "./InfoHeader";
 import { StatusIcon } from "./StatusIcon";
 
+export const panToZoomLevel = 12.5;
+
 interface SkiAreaPopupProps {
   feature: SkiAreaFeature;
   eventBus: EventBus;

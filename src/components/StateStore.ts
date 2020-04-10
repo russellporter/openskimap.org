@@ -46,7 +46,7 @@ export default class StateStore implements EventBus {
     this.update({
       aboutInfoOpen: state.aboutInfoOpen,
       info: state.selectedObjectID
-        ? { id: state.selectedObjectID, panToPosition: null }
+        ? { id: state.selectedObjectID, panToPosition: "afterLoad" }
         : null
     });
   };
