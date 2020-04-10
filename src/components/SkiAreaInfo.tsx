@@ -9,7 +9,11 @@ import Button from "@material-ui/core/Button";
 import WarningIcon from "@material-ui/icons/Warning";
 import {
   Activity,
+  getFormattedLiftType,
   getRunColor,
+  LiftStatistics,
+  LiftStatisticsByTypeKey,
+  LiftType,
   RunConvention,
   RunDifficulty,
   SkiAreaFeature,
@@ -222,9 +226,96 @@ const SkiAreaStatisticsSummary: React.SFC<{
           </div>
         );
       })}
+      {getFormattedLiftStatistics(props.statistics.lifts)}
     </>
   );
 };
+
+type LiftCategory =
+  | LiftType.Funicular
+  | LiftType.CableCar
+  | LiftType.Gondola
+  | LiftType.MixedLift
+  | LiftType.ChairLift
+  | "surface";
+
+type LiftStatisticsByCategory = Map<LiftCategory, { count: number }>;
+
+function getFormattedLiftStatistics(statistics: LiftStatistics) {
+  const liftStatisticsByCategory: LiftStatisticsByCategory = new Map<
+    LiftCategory,
+    { count: number }
+  >([
+    // Rack railway counting is unreliable, disabled for now
+    // [LiftType.RackRailway, {count: 0}],
+    [LiftType.Funicular, { count: 0 }],
+    [LiftType.CableCar, { count: 0 }],
+    [LiftType.Gondola, { count: 0 }],
+    [LiftType.MixedLift, { count: 0 }],
+    [LiftType.ChairLift, { count: 0 }],
+    ["surface", { count: 0 }]
+  ]);
+  const statisticsByLiftType = statistics.byType;
+  (Object.keys(statisticsByLiftType) as LiftStatisticsByTypeKey[]).forEach(
+    liftType => {
+      const count = statisticsByLiftType[liftType]!.count;
+      switch (liftType) {
+        case LiftType.CableCar:
+        case LiftType.Funicular:
+        case LiftType.CableCar:
+        case LiftType.Gondola:
+        case LiftType.MixedLift:
+        case LiftType.ChairLift:
+          liftStatisticsByCategory.get(liftType)!.count += count;
+          break;
+        case LiftType.DragLift:
+        case LiftType.JBar:
+        case LiftType.MagicCarpet:
+        case LiftType.Platter:
+        case LiftType.RopeTow:
+        case LiftType.TBar:
+          liftStatisticsByCategory.get("surface")!.count += count;
+          break;
+      }
+    }
+  );
+
+  const formattedStatistics = [...liftStatisticsByCategory.entries()].flatMap(
+    entry => {
+      const category = entry[0];
+      const statistics = entry[1];
+      if (statistics.count === 0) {
+        return [];
+      }
+
+      return [
+        statistics.count +
+          " " +
+          getLiftCategoryName(category) +
+          (statistics.count === 1 ? "" : "s")
+      ];
+    }
+  );
+
+  if (formattedStatistics.length === 0) {
+    return null;
+  }
+
+  return (
+    <Typography variant="subtitle1" color="textSecondary">
+      Lifts: {formattedStatistics.join(", ")}
+    </Typography>
+  );
+}
+
+function getLiftCategoryName(category: LiftCategory) {
+  switch (category) {
+    case "surface":
+      return "Surface Lift";
+    default:
+      return getFormattedLiftType(category);
+  }
+}
 
 const RunDifficultyBarChart: React.SFC<{
   runConvention: RunConvention;
