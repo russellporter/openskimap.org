@@ -1,5 +1,5 @@
+import { debounce } from "throttle-debounce";
 import EventBus from "./EventBus";
-
 export class MapInteractionManager {
   private map: mapboxgl.Map;
   private eventBus: EventBus;
@@ -14,7 +14,7 @@ export class MapInteractionManager {
   }
 
   private attachListeners() {
-    const skiAreaLayers = [
+    const skiAreaLayers = new Set([
       "operating-downhill-nordic-ski-area-icons-1",
       "operating-downhill-nordic-ski-area-icons-2",
       "operating-downhill-ski-area-icons",
@@ -22,25 +22,22 @@ export class MapInteractionManager {
       "other-operating-ski-area-icons",
       "other-ski-area-icons",
       "ski-area-labels"
-    ];
+    ]);
 
     const style = this.map.getStyle();
 
     const tappableLayers = (style.layers || [])
-      .filter((layer: any) => layer.id.indexOf("tappable") !== -1)
+      .filter(
+        (layer: any) =>
+          layer.id.indexOf("tappable") !== -1 || skiAreaLayers.has(layer.id)
+      )
       .map((layer: any) => layer.id)
-      // Prioritization of clicks: ski area, ski lift, ski run (linear),
-      // ski run (area). Need to reverse the order so lowest priority layers
-      // are registered first (and overridden by later event handlers)
-      .reverse() as [string];
-
-    const hoverableLayers = skiAreaLayers.concat(tappableLayers);
+      // Register tappable layers in a specific order so the top-most layers trigger the click handler first.
+      // If there are two objects on top of each other in two layers, the click on the object underneath will be ignored by to the debouncing below.
+      .reverse();
 
     tappableLayers.forEach(layer => {
       this.map.on("click", layer, this._onClickItem);
-    });
-
-    hoverableLayers.forEach(layer => {
       this.map.on("mouseenter", layer, () => {
         this.map.getCanvas().style.cursor = "pointer";
       });
@@ -48,16 +45,14 @@ export class MapInteractionManager {
         this.map.getCanvas().style.cursor = "";
       });
     });
-
-    skiAreaLayers.forEach(layer => {
-      this.map.on("click", layer, this._onClickItem);
-    });
   }
 
-  _onClickItem = (e: any) => {
+  _onClickItemUnthrottled = (e: any) => {
     this.eventBus.showInfo({
       id: e.features[0].properties.id,
       panToPosition: null
     });
   };
+
+  _onClickItem = debounce(10, true, this._onClickItemUnthrottled);
 }
