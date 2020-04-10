@@ -90,19 +90,17 @@ export class Map {
   };
 
   setInfo = (info: InfoData | null) => {
-    this.waitForMapLoaded(() => {
-      if (info && info.panToPosition && info.panToPosition !== "afterLoad") {
-        this.map.flyTo({ center: info.panToPosition, zoom: panToZoomLevel });
-      }
-      if (this.infoControl !== null) {
-        this.map.removeControl(this.infoControl);
-      }
-      this.infoControl =
-        info === null ? null : new InfoControl(info, this.eventBus);
-      if (this.infoControl !== null) {
-        this.map.addControl(this.infoControl);
-      }
-    });
+    if (info && info.panToPosition && info.panToPosition !== "afterLoad") {
+      this.map.flyTo({ center: info.panToPosition, zoom: panToZoomLevel });
+    }
+    if (this.infoControl !== null) {
+      this.map.removeControl(this.infoControl);
+    }
+    this.infoControl =
+      info === null ? null : new InfoControl(info, this.eventBus);
+    if (this.infoControl !== null) {
+      this.map.addControl(this.infoControl);
+    }
   };
 
   setStyle = (style: MapStyle) => {
