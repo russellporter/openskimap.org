@@ -6,6 +6,7 @@ import { CoordinatesWithElevation, getAscentAndDescent } from "./ElevationData";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
 import { FullLiftFeature } from "./Model";
+import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
 export const SkiLiftInfo: React.FunctionComponent<{
@@ -77,6 +78,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
             <span>Notes: {properties.description}</span>
           </Typography>
         )}
+        {<SourceSummary sources={properties.sources} />}
       </CardContent>
     </Card>
   );

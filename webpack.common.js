@@ -1,3 +1,4 @@
+const CopyPlugin = require("copy-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
@@ -43,6 +44,12 @@ module.exports = {
     new HtmlWebpackPlugin({
       filename: "index.html",
       template: "src/assets/index.html"
-    })
+    }),
+    new CopyPlugin([
+      {
+        from: "src/assets/robots.txt",
+        to: "robots.txt"
+      }
+    ])
   ]
 };

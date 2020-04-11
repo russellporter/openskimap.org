@@ -19,6 +19,7 @@ import EventBus from "./EventBus";
 import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
 import { InfoHeader } from "./InfoHeader";
 import { FullRunFeature } from "./Model";
+import { SourceSummary } from "./SourceSummary";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
 import { getRunTitleAndSubtitle } from "./utils/PageTitle";
 
@@ -156,7 +157,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
             <span>Notes: {properties.description}</span>
           </Typography>
         )}
-        {feature !== null && distance !== null && elevationData !== null && (
+        {distance !== null && elevationData !== null && (
           <HeightProfile
             feature={feature}
             distance={distance}
@@ -165,6 +166,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
             onHoverChartPosition={props.onHoverChartPosition}
           />
         )}
+        {<SourceSummary sources={properties.sources} />}
       </CardContent>
     </Card>
   );

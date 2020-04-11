@@ -25,6 +25,7 @@ import * as React from "react";
 import EventBus from "./EventBus";
 import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { InfoHeader } from "./InfoHeader";
+import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
 
 export const panToZoomLevel = 12.5;
@@ -62,6 +63,7 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
             runConvention={properties.runConvention}
           />
         )}
+        {<SourceSummary sources={properties.sources} />}
       </CardContent>
       {skimapOrgSource && (
         <CardActions>
