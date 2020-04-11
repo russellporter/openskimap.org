@@ -73,6 +73,16 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
           >
             See Paper Maps
           </Button>
+          {properties.website && (
+            <Button
+              size="small"
+              color="primary"
+              target="_blank"
+              href={properties.website}
+            >
+              Website
+            </Button>
+          )}
         </CardActions>
       )}
     </Card>
