@@ -71,7 +71,8 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = props => {
                       });
                     }}
                   >
-                    {shortenedSkiAreaName(skiArea.properties.name)}
+                    {shortenedSkiAreaName(skiArea.properties.name) ||
+                      "Ski Area"}
                   </Link>
                 ))
                 .reduce(
