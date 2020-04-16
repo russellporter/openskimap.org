@@ -1,7 +1,16 @@
 import turfLineSliceAlong from "@turf/line-slice-along";
 import turfNearestPointOnLine from "@turf/nearest-point-on-line";
+import { PluginServiceRegistrationOptions } from "chart.js";
 import * as mapboxgl from "mapbox-gl";
 import memoize from "memoize-one";
+import {
+  ElevationProfile,
+  getRunColor,
+  RunDifficulty,
+  RunFeature,
+  RunProperties,
+  RunUse
+} from "openskidata-format";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
 import "whatwg-fetch";
@@ -13,7 +22,7 @@ export interface HeightProfileHighlightProps {
 }
 
 interface HeightProfileProps extends HeightProfileHighlightProps {
-  feature: any;
+  feature: GeoJSON.Feature<GeoJSON.LineString, RunProperties>;
   distance: number;
   elevationData: ElevationData;
 }
@@ -78,8 +87,13 @@ export class HeightProfile extends React.Component<
     const LineChart = this.state.LineChart;
     const feature = this.props.feature;
     const elevationData = this.props.elevationData;
+    const elevationProfile = feature.properties.elevationProfile;
 
-    if (LineChart === null || elevationData === null) {
+    if (
+      LineChart === null ||
+      elevationData === null ||
+      elevationProfile === null
+    ) {
       return null;
     }
 
@@ -98,35 +112,48 @@ export class HeightProfile extends React.Component<
       datasets: [
         {
           fill: true,
-          lineTension: 0.1,
-          backgroundColor: "rgba(75,192,192,0.4)",
-          borderColor: "rgba(75,192,192,1)",
-          borderCapStyle: "butt" as "butt" | "round" | "square" | undefined,
-          borderDash: [],
-          borderDashOffset: 0.0,
-          borderJoinStyle: "miter" as "round" | "miter" | "bevel" | undefined,
-          pointBorderColor: "rgba(75,192,192,1)",
-          pointBackgroundColor: "#fff",
-          pointBorderWidth: 1,
-          pointHoverRadius: 5,
-          pointHoverBackgroundColor: "rgba(75,192,192,1)",
-          pointHoverBorderColor: "rgba(220,220,220,1)",
-          pointHoverBorderWidth: 2,
-          pointRadius: pointRadiusesWithHighlightAt(
-            highlightIndex,
-            elevations.length
-          ),
-          pointHitRadius: 10,
+          borderWidth: 0,
+          pointRadius: 0,
           data: elevations
         }
       ]
     };
 
+    const plugins: PluginServiceRegistrationOptions[] = [
+      {
+        beforeRender: function (chart) {
+          // Based on https://github.com/chartjs/Chart.js/issues/3071
+          const context = chart.ctx!;
+          const xScale = (chart as any).scales["x-axis-0"] as any;
+          const dataset = chart.data.datasets![0]!;
+
+          const left = xScale.getPixelForValue(xScale.min);
+          const right = xScale.getPixelForValue(xScale.max);
+
+          if (Number.isNaN(left) || Number.isNaN(right)) {
+            return;
+          }
+
+          const gradientFill = context.createLinearGradient(left, 0, right, 0);
+
+          var model = (chart as any).data.datasets[0]._meta[
+            Object.keys((dataset as any)._meta)[0]
+          ].dataset._model;
+          model.backgroundColor = configureChartGradient(
+            feature,
+            elevationProfile,
+            gradientFill
+          );
+        }
+      }
+    ];
+
     let that = this;
     return (
       <div className="height-profile">
         <LineChart
-          data={element => data}
+          data={data}
+          plugins={plugins}
           options={{
             legend: {
               display: false
@@ -141,6 +168,11 @@ export class HeightProfile extends React.Component<
               yAxes: [
                 {
                   ticks: {
+                    suggestedMax:
+                      Math.max(
+                        elevationData.maxElevation - elevationData.minElevation,
+                        100
+                      ) + elevationData.minElevation,
                     callback: elevation => {
                       return elevation + "m";
                     }
@@ -148,7 +180,7 @@ export class HeightProfile extends React.Component<
                 }
               ]
             },
-            onHover: function(
+            onHover: function (
               this: Chart,
               event: MouseEvent,
               activeElements: Array<{}>
@@ -172,15 +204,92 @@ function chartLabels(elevations: number[], heightProfileResolution: number) {
   return labels;
 }
 
-function pointRadiusesWithHighlightAt(index: number | null, length: number) {
-  const radiuses = Array.apply(null, Array(length)).map(
-    Number.prototype.valueOf,
-    1
-  );
-  if (index !== null) {
-    radiuses[index] = 5;
+function configureChartGradient(
+  feature: RunFeature,
+  elevationProfile: ElevationProfile,
+  gradient: CanvasGradient
+): CanvasGradient {
+  const difficultyScheme = getRunDifficultyScheme(feature);
+  const elevations = elevationProfile.heights;
+  const stopInterval = 1 / elevations.length;
+  const stopSize = 5;
+  elevations.forEach((elevation, index) => {
+    if (index < stopSize) {
+      return;
+    }
+
+    const steepness =
+      (elevations[index - stopSize] - elevation) /
+      (elevationProfile.resolution * stopSize);
+    const difficulty =
+      getEstimatedRunDifficulty(steepness, difficultyScheme) ||
+      feature.properties.difficulty;
+
+    const color = hsla(
+      getRunColor(feature.properties.convention, difficulty),
+      0.7
+    );
+    const middleIndex = index - stopSize / 2;
+    gradient.addColorStop(
+      stopInterval * (middleIndex - 0.5) + Number.EPSILON,
+      color
+    );
+    gradient.addColorStop(
+      stopInterval * (middleIndex + 0.5) - Number.EPSILON,
+      color
+    );
+  });
+  return gradient;
+}
+
+function hsla(hsl: string, amount: number) {
+  const result = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g.exec(hsl);
+  if (result === null) {
+    throw "Unsupported HSL input: " + hsl;
   }
-  return radiuses;
+
+  return `hsl(${result[1]}, ${result[2]}%, ${result[3]}%, ${amount})`;
+}
+
+type RunDifficultyScheme = {
+  // Stops must be ordered ascending by steepness
+  stops: { maxSteepness: number; difficulty: RunDifficulty }[];
+};
+
+function getRunDifficultyScheme(feature: RunFeature) {
+  if (
+    feature.properties.uses.includes(RunUse.Downhill) ||
+    feature.properties.uses.includes(RunUse.Skitour)
+  ) {
+    return {
+      stops: [
+        { maxSteepness: 0.25, difficulty: RunDifficulty.EASY },
+        { maxSteepness: 0.4, difficulty: RunDifficulty.INTERMEDIATE },
+        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED }
+      ]
+    };
+  } else if (feature.properties.uses.includes(RunUse.Nordic)) {
+    return {
+      stops: [
+        { maxSteepness: 0.1, difficulty: RunDifficulty.EASY },
+        { maxSteepness: 0.15, difficulty: RunDifficulty.INTERMEDIATE },
+        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED }
+      ]
+    };
+  } else {
+    return { stops: [] };
+  }
+}
+
+function getEstimatedRunDifficulty(
+  steepness: number,
+  scheme: RunDifficultyScheme
+): RunDifficulty | null {
+  const absoluteSteepness = Math.abs(steepness);
+  return (
+    scheme.stops.find(stop => stop.maxSteepness > absoluteSteepness)
+      ?.difficulty || null
+  );
 }
 
 function convertChartHighlightPosition(

@@ -9,6 +9,8 @@ export type CoordinatesWithElevation = [Longitude, Latitude, Elevation][];
 export interface ElevationData {
   ascent: Elevation;
   descent: Elevation;
+  minElevation: Elevation;
+  maxElevation: Elevation;
   slopeInfo: SlopeInfo;
   coordinatesWithElevation: CoordinatesWithElevation;
   heightProfileResolution: number;
@@ -18,6 +20,8 @@ interface AscentDescentInfo {
   ascent: Elevation;
   descent: Elevation;
   lastElevation: Elevation;
+  minElevation: Elevation;
+  maxElevation: Elevation;
 }
 
 interface SlopeInfo {
@@ -38,12 +42,16 @@ export default function getElevationData(
     geometry,
     elevationProfile
   );
-  const { ascent, descent } = getAscentAndDescent(coordinatesWithElevation);
+  const { ascent, descent, minElevation, maxElevation } = getAscentAndDescent(
+    coordinatesWithElevation
+  );
   return {
-    ascent: ascent,
-    descent: descent,
+    ascent,
+    descent,
+    minElevation,
+    maxElevation,
+    coordinatesWithElevation,
     slopeInfo: slopeInfo(coordinatesWithElevation),
-    coordinatesWithElevation: coordinatesWithElevation,
     heightProfileResolution: elevationProfile.resolution
   };
 }
@@ -52,8 +60,9 @@ export function getAscentAndDescent(
   coordinatesWithElevation: CoordinatesWithElevation
 ): AscentDescentInfo {
   if (coordinatesWithElevation.length === 0) {
-    return { ascent: 0, descent: 0, lastElevation: 0 };
+    throw "Empty coordinates are not supported for elevation data analysis";
   }
+  const initialElevation = coordinatesWithElevation[0][2];
   return coordinatesWithElevation
     .map(coordinate => coordinate[2])
     .reduce(
@@ -65,10 +74,24 @@ export function getAscentAndDescent(
           accumulated.descent -= ascent;
         }
         accumulated.lastElevation = currentElevation;
+        accumulated.minElevation = Math.min(
+          currentElevation,
+          accumulated.minElevation
+        );
+        accumulated.maxElevation = Math.max(
+          currentElevation,
+          accumulated.maxElevation
+        );
 
         return accumulated;
       },
-      { ascent: 0, descent: 0, lastElevation: coordinatesWithElevation[0][2] }
+      {
+        ascent: 0,
+        descent: 0,
+        minElevation: initialElevation,
+        maxElevation: initialElevation,
+        lastElevation: initialElevation
+      } as AscentDescentInfo
     );
 }
 

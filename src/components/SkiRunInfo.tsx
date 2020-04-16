@@ -11,7 +11,13 @@ import HighlightIcon from "@material-ui/icons/Highlight";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import WarningIcon from "@material-ui/icons/Warning";
 import turfLength from "@turf/length";
-import { RunFeature, RunGrooming, RunUse } from "openskidata-format";
+import { LineString } from "geojson";
+import {
+  RunFeature,
+  RunGrooming,
+  RunProperties,
+  RunUse
+} from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";
 import getElevationData from "./ElevationData";
@@ -159,7 +165,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
         )}
         {distance !== null && elevationData !== null && (
           <HeightProfile
-            feature={feature}
+            feature={feature as GeoJSON.Feature<LineString, RunProperties>}
             distance={distance}
             elevationData={elevationData}
             chartHighlightPosition={props.chartHighlightPosition}
