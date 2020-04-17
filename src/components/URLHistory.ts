@@ -11,6 +11,10 @@ export function updateURL(state: URLState) {
     return;
   }
 
+  if (!window.history) {
+    return;
+  }
+
   const query = queryString.stringify({
     about: state.aboutInfoOpen ? null : undefined,
     obj: state.selectedObjectID !== null ? state.selectedObjectID : undefined
