@@ -47,7 +47,11 @@ export default class StateStore implements EventBus {
       aboutInfoOpen: state.aboutInfoOpen,
       info: state.selectedObjectID
         ? { id: state.selectedObjectID, panToPosition: "afterLoad" }
-        : null
+        : null,
+      mapFilters: {
+        ...this._state.mapFilters,
+        selectedObjectID: state.selectedObjectID
+      }
     });
   };
 
