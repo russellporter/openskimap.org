@@ -4,7 +4,7 @@ import {
   CardContent,
   Chip,
   makeStyles,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import HighlightIcon from "@material-ui/icons/Highlight";
@@ -16,7 +16,7 @@ import {
   RunFeature,
   RunGrooming,
   RunProperties,
-  RunUse
+  RunUse,
 } from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";
@@ -34,18 +34,18 @@ interface Props extends HeightProfileHighlightProps {
   eventBus: EventBus;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   chips: {
     "&:last-child": {
-      marginRight: 0
+      marginRight: 0,
     },
     "& > *": {
-      marginRight: theme.spacing(1)
-    }
-  }
+      marginRight: theme.spacing(1),
+    },
+  },
 }));
 
-export const SkiRunInfo: React.FunctionComponent<Props> = props => {
+export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
   const classes = useStyles();
   const feature = props.feature;
   const properties = feature.properties;
@@ -81,7 +81,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
           onClose={props.eventBus.hideInfo}
           breadcrumbs={{
             eventBus: props.eventBus,
-            feature: props.feature
+            feature: props.feature,
           }}
         >
           {properties.ref && (
@@ -178,7 +178,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = props => {
   );
 };
 
-const GroomingLabel: React.SFC<{ feature: RunFeature }> = props => {
+const GroomingLabel: React.SFC<{ feature: RunFeature }> = (props) => {
   const grooming = props.feature.properties.grooming;
   const isNordic = props.feature.properties.uses.includes(RunUse.Nordic);
 

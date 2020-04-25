@@ -58,7 +58,7 @@ function initialize() {
   function update(state: State, changes: StateChanges) {
     updateURL({
       aboutInfoOpen: state.aboutInfoOpen,
-      selectedObjectID: state.info?.id ?? null
+      selectedObjectID: state.info?.id ?? null,
     });
 
     if (changes.mapStyle !== undefined) {
@@ -119,16 +119,16 @@ async function registerServiceWorker(): Promise<void> {
     if (Config.ENABLE_SERVICE_WORKER) {
       navigator.serviceWorker
         .register("/service-worker.js")
-        .then(registration => {
+        .then((registration) => {
           console.log("SW registered: ", registration);
         })
-        .catch(registrationError => {
+        .catch((registrationError) => {
           console.log("SW registration failed: ", registrationError);
         });
     } else {
       const registrations = await navigator.serviceWorker.getRegistrations();
       registrations.forEach(
-        async registration => await registration.unregister()
+        async (registration) => await registration.unregister()
       );
     }
   }

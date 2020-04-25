@@ -11,7 +11,7 @@ export class MapStyleControl implements mapboxgl.IControl {
     this._container.className =
       "mapboxgl-ctrl mapboxgl-ctrl-group openskimap-style-control";
 
-    this._container.addEventListener("contextmenu", function(e) {
+    this._container.addEventListener("contextmenu", function (e) {
       e.preventDefault();
     });
     this._satelliteButton = document.createElement("button");

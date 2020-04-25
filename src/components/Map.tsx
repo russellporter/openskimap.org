@@ -36,7 +36,7 @@ export class Map {
       zoom: zoom, // starting zoom,
       hash: true,
       attributionControl: false,
-      pitchWithRotate: false
+      pitchWithRotate: false,
     });
     this.filterControl = new FilterControl(eventBus);
     this.searchBarControl = new SearchBarControl(eventBus);
@@ -47,7 +47,7 @@ export class Map {
     this.map.addControl(
       new mapboxgl.ScaleControl({
         maxWidth: 80,
-        unit: "metric"
+        unit: "metric",
       }),
       "bottom-left"
     );
@@ -61,9 +61,9 @@ export class Map {
     this.map.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
-          enableHighAccuracy: true
+          enableHighAccuracy: true,
         },
-        trackUserLocation: true
+        trackUserLocation: true,
       }),
       "bottom-right"
     );
@@ -71,7 +71,7 @@ export class Map {
     this.map.addControl(
       new mapboxgl.NavigationControl({
         showCompass: true,
-        showZoom: false
+        showZoom: false,
       }),
       "bottom-right"
     );

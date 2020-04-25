@@ -21,7 +21,7 @@ export class MapInteractionManager {
       "operating-nordic-ski-area-icons",
       "other-operating-ski-area-icons",
       "other-ski-area-icons",
-      "ski-area-labels"
+      "ski-area-labels",
     ]);
 
     const style = this.map.getStyle();
@@ -38,7 +38,7 @@ export class MapInteractionManager {
 
     let mouseLayerCount = 0;
 
-    tappableLayers.forEach(layer => {
+    tappableLayers.forEach((layer) => {
       this.map.on("click", layer, this._onClickItem);
       this.map.on("mouseenter", layer, () => {
         mouseLayerCount += 1;
@@ -56,7 +56,7 @@ export class MapInteractionManager {
   _onClickItemUnthrottled = (e: any) => {
     this.eventBus.showInfo({
       id: e.features[0].properties.id,
-      panToPosition: null
+      panToPosition: null,
     });
   };
 

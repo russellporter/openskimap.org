@@ -1,4 +1,11 @@
-import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import {
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@material-ui/core";
 import BookmarkIcon from "@material-ui/icons/Bookmark";
 import EditIcon from "@material-ui/icons/Edit";
 import InfoIcon from "@material-ui/icons/Info";
@@ -79,10 +86,7 @@ export default class Sidebar extends React.Component<Props, {}> {
             </List>
             <Divider />
             <List>
-              <ListItem
-                button
-                onClick={ExternalURLOpener.openSkimapOrg}
-              >
+              <ListItem button onClick={ExternalURLOpener.openSkimapOrg}>
                 <ListItemIcon>
                   <BookmarkIcon />
                 </ListItemIcon>

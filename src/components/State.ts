@@ -27,6 +27,6 @@ export function getInitialState() {
     mapFiltersOpen: false,
     mapStyle: MapStyle.Terrain,
     mapFilters: defaultMapFilters,
-    info: null
+    info: null,
   };
 }

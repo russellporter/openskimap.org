@@ -9,7 +9,7 @@ import {
   RunDifficulty,
   RunFeature,
   RunProperties,
-  RunUse
+  RunUse,
 } from "openskidata-format";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
@@ -37,12 +37,12 @@ export class HeightProfile extends React.Component<
     super(props);
 
     this.state = {
-      LineChart: null
+      LineChart: null,
     };
   }
 
   componentDidMount() {
-    import("react-chartjs-2").then(module =>
+    import("react-chartjs-2").then((module) =>
       this.setState({ LineChart: module.Line })
     );
   }
@@ -69,7 +69,7 @@ export class HeightProfile extends React.Component<
 
     let position = ((x - left) / (right - left)) * this.props.distance;
     let line = turfLineSliceAlong(this.props.feature, position, position, {
-      units: "meters"
+      units: "meters",
     });
     let geometry = line.geometry;
     if (geometry === null) {
@@ -102,7 +102,7 @@ export class HeightProfile extends React.Component<
       feature
     );
     const elevations = elevationData.coordinatesWithElevation.map(
-      coordinate => {
+      (coordinate) => {
         return coordinate[2];
       }
     );
@@ -114,9 +114,9 @@ export class HeightProfile extends React.Component<
           fill: true,
           borderWidth: 0,
           pointRadius: 0,
-          data: elevations
-        }
-      ]
+          data: elevations,
+        },
+      ],
     };
 
     const plugins: PluginServiceRegistrationOptions[] = [
@@ -144,8 +144,8 @@ export class HeightProfile extends React.Component<
             elevationProfile,
             gradientFill
           );
-        }
-      }
+        },
+      },
     ];
 
     let that = this;
@@ -156,13 +156,13 @@ export class HeightProfile extends React.Component<
           plugins={plugins}
           options={{
             legend: {
-              display: false
+              display: false,
             },
             animation: {
-              duration: 0 // general animation time
+              duration: 0, // general animation time
             },
             tooltips: {
-              enabled: false
+              enabled: false,
             },
             scales: {
               yAxes: [
@@ -173,12 +173,12 @@ export class HeightProfile extends React.Component<
                         elevationData.maxElevation - elevationData.minElevation,
                         100
                       ) + elevationData.minElevation,
-                    callback: elevation => {
+                    callback: (elevation) => {
                       return elevation + "m";
-                    }
-                  }
-                }
-              ]
+                    },
+                  },
+                },
+              ],
             },
             onHover: function (
               this: Chart,
@@ -186,7 +186,7 @@ export class HeightProfile extends React.Component<
               activeElements: Array<{}>
             ): any {
               that.onHover(this, event, activeElements);
-            }
+            },
           }}
         />
       </div>
@@ -265,16 +265,16 @@ function getRunDifficultyScheme(feature: RunFeature) {
       stops: [
         { maxSteepness: 0.25, difficulty: RunDifficulty.EASY },
         { maxSteepness: 0.4, difficulty: RunDifficulty.INTERMEDIATE },
-        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED }
-      ]
+        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED },
+      ],
     };
   } else if (feature.properties.uses.includes(RunUse.Nordic)) {
     return {
       stops: [
         { maxSteepness: 0.1, difficulty: RunDifficulty.EASY },
         { maxSteepness: 0.15, difficulty: RunDifficulty.INTERMEDIATE },
-        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED }
-      ]
+        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED },
+      ],
     };
   } else {
     return { stops: [] };
@@ -287,7 +287,7 @@ function getEstimatedRunDifficulty(
 ): RunDifficulty | null {
   const absoluteSteepness = Math.abs(steepness);
   return (
-    scheme.stops.find(stop => stop.maxSteepness > absoluteSteepness)
+    scheme.stops.find((stop) => stop.maxSteepness > absoluteSteepness)
       ?.difficulty || null
   );
 }
@@ -308,7 +308,7 @@ function convertChartHighlightPosition(
     feature,
     [chartHighlightPosition.lng, chartHighlightPosition.lat],
     {
-      units: "meters"
+      units: "meters",
     }
   );
 

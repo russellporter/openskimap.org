@@ -2,11 +2,11 @@ import {
   Activity,
   RunDifficulty,
   RunGrooming,
-  RunUse
+  RunUse,
 } from "openskidata-format";
 
 export function formattedRunUse(uses: RunUse[], grooming: RunGrooming | null) {
-  const formattedUses = uses.map(use => {
+  const formattedUses = uses.map((use) => {
     switch (use) {
       case RunUse.Downhill:
         return grooming !== RunGrooming.Backcountry
@@ -44,7 +44,7 @@ export function formattedRunUse(uses: RunUse[], grooming: RunGrooming | null) {
         return null;
     }
   });
-  return formattedUses.filter(use => use !== null).join(", ");
+  return formattedUses.filter((use) => use !== null).join(", ");
 }
 
 export function formattedDifficultyName(difficulty: RunDifficulty) {

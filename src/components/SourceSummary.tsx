@@ -2,9 +2,9 @@ import { Link, Typography } from "@material-ui/core";
 import Source, { SourceType } from "openskidata-format/dist/Source";
 import * as React from "react";
 
-export const SourceSummary: React.SFC<{ sources: Source[] }> = props => {
+export const SourceSummary: React.SFC<{ sources: Source[] }> = (props) => {
   const hasOpenStreetMapSource = props.sources.some(
-    source => source.type === SourceType.OPENSTREETMAP
+    (source) => source.type === SourceType.OPENSTREETMAP
   );
   const aggregatedSources = props.sources.reduce(
     (aggregation: Map<SourceType, string[]>, source) => {

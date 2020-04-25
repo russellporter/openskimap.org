@@ -3,7 +3,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  Paper
+  Paper,
 } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
@@ -19,7 +19,7 @@ import {
   RunFeature,
   RunProperties,
   SkiAreaFeature,
-  SkiAreaProperties
+  SkiAreaProperties,
 } from "openskidata-format";
 import * as React from "react";
 import OutsideClickHandler from "react-outside-click-handler";
@@ -44,7 +44,7 @@ interface State {
 enum Activity {
   Downhill = "downhill",
   Nordic = "nordic",
-  Backcountry = "backcountry"
+  Backcountry = "backcountry",
 }
 
 type Result = SkiAreaFeature | LiftFeature | RunFeature;
@@ -59,7 +59,7 @@ export default class SearchBar extends React.Component<Props, State> {
       searchQuery: "",
       selectedIndex: 0,
       results: [],
-      hideResults: true
+      hideResults: true,
     };
     this.searchDebounced = debounce(500, this.search);
     this.searchThrottled = throttle(500, this.search);
@@ -80,9 +80,9 @@ export default class SearchBar extends React.Component<Props, State> {
   private search = (query: string) => {
     fetch(
       "https://api.openskimap.org/search?query=" + encodeURIComponent(query)
-    ).then(response => {
+    ).then((response) => {
       if (this.state.searchQuery === query) {
-        response.json().then(results => {
+        response.json().then((results) => {
           this.setState({ results: results });
         });
       }
@@ -93,7 +93,7 @@ export default class SearchBar extends React.Component<Props, State> {
     if (e.keyCode == 38) {
       e.preventDefault();
       this.setState({
-        selectedIndex: Math.max(0, this.state.selectedIndex - 1)
+        selectedIndex: Math.max(0, this.state.selectedIndex - 1),
       });
     } else if (e.keyCode == 40) {
       e.preventDefault();
@@ -101,7 +101,7 @@ export default class SearchBar extends React.Component<Props, State> {
         selectedIndex: Math.min(
           this.state.results.length - 1,
           this.state.selectedIndex + 1
-        )
+        ),
       });
     }
   };
@@ -115,7 +115,7 @@ export default class SearchBar extends React.Component<Props, State> {
         searchQuery: "",
         selectedIndex: 0,
         results: [],
-        hideResults: true
+        hideResults: true,
       });
       this.props.eventBus.showInfo(infoDataForResult(result));
     };
@@ -141,11 +141,11 @@ export default class SearchBar extends React.Component<Props, State> {
               }}
               style={{ marginLeft: "8", flex: "1" }}
               placeholder="Search Ski Areas, Lifts, and Runs"
-              onChange={e => {
+              onChange={(e) => {
                 this.setState({ hideResults: false });
                 this.updateSearchQuery(e.target.value);
               }}
-              onKeyDown={e => {
+              onKeyDown={(e) => {
                 this.handleKeyNavigation(e);
                 if (
                   e.keyCode === 13 &&
@@ -200,7 +200,7 @@ export const SearchResults: React.FunctionComponent<{
   onSelect: (result: Result) => void;
   selectedIndex: number;
   results: Result[];
-}> = props => {
+}> = (props) => {
   let dividerIndex = 0;
   return (
     <List disablePadding={true}>
@@ -222,7 +222,7 @@ export const SearchResults: React.FunctionComponent<{
             [
               previous,
               <Divider key={"divider-" + dividerIndex++} />,
-              current
+              current,
             ] as any
         )}
     </List>
@@ -235,8 +235,8 @@ function infoDataForResult(result: Result): InfoData {
     id: result.properties.id,
     panToPosition: geometry && [
       geometry.coordinates[0],
-      geometry.coordinates[1]
-    ]
+      geometry.coordinates[1],
+    ],
   };
 }
 
@@ -244,7 +244,7 @@ const SearchResult: React.FunctionComponent<{
   result: Result;
   onSelect: () => void;
   selected: boolean;
-}> = props => {
+}> = (props) => {
   return (
     <ListItem button onClick={props.onSelect} selected={props.selected}>
       <ListItemText
@@ -262,7 +262,7 @@ function getSecondaryText(
     case FeatureType.SkiArea:
       return (
         properties.activities
-          .map(activity => {
+          .map((activity) => {
             switch (activity) {
               case Activity.Downhill:
                 return "Downhill";

@@ -7,9 +7,9 @@ import { shortenedSkiAreaName } from "./Formatters";
 import { FullLiftFeature, FullRunFeature } from "./Model";
 import { getFirstPoint } from "./utils/GeoJSON";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   breadcrumbs: {
-    marginBottom: theme.spacing(0.5)
+    marginBottom: theme.spacing(0.5),
   },
   breadcrumb: {
     maxWidth: "250px",
@@ -17,8 +17,8 @@ const useStyles = makeStyles(theme => ({
     display: "inline-block",
     textOverflow: "ellipsis",
     overflow: "hidden",
-    verticalAlign: "bottom"
-  }
+    verticalAlign: "bottom",
+  },
 }));
 
 export type InfoBreadcrumbsProps = {
@@ -26,7 +26,7 @@ export type InfoBreadcrumbsProps = {
   eventBus: EventBus;
 };
 
-export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = props => {
+export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
   const classes = useStyles();
   const properties = props.feature.properties;
   const skiAreas =
@@ -58,7 +58,7 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = props => {
           {skiAreas.length > 0 && (
             <span>
               {skiAreas
-                .map(skiArea => (
+                .map((skiArea) => (
                   <Link
                     classes={{ root: classes.breadcrumb }}
                     color="inherit"
@@ -67,7 +67,7 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = props => {
                     onClick={() => {
                       props.eventBus.showInfo({
                         id: skiArea.properties.id,
-                        panToPosition: null
+                        panToPosition: null,
                       });
                     }}
                   >

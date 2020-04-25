@@ -2,12 +2,12 @@ import {
   FeatureType,
   getLiftNameAndType,
   RunProperties,
-  SkiAreaFeature
+  SkiAreaFeature,
 } from "openskidata-format";
 import {
   formattedDifficultyName,
   formattedRunUse,
-  shortenedSkiAreaName
+  shortenedSkiAreaName,
 } from "../Formatters";
 import { FullLiftFeature, FullRunFeature } from "../Model";
 
@@ -28,7 +28,7 @@ function nullableToArray<T>(object: T | null): T[] {
 
 function skiAreaNames(skiAreas: SkiAreaFeature[]): string | null {
   const names = skiAreas
-    .flatMap(skiArea => {
+    .flatMap((skiArea) => {
       const name = skiArea.properties.name;
       return name !== null ? [shortenedSkiAreaName(name)] : [];
     })

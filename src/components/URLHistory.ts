@@ -17,7 +17,7 @@ export function updateURL(state: URLState) {
 
   const query = queryString.stringify({
     about: state.aboutInfoOpen ? null : undefined,
-    obj: state.selectedObjectID !== null ? state.selectedObjectID : undefined
+    obj: state.selectedObjectID !== null ? state.selectedObjectID : undefined,
   });
   window.history.pushState(
     state,
@@ -33,6 +33,6 @@ export function getURLState(): URLState {
     selectedObjectID:
       query.obj !== undefined && typeof query.obj === "string"
         ? query.obj
-        : null
+        : null,
   };
 }

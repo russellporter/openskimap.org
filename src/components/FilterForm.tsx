@@ -5,7 +5,7 @@ import {
   FormGroup,
   FormLabel,
   Slider,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import { Activity } from "openskidata-format";
 import * as React from "react";
@@ -20,7 +20,7 @@ export const FilterForm: React.FunctionComponent<{
   filters: MapFilters;
   width: number;
   visibleSkiAreasCount: number;
-}> = props => {
+}> = (props) => {
   const isDownhillEnabled = !props.filters.hiddenActivities.includes(
     Activity.Downhill
   );
@@ -74,7 +74,7 @@ export const FilterForm: React.FunctionComponent<{
               min={0}
               max={5000}
               valueLabelDisplay="auto"
-              valueLabelFormat={value => value + " m"}
+              valueLabelFormat={(value) => value + " m"}
               ValueLabelComponent={ValueLabel}
               onChange={(_, value) =>
                 props.eventBus.setMinimumElevation(value as number)
@@ -90,7 +90,7 @@ export const FilterForm: React.FunctionComponent<{
               min={0}
               max={2000}
               valueLabelDisplay="auto"
-              valueLabelFormat={value => value + " m"}
+              valueLabelFormat={(value) => value + " m"}
               ValueLabelComponent={ValueLabel}
               onChange={(_, value) =>
                 props.eventBus.setMinimumVertical(value as number)
@@ -106,7 +106,7 @@ export const FilterForm: React.FunctionComponent<{
               min={0}
               max={500}
               valueLabelDisplay="auto"
-              valueLabelFormat={value => value + " km"}
+              valueLabelFormat={(value) => value + " km"}
               ValueLabelComponent={ValueLabel}
               onChange={(_, value) =>
                 props.eventBus.setMinimumRunLength(value as number)

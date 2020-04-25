@@ -10,7 +10,7 @@ export default function getInclinedLengthInMeters(
     (previous, segment) => {
       const coords = segment!.geometry.coordinates;
       const horizontalDistance = distance(coords[0], coords[1], {
-        units: "meters"
+        units: "meters",
       });
       const verticalDistance = (coords[1][2] || 0) - (coords[0][2] || 0);
       return (

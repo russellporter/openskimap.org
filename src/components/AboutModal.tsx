@@ -3,16 +3,16 @@ import * as React from "react";
 import About from "./About";
 import EventBus from "./EventBus";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
-    padding: theme.spacing(4)
-  }
+    padding: theme.spacing(4),
+  },
 }));
 
 export const AboutModal: React.FunctionComponent<{
   open: boolean;
   eventBus: EventBus;
-}> = props => {
+}> = (props) => {
   const classes = useStyles();
 
   return (

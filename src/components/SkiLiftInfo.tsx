@@ -12,7 +12,7 @@ import getInclinedLengthInMeters from "./utils/InclinedLength";
 export const SkiLiftInfo: React.FunctionComponent<{
   eventBus: EventBus;
   feature: FullLiftFeature;
-}> = props => {
+}> = (props) => {
   const properties = props.feature.properties;
   const geometry = props.feature.geometry;
   const durationInSeconds = props.feature.properties.duration;
@@ -38,7 +38,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
           onClose={props.eventBus.hideInfo}
           breadcrumbs={{
             eventBus: props.eventBus,
-            feature: props.feature
+            feature: props.feature,
           }}
         >
           {properties.ref && (

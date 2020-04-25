@@ -3,7 +3,7 @@ import {
   CardActions,
   CardContent,
   Tooltip,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import WarningIcon from "@material-ui/icons/Warning";
@@ -19,7 +19,7 @@ import {
   SkiAreaFeature,
   SkiAreaProperties,
   SkiAreaStatistics,
-  SourceType
+  SourceType,
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
@@ -35,10 +35,10 @@ interface SkiAreaPopupProps {
   eventBus: EventBus;
 }
 
-const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
+const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = (props) => {
   const properties = props.feature.properties;
   const skimapOrgSource = properties.sources.find(
-    s => s.type === SourceType.SKIMAP_ORG
+    (s) => s.type === SourceType.SKIMAP_ORG
   );
   return (
     <Card>
@@ -91,7 +91,7 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
   );
 };
 
-const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
+const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = (props) => {
   const properties = props.feature.properties;
   return (
     <Card>
@@ -122,7 +122,7 @@ const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = props => {
   );
 };
 
-export const SkiAreaInfo: React.SFC<SkiAreaPopupProps> = props => {
+export const SkiAreaInfo: React.SFC<SkiAreaPopupProps> = (props) => {
   const properties = props.feature.properties;
   return properties.generated ? (
     <GeneratedSkiArea {...props} />
@@ -172,11 +172,11 @@ const SkiAreaStatisticsSummary: React.SFC<{
   activities: Activity[];
   statistics: SkiAreaStatistics;
   runConvention: RunConvention;
-}> = props => {
+}> = (props) => {
   const allActivities: Activity[] = [
     Activity.Downhill,
     Activity.Nordic,
-    Activity.Backcountry
+    Activity.Backcountry,
   ];
   const difficulties: (RunDifficulty | null)[] = [
     RunDifficulty.NOVICE,
@@ -186,26 +186,26 @@ const SkiAreaStatisticsSummary: React.SFC<{
     RunDifficulty.EXPERT,
     RunDifficulty.FREERIDE,
     RunDifficulty.EXTREME,
-    null
+    null,
   ];
   const runStatistics: [
     Activity,
     [RunDifficulty | null, number][]
-  ][] = allActivities.flatMap(activity => {
+  ][] = allActivities.flatMap((activity) => {
     const statisticsForActivity = props.statistics.runs.byActivity[activity];
     if (statisticsForActivity !== undefined) {
       return [
         [
           activity,
-          difficulties.flatMap(difficulty => {
+          difficulties.flatMap((difficulty) => {
             const statisticsForDifficulty =
               statisticsForActivity.byDifficulty[difficulty || "other"];
             if (statisticsForDifficulty !== undefined) {
               return [[difficulty, statisticsForDifficulty.lengthInKm]];
             }
             return [];
-          })
-        ]
+          }),
+        ],
       ];
     }
     return [];
@@ -214,7 +214,7 @@ const SkiAreaStatisticsSummary: React.SFC<{
   return (
     <>
       {elevationSummary(props.statistics, props.activities)}
-      {runStatistics.map(activityStatistics => {
+      {runStatistics.map((activityStatistics) => {
         const totalRunKm = activityStatistics[1].reduce((previous, current) => {
           return previous + current[1];
         }, 0);
@@ -267,11 +267,11 @@ function getFormattedLiftStatistics(statistics: LiftStatistics) {
     [LiftType.Gondola, { count: 0 }],
     [LiftType.MixedLift, { count: 0 }],
     [LiftType.ChairLift, { count: 0 }],
-    ["surface", { count: 0 }]
+    ["surface", { count: 0 }],
   ]);
   const statisticsByLiftType = statistics.byType;
   (Object.keys(statisticsByLiftType) as LiftStatisticsByTypeKey[]).forEach(
-    liftType => {
+    (liftType) => {
       const count = statisticsByLiftType[liftType]!.count;
       switch (liftType) {
         case LiftType.CableCar:
@@ -295,7 +295,7 @@ function getFormattedLiftStatistics(statistics: LiftStatistics) {
   );
 
   const formattedStatistics = [...liftStatisticsByCategory.entries()].flatMap(
-    entry => {
+    (entry) => {
       const category = entry[0];
       const statistics = entry[1];
       if (statistics.count === 0) {
@@ -306,7 +306,7 @@ function getFormattedLiftStatistics(statistics: LiftStatistics) {
         statistics.count +
           " " +
           getLiftCategoryName(category) +
-          (statistics.count === 1 ? "" : "s")
+          (statistics.count === 1 ? "" : "s"),
       ];
     }
   );
@@ -336,8 +336,8 @@ const RunDifficultyBarChart: React.SFC<{
   activity: Activity;
   totalRunKm: number;
   data: [RunDifficulty | null, number][];
-}> = props => {
-  const parts = props.data.map(d => {
+}> = (props) => {
+  const parts = props.data.map((d) => {
     const runKm = d[1];
     const percentage = (runKm / props.totalRunKm) * 100.0;
     const difficulty = d[0];
@@ -356,20 +356,20 @@ const RunDifficultyBarChart: React.SFC<{
             modifiers: {
               offset: {
                 enabled: true,
-                offset: "0px, -8px"
+                offset: "0px, -8px",
               },
               flip: {
                 enabled: false,
-                padding: 0
-              }
-            }
-          }
+                padding: 0,
+              },
+            },
+          },
         }}
       >
         <span
           style={{
             width: percentage + "%",
-            backgroundColor: getRunColor(props.runConvention, difficulty)
+            backgroundColor: getRunColor(props.runConvention, difficulty),
           }}
         ></span>
       </Tooltip>

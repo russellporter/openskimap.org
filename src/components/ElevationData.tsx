@@ -52,7 +52,7 @@ export default function getElevationData(
     maxElevation,
     coordinatesWithElevation,
     slopeInfo: slopeInfo(coordinatesWithElevation),
-    heightProfileResolution: elevationProfile.resolution
+    heightProfileResolution: elevationProfile.resolution,
   };
 }
 
@@ -64,7 +64,7 @@ export function getAscentAndDescent(
   }
   const initialElevation = coordinatesWithElevation[0][2];
   return coordinatesWithElevation
-    .map(coordinate => coordinate[2])
+    .map((coordinate) => coordinate[2])
     .reduce(
       (accumulated, currentElevation) => {
         const ascent = currentElevation - accumulated.lastElevation;
@@ -90,7 +90,7 @@ export function getAscentAndDescent(
         descent: 0,
         minElevation: initialElevation,
         maxElevation: initialElevation,
-        lastElevation: initialElevation
+        lastElevation: initialElevation,
       } as AscentDescentInfo
     );
 }

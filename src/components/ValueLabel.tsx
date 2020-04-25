@@ -9,9 +9,9 @@ const styles = (theme: any) => ({
   thumb: {
     "&$open": {
       "& $offset": {
-        transform: "scale(1) translateY(-10px)"
-      }
-    }
+        transform: "scale(1) translateY(-10px)",
+      },
+    },
   },
   open: {},
   offset: {
@@ -20,13 +20,13 @@ const styles = (theme: any) => ({
     fontSize: theme.typography.pxToRem(12),
     lineHeight: 1.2,
     transition: theme.transitions.create(["transform"], {
-      duration: theme.transitions.duration.shortest
+      duration: theme.transitions.duration.shortest,
     }),
     top: -50,
     left: "calc(-50% + -12px)",
     transformOrigin: "bottom center",
     transform: "scale(0)",
-    position: "absolute"
+    position: "absolute",
   },
   circle: {
     display: "flex",
@@ -36,12 +36,12 @@ const styles = (theme: any) => ({
     height: 48,
     borderRadius: "50% 50% 50% 0",
     backgroundColor: "currentColor",
-    transform: "rotate(-45deg)"
+    transform: "rotate(-45deg)",
   },
   label: {
     color: theme.palette.primary.contrastText,
-    transform: "rotate(45deg)"
-  }
+    transform: "rotate(45deg)",
+  },
 });
 
 /**
@@ -54,7 +54,7 @@ function ValueLabel(props: any) {
     className,
     open,
     value,
-    valueLabelDisplay
+    valueLabelDisplay,
   } = props;
 
   if (valueLabelDisplay === "off") {
@@ -67,10 +67,10 @@ function ValueLabel(props: any) {
       className: clsx(
         children.props.className,
         {
-          [classes.open]: open || valueLabelDisplay === "on"
+          [classes.open]: open || valueLabelDisplay === "on",
         },
         classes.thumb
-      )
+      ),
     },
     <span className={clsx(classes.offset, className)}>
       <span className={classes.circle}>

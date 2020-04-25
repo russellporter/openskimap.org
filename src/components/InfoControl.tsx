@@ -63,12 +63,12 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
           eventBus={this._eventBus}
           width={controlWidth(map)}
           chartHighlightPosition={this._chartHighlightPosition}
-          onLoadFeature={feature => {
+          onLoadFeature={(feature) => {
             if (this._panToPositionAfterLoad) {
               const point = getFirstPoint(feature.geometry);
               this._map?.flyTo({
                 center: [point[0], point[1]],
-                zoom: panToZoomLevel
+                zoom: panToZoomLevel,
               });
             }
           }}

@@ -50,37 +50,37 @@ export default class StateStore implements EventBus {
         : null,
       mapFilters: {
         ...this._state.mapFilters,
-        selectedObjectID: state.selectedObjectID
-      }
+        selectedObjectID: state.selectedObjectID,
+      },
     });
   };
 
   showInfo = (info: InfoData) => {
     this.update({
       info: info,
-      mapFilters: { ...this._state.mapFilters, selectedObjectID: info.id }
+      mapFilters: { ...this._state.mapFilters, selectedObjectID: info.id },
     });
   };
 
   hideInfo = () => {
     this.update({
       info: null,
-      mapFilters: { ...this._state.mapFilters, selectedObjectID: null }
+      mapFilters: { ...this._state.mapFilters, selectedObjectID: null },
     });
   };
 
   toggleActivity = (activity: Activity) => {
     let hiddenActivities = this._state.mapFilters.hiddenActivities || [];
     if (hiddenActivities.includes(activity)) {
-      hiddenActivities = hiddenActivities.filter(a => a !== activity);
+      hiddenActivities = hiddenActivities.filter((a) => a !== activity);
     } else {
       hiddenActivities.push(activity);
     }
     this.update({
       mapFilters: {
         ...this._state.mapFilters,
-        hiddenActivities: hiddenActivities
-      }
+        hiddenActivities: hiddenActivities,
+      },
     });
   };
 
@@ -88,16 +88,16 @@ export default class StateStore implements EventBus {
     this.update({
       mapFilters: {
         ...this._state.mapFilters,
-        minElevation: elevation
-      }
+        minElevation: elevation,
+      },
     });
   }
   setMinimumVertical(vertical: number) {
     this.update({
       mapFilters: {
         ...this._state.mapFilters,
-        minVertical: vertical
-      }
+        minVertical: vertical,
+      },
     });
   }
 
@@ -105,8 +105,8 @@ export default class StateStore implements EventBus {
     this.update({
       mapFilters: {
         ...this._state.mapFilters,
-        minRunLength: runLength
-      }
+        minRunLength: runLength,
+      },
     });
   }
 
@@ -119,7 +119,7 @@ export default class StateStore implements EventBus {
 
   private update(changes: StateChanges): void {
     const state = this._state as { [key: string]: any };
-    Object.keys(changes).forEach(key => {
+    Object.keys(changes).forEach((key) => {
       const change = (changes as { [key: string]: any })[key];
 
       if (state[key] !== change) {

@@ -4,7 +4,7 @@ import * as React from "react";
 
 export const TopRightCloseButton: React.FunctionComponent<{
   onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
-}> = props => {
+}> = (props) => {
   return (
     <IconButton
       style={{ marginRight: "-16px", marginTop: "-16px" }}

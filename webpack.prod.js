@@ -9,18 +9,18 @@ const { GenerateSW } = require("workbox-webpack-plugin");
 module.exports = merge(common, {
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin()]
+    minimizer: [new TerserPlugin()],
   },
   plugins: [
     new BundleAnalyzerPlugin({ analyzerMode: "disabled" }),
     new webpack.DefinePlugin({
-      ENABLE_SERVICE_WORKER: true
+      ENABLE_SERVICE_WORKER: true,
     }),
     new GenerateSW({
       swDest: "service-worker.js",
       clientsClaim: true,
       skipWaiting: true,
-      maximumFileSizeToCacheInBytes: 50000000
-    })
-  ]
+      maximumFileSizeToCacheInBytes: 50000000,
+    }),
+  ],
 });

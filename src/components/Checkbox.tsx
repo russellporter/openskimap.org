@@ -9,18 +9,18 @@ export const NordicCheckbox: React.ComponentType<CheckboxProps> = withStyles({
   root: {
     color: nordicSkiAreaColor,
     "&$checked": {
-      color: nordicSkiAreaColor
-    }
+      color: nordicSkiAreaColor,
+    },
   },
-  checked: {}
-})(props => <Checkbox color="default" {...props} />);
+  checked: {},
+})((props) => <Checkbox color="default" {...props} />);
 
 export const DownhillCheckbox: React.ComponentType<CheckboxProps> = withStyles({
   root: {
     color: downhillSkiAreaColor,
     "&$checked": {
-      color: downhillSkiAreaColor
-    }
+      color: downhillSkiAreaColor,
+    },
   },
-  checked: {}
-})(props => <Checkbox color="default" {...props} />);
+  checked: {},
+})((props) => <Checkbox color="default" {...props} />);

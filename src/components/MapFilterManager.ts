@@ -17,7 +17,7 @@ export default class MapFiltersManager {
       [this.skiAreaLayers(), rules.skiAreas],
       [this.runLayers(), rules.runs],
       [this.liftLayers(), rules.lifts],
-      [this.selectedLayers(), rules.selected]
+      [this.selectedLayers(), rules.selected],
     ];
 
     const rulesByLayer = layersAndRules.reduce(
@@ -25,7 +25,7 @@ export default class MapFiltersManager {
         const layers = layersAndRules[0];
         const rules = layersAndRules[1];
 
-        layers.forEach(layer => {
+        layers.forEach((layer) => {
           combinedRulesByLayer.set(
             layer,
             combine(rules, combinedRulesByLayer.get(layer) || [])
@@ -51,26 +51,26 @@ export default class MapFiltersManager {
 
     return this.map.querySourceFeatures("openskimap", {
       sourceLayer: "skiareas",
-      filter: ["all"].concat(rules)
+      filter: ["all"].concat(rules),
     }).length;
   };
 
   private runLayers = () => {
     return this.layers()
-      .filter(layer => layer["source-layer"] === "runs")
-      .map(layer => layer.id);
+      .filter((layer) => layer["source-layer"] === "runs")
+      .map((layer) => layer.id);
   };
 
   private liftLayers = () => {
     return this.layers()
-      .filter(layer => layer["source-layer"] === "lifts")
-      .map(layer => layer.id);
+      .filter((layer) => layer["source-layer"] === "lifts")
+      .map((layer) => layer.id);
   };
 
   private skiAreaLayers = () => {
     return this.layers()
-      .filter(layer => layer["source-layer"] === "skiareas")
-      .map(layer => layer.id);
+      .filter((layer) => layer["source-layer"] === "skiareas")
+      .map((layer) => layer.id);
   };
 
   private selectedLayers = () => {
@@ -142,13 +142,13 @@ function getFilterRules(filters: MapFilters): MapFilterRules {
     getElevationFilterRules(filters),
     getVerticalFilterRules(filters),
     getRunLengthFilterRules(filters),
-    getSelectedObjectFilterRules(filters)
+    getSelectedObjectFilterRules(filters),
   ].reduce((previous, rules) => {
     return {
       runs: combine(previous.runs, rules.runs),
       lifts: combine(previous.lifts, rules.lifts),
       skiAreas: combine(previous.skiAreas, rules.skiAreas),
-      selected: combine(previous.selected, rules.selected)
+      selected: combine(previous.selected, rules.selected),
     };
   }, noRules());
 }
@@ -169,21 +169,21 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
       skiAreas: "hidden",
       lifts: "hidden",
       runs: [["!in", "use", RunUse.Downhill, RunUse.Nordic, RunUse.Skitour]],
-      selected: []
+      selected: [],
     };
   } else if (hasDownhill && !hasNordic) {
     return {
       skiAreas: [["has", "has_downhill"]],
       lifts: [],
       runs: [["in", "use", RunUse.Downhill, RunUse.Skitour]],
-      selected: []
+      selected: [],
     };
   } else if (hasNordic && !hasDownhill) {
     return {
       skiAreas: [["has", "has_nordic"]],
       lifts: "hidden",
       runs: [["in", "use", RunUse.Nordic]],
-      selected: []
+      selected: [],
     };
   } else {
     return noRules();
@@ -196,7 +196,7 @@ function getElevationFilterRules(filters: MapFilters): MapFilterRules {
       skiAreas: [[">", "maxElevation", filters.minElevation]],
       lifts: [],
       runs: [],
-      selected: []
+      selected: [],
     };
   } else {
     return noRules();
@@ -209,7 +209,7 @@ function getVerticalFilterRules(filters: MapFilters): MapFilterRules {
       skiAreas: [[">", "vertical", filters.minVertical]],
       lifts: [],
       runs: [],
-      selected: []
+      selected: [],
     };
   } else {
     return noRules();
@@ -236,7 +236,7 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
     skiAreas: rules.length > 1 ? [["any"].concat(rules)] : rules,
     lifts: [],
     runs: [],
-    selected: []
+    selected: [],
   };
 }
 
@@ -247,8 +247,8 @@ function getSelectedObjectFilterRules(filters: MapFilters): MapFilterRules {
       [
         "any",
         ["==", "id", filters.selectedObjectID],
-        ["has", "skiArea-" + filters.selectedObjectID]
-      ]
+        ["has", "skiArea-" + filters.selectedObjectID],
+      ],
     ];
   } else {
     rules.selected = "hidden";

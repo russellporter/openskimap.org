@@ -1,23 +1,23 @@
 import { Chip, makeStyles } from "@material-ui/core";
 import * as React from "react";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   label: {
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
     color: "white",
-    fontSize: "1.25rem"
+    fontSize: "1.25rem",
   },
   root: {
     minWidth: "32px",
-    flexShrink: 0
-  }
+    flexShrink: 0,
+  },
 }));
 
 export const Badge: React.FunctionComponent<{
   text: string;
   color: string;
-}> = props => {
+}> = (props) => {
   const classes = useStyles();
 
   return (
@@ -25,10 +25,10 @@ export const Badge: React.FunctionComponent<{
       label={props.text}
       classes={{
         root: classes.root,
-        label: classes.label
+        label: classes.label,
       }}
       style={{
-        backgroundColor: props.color
+        backgroundColor: props.color,
       }}
     />
   );

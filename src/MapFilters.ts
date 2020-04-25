@@ -13,5 +13,5 @@ export const defaultMapFilters = {
   minVertical: null,
   minElevation: null,
   minRunLength: null,
-  selectedObjectID: null
+  selectedObjectID: null,
 };

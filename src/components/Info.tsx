@@ -19,7 +19,7 @@ export const Info: React.FunctionComponent<{
   chartHighlightPosition: mapboxgl.LngLat | null;
   onLoadFeature: (feature: MapFeature) => void;
   onHoverChartPosition: (position: mapboxgl.LngLat | null) => void;
-}> = props => {
+}> = (props) => {
   const [feature, setFeature] = useState<MapFeature | null>(null);
   useEffect(() => {
     const fetchData = async () => {
@@ -40,7 +40,7 @@ export const Info: React.FunctionComponent<{
       ) {
         try {
           properties.skiAreaFeatures = await Promise.all(
-            properties.skiAreas.map(id => loadGeoJSON<SkiAreaFeature>(id))
+            properties.skiAreas.map((id) => loadGeoJSON<SkiAreaFeature>(id))
           );
         } catch (error) {
           console.log(error);

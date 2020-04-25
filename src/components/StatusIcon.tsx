@@ -11,7 +11,7 @@ interface Props {
   hideIfOperating: Boolean;
 }
 
-export const StatusIcon: React.SFC<Props> = props => {
+export const StatusIcon: React.SFC<Props> = (props) => {
   if (props.hideIfOperating && props.status === Status.Operating) {
     return null;
   }

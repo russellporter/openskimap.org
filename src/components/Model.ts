@@ -3,7 +3,7 @@ import {
   LiftProperties,
   RunFeature,
   RunProperties,
-  SkiAreaFeature
+  SkiAreaFeature,
 } from "openskidata-format";
 
 export interface FullRunProperties extends RunProperties {
