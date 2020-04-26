@@ -1,4 +1,4 @@
-import { Activity, RunUse } from "openskidata-format";
+import { Activity } from "openskidata-format";
 import MapFilters from "../MapFilters";
 
 export default class MapFiltersManager {
@@ -168,21 +168,21 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
     return {
       skiAreas: "hidden",
       lifts: "hidden",
-      runs: [["!in", "use", RunUse.Downhill, RunUse.Nordic, RunUse.Skitour]],
+      runs: [["has", "other"]],
       selected: [],
     };
   } else if (hasDownhill && !hasNordic) {
     return {
       skiAreas: [["has", "has_downhill"]],
       lifts: [],
-      runs: [["in", "use", RunUse.Downhill, RunUse.Skitour]],
+      runs: [["any", ["has", "downhill"], ["has", "skitour"]]],
       selected: [],
     };
   } else if (hasNordic && !hasDownhill) {
     return {
       skiAreas: [["has", "has_nordic"]],
       lifts: "hidden",
-      runs: [["in", "use", RunUse.Nordic]],
+      runs: [["has", "nordic"]],
       selected: [],
     };
   } else {
