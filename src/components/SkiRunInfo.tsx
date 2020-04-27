@@ -27,7 +27,7 @@ import { InfoHeader } from "./InfoHeader";
 import { FullRunFeature } from "./Model";
 import { SourceSummary } from "./SourceSummary";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
-import { getRunTitleAndSubtitle } from "./utils/PageTitle";
+import { getRunTitleAndSubtitle } from "./utils/PageMetadata";
 
 interface Props extends HeightProfileHighlightProps {
   feature: FullRunFeature;

@@ -11,15 +11,29 @@ import {
 } from "../Formatters";
 import { FullLiftFeature, FullRunFeature } from "../Model";
 
-export function updatePageTitle(
+const metaDescriptionElement = getMetaDescription();
+const originalMetaDescription = metaDescriptionElement.getAttribute("content")!;
+
+export function updatePageMetadata(
   feature: SkiAreaFeature | FullLiftFeature | FullRunFeature | null
 ) {
   const name = feature !== null ? getDetailedTitle(feature) : null;
   if (name !== null && name.length > 0) {
     document.title = name + " - OpenSkiMap.org";
+    metaDescriptionElement.setAttribute(
+      "content",
+      `Explore a ski trail map of ${name} and learn more about the ski area.`
+    );
   } else {
     document.title = "OpenSkiMap.org";
+    metaDescriptionElement.setAttribute("content", originalMetaDescription);
   }
+}
+
+function getMetaDescription(): HTMLMetaElement {
+  const metas = Array.from(document.getElementsByTagName("meta"));
+
+  return metas.find((meta) => meta.getAttribute("name") === "description")!;
 }
 
 function nullableToArray<T>(object: T | null): T[] {

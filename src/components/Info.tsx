@@ -8,7 +8,7 @@ import { FullLiftFeature, FullRunFeature } from "./Model";
 import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";
-import { updatePageTitle } from "./utils/PageTitle";
+import { updatePageMetadata } from "./utils/PageMetadata";
 
 type MapFeature = FullRunFeature | FullLiftFeature | SkiAreaFeature;
 
@@ -48,7 +48,7 @@ export const Info: React.FunctionComponent<{
         }
       }
 
-      updatePageTitle(data);
+      updatePageMetadata(data);
       setFeature(data);
       props.onLoadFeature(data);
     };

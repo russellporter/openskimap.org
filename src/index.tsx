@@ -9,7 +9,7 @@ import State, { getInitialState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import { Themed } from "./components/Themed";
 import { getURLState, updateURL } from "./components/URLHistory";
-import { updatePageTitle } from "./components/utils/PageTitle";
+import { updatePageMetadata } from "./components/utils/PageMetadata";
 import * as Config from "./Config";
 import "./index.css";
 
@@ -93,7 +93,7 @@ function initialize() {
 
     if (changes.info !== undefined) {
       if (changes.info === null) {
-        updatePageTitle(null);
+        updatePageMetadata(null);
       }
       map!.setInfo(changes.info);
     }
