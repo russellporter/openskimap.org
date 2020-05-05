@@ -1,11 +1,18 @@
-import { Breadcrumbs, Link, makeStyles, Typography } from "@material-ui/core";
-import { country_reverse_geocoding } from "country-reverse-geocoding";
-import { FeatureType, SkiAreaFeature } from "openskidata-format";
+import { Breadcrumbs, Link, makeStyles } from "@material-ui/core";
+import {
+  FeatureType,
+  Location,
+  SkiAreaFeature,
+  SkiAreaProperties,
+} from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
-import { shortenedSkiAreaName } from "./Formatters";
-import { FullLiftFeature, FullRunFeature } from "./Model";
-import { getFirstPoint } from "./utils/GeoJSON";
+import {
+  FullLiftFeature,
+  FullLiftProperties,
+  FullRunFeature,
+  FullRunProperties,
+} from "./Model";
 
 const useStyles = makeStyles((theme) => ({
   breadcrumbs: {
@@ -29,13 +36,9 @@ export type InfoBreadcrumbsProps = {
 export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
   const classes = useStyles();
   const properties = props.feature.properties;
-  const skiAreas =
-    properties.type === FeatureType.Lift || properties.type === FeatureType.Run
-      ? properties.skiAreaFeatures
-      : [];
-  const countryName = getCountryName(props.feature.geometry);
+  const breadcrumbs = getBreadcrumbs(properties, props.eventBus);
 
-  if (skiAreas.length === 0 && countryName === null) {
+  if (breadcrumbs.length === 0) {
     return null;
   }
 
@@ -47,34 +50,34 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
           separator="›"
           aria-label="breadcrumb"
         >
-          {countryName && (
-            <Typography
-              variant="inherit"
-              classes={{ root: classes.breadcrumb }}
-            >
-              {countryName}
-            </Typography>
-          )}
-          {skiAreas.length > 0 && (
+          {breadcrumbs.map((breadcrumbsGroup) => (
             <span>
-              {skiAreas
-                .map((skiArea) => (
-                  <Link
-                    classes={{ root: classes.breadcrumb }}
-                    color="inherit"
-                    key={"skiArea-" + skiArea.properties.id}
-                    href={"#"}
-                    onClick={() => {
-                      props.eventBus.showInfo({
-                        id: skiArea.properties.id,
-                        panToPosition: null,
-                      });
-                    }}
-                  >
-                    {shortenedSkiAreaName(skiArea.properties.name) ||
-                      "Ski Area"}
-                  </Link>
-                ))
+              {breadcrumbsGroup
+                .map((breadcrumb) => {
+                  if (breadcrumb.onClick) {
+                    return (
+                      <Link
+                        classes={{ root: classes.breadcrumb }}
+                        color="inherit"
+                        key={breadcrumb.id}
+                        href={"#"}
+                        onClick={breadcrumb.onClick}
+                      >
+                        {breadcrumb.text}
+                      </Link>
+                    );
+                  } else {
+                    return (
+                      <span
+                        className={classes.breadcrumb}
+                        color="inherit"
+                        key={breadcrumb.id}
+                      >
+                        {breadcrumb.text}
+                      </span>
+                    );
+                  }
+                })
                 .reduce(
                   (
                     accumulatedResult: React.ReactNode[],
@@ -91,25 +94,100 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
                   []
                 )}
             </span>
-          )}
+          ))}
         </Breadcrumbs>
       }
     </>
   );
 };
 
-function getCountryName(geometry: GeoJSON.Geometry): string | null {
-  const point = getFirstPoint(geometry);
-  const country = country_reverse_geocoding().get_country(point[1], point[0]);
-  if (country?.name !== undefined) {
-    return country.name;
-  } else {
-    console.log(
-      "Failed to get country " +
-        JSON.stringify(country) +
-        " for point " +
-        JSON.stringify(point)
-    );
-    return null;
+type Breadcrumb = {
+  id: string;
+  text: string;
+  onClick?: () => void;
+};
+
+function getBreadcrumbs(
+  properties: SkiAreaProperties | FullLiftProperties | FullRunProperties,
+  eventBus: EventBus
+): Breadcrumb[][] {
+  let skiAreas: SkiAreaFeature[] = [];
+  if (
+    properties.type === FeatureType.Lift ||
+    properties.type === FeatureType.Run
+  ) {
+    skiAreas = properties.skiAreaFeatures;
   }
+
+  let locations: Location[];
+  if (properties.location) {
+    locations = [properties.location];
+  } else {
+    locations = skiAreas.flatMap((skiArea) =>
+      skiArea.properties.location ? [skiArea.properties.location] : []
+    );
+  }
+
+  const countryBreadcrumbs: Breadcrumb[] = unique(
+    locations.flatMap((location) => {
+      if (!location) {
+        return [];
+      }
+      return [
+        {
+          id: "country-" + location.iso3166_1Alpha2,
+          text: location.localized.en.country,
+        },
+      ];
+    })
+  );
+
+  const regionBreadcrumbs: Breadcrumb[] = unique(
+    locations.flatMap((location) => {
+      const regionName = location?.localized.en.region;
+      const regionCode = location?.iso3166_2;
+      if (!regionName || !regionCode) {
+        return [];
+      }
+
+      return [
+        {
+          id: "region-" + regionCode,
+          text: regionName,
+        },
+      ];
+    })
+  );
+
+  const skiAreaBreadcrumbs: Breadcrumb[] = unique(
+    skiAreas.flatMap((skiArea) => {
+      return [
+        {
+          id: "skiArea-" + skiArea.properties.id,
+          text: skiArea.properties.name ?? "Ski Area",
+          onClick: () => {
+            eventBus.showInfo({
+              id: skiArea.properties.id,
+              panToPosition: null,
+            });
+          },
+        },
+      ];
+    })
+  );
+
+  return [countryBreadcrumbs, regionBreadcrumbs, skiAreaBreadcrumbs].filter(
+    (group) => group.length > 0
+  );
+}
+
+function unique<T extends { id: string }>(input: T[]): T[] {
+  const ids = new Set();
+  return input.filter((item) => {
+    if (ids.has(item.id)) {
+      return false;
+    }
+    ids.add(item.id);
+    return true;
+  });
 }
