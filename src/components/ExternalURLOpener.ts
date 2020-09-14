@@ -4,6 +4,14 @@ export function openSkimapOrg() {
   openURL("https://skimap.org");
 }
 
+export function openPrivacyPolicy() {
+  openURL("https://skimap.org/pages/privacyPolicy");
+}
+
+export function openCookiePolicy() {
+  openURL("https://skimap.org/pages/cookiePolicy");
+}
+
 export function editMap(map: Map) {
   let center = map!.getCenter().wrap();
   openURL(
