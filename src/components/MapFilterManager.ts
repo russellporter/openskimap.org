@@ -193,7 +193,7 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
 function getElevationFilterRules(filters: MapFilters): MapFilterRules {
   if (filters.minElevation) {
     return {
-      skiAreas: [[">", "maxElevation", filters.minElevation]],
+      skiAreas: [[">", ["get", "maxElevation"], filters.minElevation]],
       lifts: [],
       runs: [],
       selected: [],
@@ -206,7 +206,7 @@ function getElevationFilterRules(filters: MapFilters): MapFilterRules {
 function getVerticalFilterRules(filters: MapFilters): MapFilterRules {
   if (filters.minVertical) {
     return {
-      skiAreas: [[">", "vertical", filters.minVertical]],
+      skiAreas: [[">", ["get", "vertical"], filters.minVertical]],
       lifts: [],
       runs: [],
       selected: [],
@@ -226,10 +226,10 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
 
   const rules: any[] = [];
   if (hasDownhill) {
-    rules.push([">", "downhillDistance", filters.minRunLength]);
+    rules.push([">", ["get", "downhillDistance"], filters.minRunLength]);
   }
   if (hasNordic) {
-    rules.push([">", "nordicDistance", filters.minRunLength]);
+    rules.push([">", ["get", "nordicDistance"], filters.minRunLength]);
   }
 
   return {
@@ -246,7 +246,7 @@ function getSelectedObjectFilterRules(filters: MapFilters): MapFilterRules {
     rules.selected = [
       [
         "any",
-        ["==", "id", filters.selectedObjectID],
+        ["==", ["get", "id"], filters.selectedObjectID],
         ["has", "skiArea-" + filters.selectedObjectID],
       ],
     ];
