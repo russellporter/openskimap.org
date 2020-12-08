@@ -1,4 +1,4 @@
-import { Activity } from "openskidata-format";
+import { Activity, SkiAreaFeature } from "openskidata-format";
 import MapFilters from "../MapFilters";
 
 export default class MapFiltersManager {
@@ -49,10 +49,27 @@ export default class MapFiltersManager {
       return 0;
     }
 
-    return this.map.querySourceFeatures("openskimap", {
+    const loadedSkiAreas = this.map.querySourceFeatures("openskimap", {
       sourceLayer: "skiareas",
       filter: ["all"].concat(rules),
-    }).length;
+    });
+
+    const bounds = this.map.getBounds();
+
+    // For unknown reasons, the same ski area is often returned twice from querySourceFeatures.
+    // Also querySourceFeatures can return ski areas that are slightly off screen,
+    const skiAreaIDs = new Set(
+      loadedSkiAreas
+        .filter(
+          (skiArea) =>
+            skiArea.geometry.type === "Point" &&
+            bounds.contains(skiArea.geometry.coordinates as [number, number])
+        )
+        .map((skiArea) => skiArea.properties as SkiAreaFeature)
+        .map((skiAreaProperties) => skiAreaProperties.id)
+    );
+
+    return skiAreaIDs.size;
   };
 
   private runLayers = () => {
