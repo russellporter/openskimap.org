@@ -36,7 +36,6 @@ export class Map {
       zoom: zoom, // starting zoom,
       hash: true,
       attributionControl: false,
-      pitchWithRotate: false,
     });
     this.filterControl = new FilterControl(eventBus);
     this.searchBarControl = new SearchBarControl(eventBus);
