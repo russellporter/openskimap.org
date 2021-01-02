@@ -257,6 +257,14 @@ const SearchResult: React.FunctionComponent<{
 
 function getSecondaryText(
   properties: SkiAreaProperties | LiftProperties | RunProperties
+): string {
+  return [getFeatureDetails(properties), getLocation(properties)]
+    .filter(isString)
+    .join(" - ");
+}
+
+function getFeatureDetails(
+  properties: SkiAreaProperties | LiftProperties | RunProperties
 ) {
   switch (properties.type) {
     case FeatureType.SkiArea:
@@ -279,4 +287,35 @@ function getSecondaryText(
     case FeatureType.Lift:
       return getLiftNameAndType(properties) + " lift";
   }
+}
+
+function getLocation(
+  properties: SkiAreaProperties | LiftProperties | RunProperties
+): string | null {
+  let components: string[] = [];
+
+  if (
+    properties.type === FeatureType.Lift ||
+    properties.type === FeatureType.Run
+  ) {
+    components.push(
+      properties.skiAreas.map((skiArea) => skiArea.properties.name).join(" / ")
+    );
+  }
+
+  const location = properties.location?.localized.en;
+  if (location?.region) {
+    components.push(location.region);
+  }
+
+  if (location?.country) {
+    components.push(location.country);
+  }
+
+  const formatted = components.join(", ");
+  return formatted.length > 0 ? formatted : null;
+}
+
+function isString(e: any): e is string {
+  return !!e;
 }
