@@ -1,17 +1,16 @@
 import { Card, CardContent, Typography } from "@material-ui/core";
-import { getLiftNameAndType } from "openskidata-format";
+import { getLiftNameAndType, LiftFeature } from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";
 import { CoordinatesWithElevation, getAscentAndDescent } from "./ElevationData";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
-import { FullLiftFeature } from "./Model";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
 export const SkiLiftInfo: React.FunctionComponent<{
   eventBus: EventBus;
-  feature: FullLiftFeature;
+  feature: LiftFeature;
 }> = (props) => {
   const properties = props.feature.properties;
   const geometry = props.feature.geometry;

@@ -1,18 +1,16 @@
 import { Breadcrumbs, Link, makeStyles } from "@material-ui/core";
 import {
   FeatureType,
+  LiftFeature,
+  LiftProperties,
   Location,
+  RunFeature,
+  RunProperties,
   SkiAreaFeature,
   SkiAreaProperties,
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
-import {
-  FullLiftFeature,
-  FullLiftProperties,
-  FullRunFeature,
-  FullRunProperties,
-} from "./Model";
 
 const useStyles = makeStyles((theme) => ({
   breadcrumbs: {
@@ -29,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export type InfoBreadcrumbsProps = {
-  feature: FullLiftFeature | FullRunFeature | SkiAreaFeature;
+  feature: LiftFeature | RunFeature | SkiAreaFeature;
   eventBus: EventBus;
 };
 
@@ -108,7 +106,7 @@ type Breadcrumb = {
 };
 
 function getBreadcrumbs(
-  properties: SkiAreaProperties | FullLiftProperties | FullRunProperties,
+  properties: SkiAreaProperties | LiftProperties | RunProperties,
   eventBus: EventBus
 ): Breadcrumb[][] {
   let skiAreas: SkiAreaFeature[] = [];
@@ -116,7 +114,7 @@ function getBreadcrumbs(
     properties.type === FeatureType.Lift ||
     properties.type === FeatureType.Run
   ) {
-    skiAreas = properties.skiAreaFeatures;
+    skiAreas = properties.skiAreas;
   }
 
   let locations: Location[];

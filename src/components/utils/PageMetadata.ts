@@ -1,6 +1,8 @@
 import {
   FeatureType,
   getLiftNameAndType,
+  LiftFeature,
+  RunFeature,
   RunProperties,
   SkiAreaFeature,
 } from "openskidata-format";
@@ -9,13 +11,12 @@ import {
   formattedRunUse,
   shortenedSkiAreaName,
 } from "../Formatters";
-import { FullLiftFeature, FullRunFeature } from "../Model";
 
 const metaDescriptionElement = getMetaDescription();
 const originalMetaDescription = metaDescriptionElement.getAttribute("content")!;
 
 export function updatePageMetadata(
-  feature: SkiAreaFeature | FullLiftFeature | FullRunFeature | null
+  feature: SkiAreaFeature | LiftFeature | RunFeature | null
 ) {
   const name = feature !== null ? getDetailedTitle(feature) : null;
   if (name !== null && name.length > 0) {
@@ -52,17 +53,17 @@ function skiAreaNames(skiAreas: SkiAreaFeature[]): string | null {
 }
 
 function getDetailedTitle(
-  feature: SkiAreaFeature | FullLiftFeature | FullRunFeature
+  feature: SkiAreaFeature | LiftFeature | RunFeature
 ): string | null {
   const properties = feature.properties;
   switch (properties.type) {
     case FeatureType.Lift:
       return nullableToArray(getLiftNameAndType(properties))
-        .concat(nullableToArray(skiAreaNames(properties.skiAreaFeatures)))
+        .concat(nullableToArray(skiAreaNames(properties.skiAreas)))
         .join(" - ");
     case FeatureType.Run:
       return [getRunTitleAndSubtitle(properties).title]
-        .concat(nullableToArray(skiAreaNames(properties.skiAreaFeatures)))
+        .concat(nullableToArray(skiAreaNames(properties.skiAreas)))
         .join(" - ");
     case FeatureType.SkiArea:
       return properties.name;

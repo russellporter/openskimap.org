@@ -24,13 +24,12 @@ import getElevationData from "./ElevationData";
 import EventBus from "./EventBus";
 import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
 import { InfoHeader } from "./InfoHeader";
-import { FullRunFeature } from "./Model";
 import { SourceSummary } from "./SourceSummary";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
 import { getRunTitleAndSubtitle } from "./utils/PageMetadata";
 
 interface Props extends HeightProfileHighlightProps {
-  feature: FullRunFeature;
+  feature: RunFeature;
   eventBus: EventBus;
 }
 

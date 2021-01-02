@@ -1,16 +1,20 @@
 import { Card } from "@material-ui/core";
-import { FeatureType, SkiAreaFeature } from "openskidata-format";
+import {
+  FeatureType,
+  LiftFeature,
+  RunFeature,
+  SkiAreaFeature,
+} from "openskidata-format";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import EventBus from "./EventBus";
 import { loadGeoJSON } from "./GeoJSONLoader";
-import { FullLiftFeature, FullRunFeature } from "./Model";
 import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";
 import { updatePageMetadata } from "./utils/PageMetadata";
 
-type MapFeature = FullRunFeature | FullLiftFeature | SkiAreaFeature;
+type MapFeature = RunFeature | LiftFeature | SkiAreaFeature;
 
 export const Info: React.FunctionComponent<{
   id: string;
@@ -32,22 +36,6 @@ export const Info: React.FunctionComponent<{
         return;
       }
 
-      let skiAreaNames: string[] = [];
-      const properties = data.properties;
-      if (
-        properties.type === FeatureType.Lift ||
-        properties.type === FeatureType.Run
-      ) {
-        try {
-          properties.skiAreaFeatures = await Promise.all(
-            properties.skiAreas.map((id) => loadGeoJSON<SkiAreaFeature>(id))
-          );
-        } catch (error) {
-          console.log(error);
-          properties.skiAreaFeatures = [];
-        }
-      }
-
       updatePageMetadata(data);
       setFeature(data);
       props.onLoadFeature(data);
@@ -60,13 +48,13 @@ export const Info: React.FunctionComponent<{
     <Card style={{ width: props.width }}>
       {feature && feature.properties.type == FeatureType.Lift && (
         <SkiLiftInfo
-          feature={feature as FullLiftFeature}
+          feature={feature as LiftFeature}
           eventBus={props.eventBus}
         />
       )}
       {feature && feature.properties.type == FeatureType.Run && (
         <SkiRunInfo
-          feature={feature as FullRunFeature}
+          feature={feature as RunFeature}
           chartHighlightPosition={props.chartHighlightPosition}
           onHoverChartPosition={props.onHoverChartPosition}
           eventBus={props.eventBus}
