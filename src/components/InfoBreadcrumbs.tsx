@@ -48,8 +48,8 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
           separator="›"
           aria-label="breadcrumb"
         >
-          {breadcrumbs.map((breadcrumbsGroup) => (
-            <span>
+          {breadcrumbs.map((breadcrumbsGroup, groupIndex) => (
+            <span key={groupIndex}>
               {breadcrumbsGroup
                 .map((breadcrumb) => {
                   if (breadcrumb.onClick) {

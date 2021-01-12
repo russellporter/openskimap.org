@@ -1,6 +1,6 @@
 import { Activity, SkiAreaFeature } from "openskidata-format";
 import MapFilters from "../MapFilters";
-
+import assert from "./utils/assert";
 export default class MapFiltersManager {
   private map: mapboxgl.Map;
   private originalFilters: Map<string, any[] | undefined> = new Map();
@@ -74,19 +74,26 @@ export default class MapFiltersManager {
 
   private runLayers = () => {
     return this.layers()
-      .filter((layer) => layer["source-layer"] === "runs")
+      .filter(
+        (layer) => layer.type !== "custom" && layer["source-layer"] === "runs"
+      )
       .map((layer) => layer.id);
   };
 
   private liftLayers = () => {
     return this.layers()
-      .filter((layer) => layer["source-layer"] === "lifts")
+      .filter(
+        (layer) => layer.type !== "custom" && layer["source-layer"] === "lifts"
+      )
       .map((layer) => layer.id);
   };
 
   private skiAreaLayers = () => {
     return this.layers()
-      .filter((layer) => layer["source-layer"] === "skiareas")
+      .filter(
+        (layer) =>
+          layer.type !== "custom" && layer["source-layer"] === "skiareas"
+      )
       .map((layer) => layer.id);
   };
 
@@ -100,6 +107,7 @@ export default class MapFiltersManager {
 
   private setFilterOverride = (layerName: string, rules: any[] | "hidden") => {
     const layer = this.map.getLayer(layerName);
+    assert(layer.type !== "custom", "Custom layers are not supported");
     if (!layer) {
       return;
     }

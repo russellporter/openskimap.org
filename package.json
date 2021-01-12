@@ -46,6 +46,7 @@
     "@types/geojson": "^7946.0.7",
     "@types/mapbox-gl": "^1.12.1",
     "@types/memoize-one": "^3.1.2",
+    "@types/node": "^14.14.20",
     "@types/query-string": "^6.3.0",
     "@types/throttle-debounce": "^1.1.1",
     "awesome-typescript-loader": "^5.2.1",
