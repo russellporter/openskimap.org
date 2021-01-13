@@ -248,12 +248,20 @@ const SearchResult: React.FunctionComponent<{
   return (
     <ListItem button onClick={props.onSelect} selected={props.selected}>
       <ListItemText
-        primary={props.result.properties.name}
+        primary={getPrimaryText(props.result)}
         secondary={getSecondaryText(props.result.properties)}
       />
     </ListItem>
   );
 };
+
+function getPrimaryText(result: Result): string | null {
+  return (
+    result.properties.name ||
+    result.properties.location?.localized.en.locality ||
+    null
+  );
+}
 
 function getSecondaryText(
   properties: SkiAreaProperties | LiftProperties | RunProperties

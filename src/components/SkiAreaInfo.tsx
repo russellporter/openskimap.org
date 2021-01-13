@@ -6,7 +6,6 @@ import {
   Typography,
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import WarningIcon from "@material-ui/icons/Warning";
 import {
   Activity,
   getFormattedLiftType,
@@ -35,7 +34,9 @@ interface SkiAreaPopupProps {
   eventBus: EventBus;
 }
 
-const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = (props) => {
+export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
+  props
+) => {
   const properties = props.feature.properties;
   const skimapOrgSource = properties.sources.find(
     (s) => s.type === SourceType.SKIMAP_ORG
@@ -53,7 +54,7 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = (props) => {
             hideIfOperating={true}
           />
           <Typography variant="h5" component="h2">
-            {properties.name}
+            {getTitle(properties)}
           </Typography>
         </InfoHeader>
         {properties.statistics && (
@@ -91,57 +92,29 @@ const CrowdsourcedSkiArea: React.SFC<SkiAreaPopupProps> = (props) => {
   );
 };
 
-const GeneratedSkiArea: React.SFC<SkiAreaPopupProps> = (props) => {
-  const properties = props.feature.properties;
-  return (
-    <Card>
-      <CardContent>
-        <InfoHeader onClose={props.eventBus.hideInfo}>
-          <Typography gutterBottom variant="h5" component="h2">
-            {activitySummary(properties)}{" "}
-            <Tooltip
-              placement="right"
-              title="This ski area information is generated from OpenStreetMap data"
-            >
-              <WarningIcon
-                fontSize="inherit"
-                style={{ verticalAlign: "text-top" }}
-              />
-            </Tooltip>
-          </Typography>
-        </InfoHeader>
-        {properties.statistics && (
-          <SkiAreaStatisticsSummary
-            activities={properties.activities}
-            statistics={properties.statistics}
-            runConvention={properties.runConvention}
-          />
-        )}
-      </CardContent>
-    </Card>
-  );
-};
+function getTitle(properties: SkiAreaProperties) {
+  if (properties.name) {
+    return properties.name;
+  }
 
-export const SkiAreaInfo: React.SFC<SkiAreaPopupProps> = (props) => {
-  const properties = props.feature.properties;
-  return properties.generated ? (
-    <GeneratedSkiArea {...props} />
-  ) : (
-    <CrowdsourcedSkiArea {...props} />
-  );
-};
-
-function activitySummary(properties: SkiAreaProperties) {
+  let summary: string;
   const downhill = properties.activities.includes(Activity.Downhill);
   const nordic = properties.activities.includes(Activity.Nordic);
   if (downhill && nordic) {
-    return "Downhill & Nordic Ski Area";
+    summary = "Downhill & Nordic Ski Area";
   } else if (downhill) {
-    return "Downhill Ski Area";
+    summary = "Downhill Ski Area";
   } else if (nordic) {
-    return "Nordic Ski Area";
+    summary = "Nordic Ski Area";
   } else {
-    return "Ski Area";
+    summary = "Ski Area";
+  }
+
+  const locality = properties.location?.localized.en.locality;
+  if (locality) {
+    return summary + " near " + locality;
+  } else {
+    return summary;
   }
 }
 
