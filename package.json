@@ -44,7 +44,7 @@
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",
     "@types/geojson": "^7946.0.7",
-    "@types/mapbox-gl": "^1.12.1",
+    "@types/mapbox-gl": "^2.0.2",
     "@types/memoize-one": "^3.1.2",
     "@types/node": "^14.14.20",
     "@types/query-string": "^6.3.0",
