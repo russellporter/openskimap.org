@@ -50,6 +50,10 @@ module.exports = {
         from: "src/assets/robots.txt",
         to: "robots.txt",
       },
+      {
+        from: "taginfo.json",
+        to: "taginfo.json",
+      },
     ]),
   ],
 };

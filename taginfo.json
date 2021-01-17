@@ -1,0 +1,76 @@
+{
+  "data_format": 1,
+  "data_url": "https://openskimap.org/taginfo.json",
+  "project": {
+    "name": "OpenSkiMap",
+    "description": "Interactive map for winter sports",
+    "project_url": "https://openskimap.org",
+    "contact_name": "Russell",
+    "contact_email": "contact@skimap.org"
+  },
+  "tags": [
+    {
+      "key": "landuse",
+      "value": "winter_sports",
+      "object_types": ["way"],
+      "description": "Displayed as a point on the map. Searchable."
+    },
+    {
+      "key": "piste:type",
+      "object_types": ["relation", "way"]
+    },
+    {
+      "key": "piste:difficulty",
+      "object_types": ["relation", "way"]
+    },
+    {
+      "key": "piste:grooming",
+      "object_types": ["relation", "way"]
+    },
+    {
+      "key": "aerialway",
+      "object_types": ["way"]
+    },
+    {
+      "key": "aerialway:occupancy",
+      "object_types": ["way"]
+    },
+    {
+      "key": "aerialway:duration",
+      "object_types": ["way"]
+    },
+    {
+      "key": "aerialway:bubble",
+      "object_types": ["way"]
+    },
+    {
+      "key": "aerialway:heating",
+      "object_types": ["way"]
+    },
+    {
+      "key": "railway",
+      "value": "funicular",
+      "object_types": ["way"]
+    },
+    {
+      "key": "gladed",
+      "object_types": ["way"],
+      "description": "Rendered and shown in piste details."
+    },
+    {
+      "key": "patrolled",
+      "object_types": ["relation", "way"],
+      "description": "Shown in piste details."
+    },
+    {
+      "key": "lit",
+      "object_types": ["relation", "way"],
+      "description": "Rendered and shown in piste details."
+    },
+    {
+      "key": "piste:lit",
+      "object_types": ["relation", "way"],
+      "description": "Rendered and shown in piste details."
+    }
+  ]
+}
