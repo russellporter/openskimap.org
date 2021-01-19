@@ -80,23 +80,25 @@ export default class About extends React.Component<Props> {
           GeoJSON data is available under the license. Note that the data format
           is not stable and changes on a regular basis as the project evolves.
         </Typography>
-        <ul>
-          <li>
-            <Link href="http://tiles.skimap.org/geojson/ski_areas.geojson">
-              Ski Areas
-            </Link>
-          </li>
-          <li>
-            <Link href="http://tiles.skimap.org/geojson/lifts.geojson">
-              Lifts
-            </Link>
-          </li>
-          <li>
-            <Link href="http://tiles.skimap.org/geojson/runs.geojson">
-              Runs
-            </Link>
-          </li>
-        </ul>
+        <Typography>
+          <ul>
+            <li>
+              <Link href="https://tiles.skimap.org/geojson/ski_areas.geojson">
+                Ski Areas
+              </Link>
+            </li>
+            <li>
+              <Link href="https://tiles.skimap.org/geojson/lifts.geojson">
+                Lifts
+              </Link>
+            </li>
+            <li>
+              <Link href="https://tiles.skimap.org/geojson/runs.geojson">
+                Runs
+              </Link>
+            </li>
+          </ul>
+        </Typography>
       </>
     );
   }
