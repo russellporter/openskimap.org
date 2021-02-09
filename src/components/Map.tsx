@@ -53,10 +53,7 @@ export class Map {
 
     this.map.addControl(this.searchBarControl);
 
-    this.map.addControl(
-      new mapboxgl.AttributionControl({ compact: true }),
-      "bottom-left"
-    );
+    this.map.addControl(new mapboxgl.AttributionControl());
     this.map.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
