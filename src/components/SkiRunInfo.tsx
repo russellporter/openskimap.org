@@ -1,6 +1,7 @@
 import {
   Avatar,
   Card,
+  CardActions,
   CardContent,
   Chip,
   makeStyles,
@@ -22,6 +23,7 @@ import * as React from "react";
 import { Badge } from "./Badge";
 import getElevationData from "./ElevationData";
 import EventBus from "./EventBus";
+import { getWebsiteActions } from "./FeatureActions";
 import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
 import { InfoHeader } from "./InfoHeader";
 import { SourceSummary } from "./SourceSummary";
@@ -73,6 +75,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
   }, [geometry, elevationProfile]);
   const slopeInfo = elevationData && elevationData.slopeInfo;
   const { title, subtitle } = getRunTitleAndSubtitle(props.feature.properties);
+  const actions = getWebsiteActions(properties.websites);
   return (
     <Card>
       <CardContent>
@@ -173,6 +176,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
         )}
         {<SourceSummary sources={properties.sources} />}
       </CardContent>
+      {actions.length > 0 && <CardActions>{actions}</CardActions>}
     </Card>
   );
 };

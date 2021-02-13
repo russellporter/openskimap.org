@@ -22,6 +22,7 @@ import {
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
+import { getWebsiteActions } from "./FeatureActions";
 import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { InfoHeader } from "./InfoHeader";
 import { SourceSummary } from "./SourceSummary";
@@ -38,9 +39,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
   props
 ) => {
   const properties = props.feature.properties;
-  const skimapOrgSource = properties.sources.find(
-    (s) => s.type === SourceType.SKIMAP_ORG
-  );
+  const actions = getActions(properties);
   return (
     <Card>
       <CardContent>
@@ -66,31 +65,34 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
         )}
         {<SourceSummary sources={properties.sources} />}
       </CardContent>
-      {skimapOrgSource && (
-        <CardActions>
-          <Button
-            size="small"
-            color="primary"
-            target="_blank"
-            href={"https://skimap.org/SkiAreas/view/" + skimapOrgSource.id}
-          >
-            See Paper Maps
-          </Button>
-          {properties.website && (
-            <Button
-              size="small"
-              color="primary"
-              target="_blank"
-              href={properties.website}
-            >
-              Website
-            </Button>
-          )}
-        </CardActions>
-      )}
+      {actions.length > 0 && <CardActions>{actions}</CardActions>}
     </Card>
   );
 };
+
+function getActions(properties: SkiAreaProperties): JSX.Element[] {
+  const skimapOrgSource = properties.sources.find(
+    (s) => s.type === SourceType.SKIMAP_ORG
+  );
+  let actions = [];
+  if (skimapOrgSource) {
+    actions.push(
+      <Button
+        key="paperMaps"
+        size="small"
+        color="primary"
+        target="_blank"
+        href={"https://skimap.org/SkiAreas/view/" + skimapOrgSource.id}
+      >
+        See Paper Maps
+      </Button>
+    );
+  }
+
+  actions = actions.concat(getWebsiteActions(properties.websites));
+
+  return actions;
+}
 
 function getTitle(properties: SkiAreaProperties) {
   if (properties.name) {

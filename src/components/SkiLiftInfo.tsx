@@ -1,9 +1,10 @@
-import { Card, CardContent, Typography } from "@material-ui/core";
+import { Card, CardActions, CardContent, Typography } from "@material-ui/core";
 import { getLiftNameAndType, LiftFeature } from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";
 import { CoordinatesWithElevation, getAscentAndDescent } from "./ElevationData";
 import EventBus from "./EventBus";
+import { getWebsiteActions } from "./FeatureActions";
 import { InfoHeader } from "./InfoHeader";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
@@ -30,6 +31,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
 
   const speed =
     distance && durationInSeconds ? distance / durationInSeconds : null;
+  const actions = getWebsiteActions(properties.websites);
   return (
     <Card>
       <CardContent>
@@ -79,6 +81,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
         )}
         {<SourceSummary sources={properties.sources} />}
       </CardContent>
+      {actions.length > 0 && <CardActions>{actions}</CardActions>}
     </Card>
   );
 };

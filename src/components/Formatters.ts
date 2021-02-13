@@ -40,6 +40,10 @@ export function formattedRunUse(uses: RunUse[], grooming: RunGrooming | null) {
         return grooming !== RunGrooming.Backcountry
           ? "Connector trail"
           : "Connector route";
+      case RunUse.Fatbike:
+        return grooming !== RunGrooming.Backcountry
+          ? "Fatbike trail"
+          : "Fatbike route";
       default:
         return null;
     }
