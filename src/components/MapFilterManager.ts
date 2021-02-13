@@ -272,7 +272,7 @@ function getSelectedObjectFilterRules(filters: MapFilters): MapFilterRules {
       [
         "any",
         ["==", ["get", "id"], filters.selectedObjectID],
-        ["has", "skiArea-" + filters.selectedObjectID],
+        ["in", filters.selectedObjectID, ["get", "skiAreas"]],
       ],
     ];
   } else {
