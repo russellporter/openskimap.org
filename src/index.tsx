@@ -29,7 +29,7 @@ function initialize() {
   );
 
   (mapboxgl as any).accessToken =
-    "pk.eyJ1IjoicnVzc2VsbCIsImEiOiJjaXUwYWE5NGYwMW94MnpydG5jaWxjOHJsIn0.oyWAcfWU5SMOOWevkrenlw";
+    "pk.eyJ1IjoicnVzc2VsbCIsImEiOiJja215dmpmMWYwN3ZnMnRwazRuOHF1azZ4In0.JjYNDuMzMZ5plb_YbF_Q5A";
   mapboxgl.setRTLTextPlugin(
     "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js",
     () => {}
