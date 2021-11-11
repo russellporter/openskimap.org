@@ -20,7 +20,7 @@
     "@turf/length": "^6.5.0",
     "@turf/line-chunk": "^5.1.5",
     "@turf/line-slice-along": "^5.1.5",
-    "@turf/meta": "^6.0.2",
+    "@turf/meta": "^6.5.0",
     "@turf/nearest-point-on-line": "^5.1.5",
     "@types/chart.js": "^2.9.34",
     "@types/react": "^16.9.49",
