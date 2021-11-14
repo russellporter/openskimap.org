@@ -31,7 +31,7 @@
     "openskidata-format": "^0.13.1",
     "query-string": "^6.14.1",
     "react": "^16.13.1",
-    "react-chartjs-2": "^2.10.0",
+    "react-chartjs-2": "^2.11.2",
     "react-dom": "^16.13.1",
     "react-outside-click-handler": "^1.3.0",
     "shallow-equal": "^1.2.1",
