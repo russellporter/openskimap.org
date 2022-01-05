@@ -1,5 +1,5 @@
 const CopyPlugin = require("copy-webpack-plugin");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 
@@ -39,7 +39,7 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin(["dist"]),
+    new CleanWebpackPlugin(),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /de/),
     new HtmlWebpackPlugin({
       filename: "index.html",
