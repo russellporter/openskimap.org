@@ -22,7 +22,7 @@
     "@turf/line-slice-along": "^5.1.5",
     "@turf/meta": "^6.5.0",
     "@turf/nearest-point-on-line": "^5.1.5",
-    "@types/chart.js": "^2.9.34",
+    "@types/chart.js": "^2.9.35",
     "@types/react": "^16.14.20",
     "@types/react-dom": "^16.9.14",
     "@types/react-outside-click-handler": "^1.3.0",
