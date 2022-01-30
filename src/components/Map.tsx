@@ -18,7 +18,8 @@ export class Map {
   private infoControl: InfoControl | null = null;
   private filterControl: FilterControl;
   private searchBarControl: SearchBarControl;
-  private loaded: boolean = false;
+  private loaded = false;
+  private filtersVisible = false;
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
@@ -115,6 +116,7 @@ export class Map {
 
   setFiltersVisible = (visible: boolean) => {
     this.waitForMapLoaded(() => {
+      this.filtersVisible = visible;
       this.searchBarControl.setFiltersShown(visible);
       if (visible) {
         this.map.addControl(this.filterControl);
@@ -123,6 +125,7 @@ export class Map {
         this.map.removeControl(this.filterControl);
         this.map.off("render", this.updateVisibleSkiAreasCount);
       }
+
       this.updateVisibleSkiAreasCountUnthrottled();
     });
   };
@@ -136,6 +139,10 @@ export class Map {
   };
 
   private updateVisibleSkiAreasCountUnthrottled = () => {
+    if (!this.filtersVisible) {
+      return;
+    }
+
     this.filterControl.setVisibleSkiAreasCount(
       this.filterManager.getVisibleSkiAreasCount()
     );

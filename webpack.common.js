@@ -1,6 +1,5 @@
-const CopyPlugin = require("copy-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
@@ -9,6 +8,7 @@ module.exports = {
     filename: "[name].bundle.js",
     chunkFilename: "[name].chunk.js",
     path: __dirname + "/dist",
+    clean: true,
   },
 
   resolve: {
@@ -22,11 +22,27 @@ module.exports = {
         test: /\.css$/,
         use: ["style-loader", "css-loader"],
       },
-      // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-      { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+      // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
+      { test: /\.tsx?$/, loader: "ts-loader" },
 
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
       { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
+
+      {
+        test: path.resolve(__dirname, "src/assets/robots.txt"),
+        type: "asset/resource",
+        generator: {
+          filename: "robots.txt",
+        },
+      },
+
+      {
+        test: path.resolve(__dirname, "taginfo.json"),
+        type: "asset/resource",
+        generator: {
+          filename: "taginfo.json",
+        },
+      },
     ],
   },
 
@@ -39,21 +55,10 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin(),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /de/),
     new HtmlWebpackPlugin({
       filename: "index.html",
       template: "src/assets/index.html",
     }),
-    new CopyPlugin([
-      {
-        from: "src/assets/robots.txt",
-        to: "robots.txt",
-      },
-      {
-        from: "taginfo.json",
-        to: "taginfo.json",
-      },
-    ]),
   ],
 };

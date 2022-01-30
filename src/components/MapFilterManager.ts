@@ -1,3 +1,4 @@
+import * as mapboxgl from "mapbox-gl";
 import { Activity, SkiAreaFeature } from "openskidata-format";
 import MapFilters from "../MapFilters";
 import assert from "./utils/assert";

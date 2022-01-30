@@ -9,7 +9,7 @@ import {
   RunDifficulty,
   RunFeature,
   RunProperties,
-  RunUse,
+  RunUse
 } from "openskidata-format";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
@@ -173,7 +173,7 @@ export class HeightProfile extends React.Component<
                         elevationData.maxElevation - elevationData.minElevation,
                         100
                       ) + elevationData.minElevation,
-                    callback: (elevation) => {
+                    callback: (elevation: any) => {
                       return elevation + "m";
                     },
                   },
