@@ -60,7 +60,7 @@
     {
       "key": "patrolled",
       "object_types": ["relation", "way"],
-      "description": "Shown in piste details."
+      "description": "Rendered and shown in piste details."
     },
     {
       "key": "lit",
