@@ -1,6 +1,8 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import "../taginfo.json";
+import "./assets/robots.txt";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
 import { Map } from "./components/Map";
