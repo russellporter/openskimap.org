@@ -15,7 +15,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.11.2",
-    "@material-ui/styles": "^4.11.4",
+    "@material-ui/styles": "^4.11.5",
     "@turf/centroid": "^6.5.0",
     "@turf/distance": "^6.5.0",
     "@turf/helpers": "^6.5.0",
