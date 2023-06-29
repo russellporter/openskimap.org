@@ -1831,12 +1831,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chart.js@npm:^2.9.35":
-  version: 2.9.35
-  resolution: "@types/chart.js@npm:2.9.35"
+"@types/chart.js@npm:^2.9.37":
+  version: 2.9.37
+  resolution: "@types/chart.js@npm:2.9.37"
   dependencies:
     moment: ^2.10.2
-  checksum: 5b1571ac7190734109b055c897d9a33bbd6e0303b1640d290a68980da93002f302bc652d9d6f71719f2d3c05b22eee10f74516a1de8458ce82e8fe4bac339f74
+  checksum: 5626a8cc3b410c9f2668ee7efd5b1b408f7de814608f83f9fdb349f59e3c7f5eb7199e73b41e6634c24b4ccb8d3846b290264df8d4224d184f63b095f82cfb94
   languageName: node
   linkType: hard
 
@@ -6655,7 +6655,7 @@ __metadata:
     "@turf/line-slice-along": ^6.5.0
     "@turf/meta": ^6.5.0
     "@turf/nearest-point-on-line": ^6.5.0
-    "@types/chart.js": ^2.9.35
+    "@types/chart.js": ^2.9.37
     "@types/geojson": ^7946.0.8
     "@types/mapbox-gl": ^2.6.0
     "@types/memoize-one": ^4.1.1
@@ -6684,7 +6684,7 @@ __metadata:
     terser-webpack-plugin: ^5.3.0
     throttle-debounce: ^3.0.1
     ts-loader: ^9.2.6
-    tslib: ^2.5.0
+    tslib: ^2.5.2
     typescript: ^4.5.5
     webpack: ^5.76.0
     webpack-bundle-analyzer: ^4.5.0
@@ -8613,10 +8613,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "tslib@npm:2.5.0"
-  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
+"tslib@npm:^2.5.2":
+  version: 2.6.0
+  resolution: "tslib@npm:2.6.0"
+  checksum: c01066038f950016a18106ddeca4649b4d76caa76ec5a31e2a26e10586a59fceb4ee45e96719bf6c715648e7c14085a81fee5c62f7e9ebee68e77a5396e5538f
   languageName: node
   linkType: hard
 
