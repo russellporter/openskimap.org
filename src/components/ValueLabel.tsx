@@ -1,7 +1,7 @@
 // Copied from https://github.com/mui-org/material-ui/blob/master/packages/material-ui/src/Slider/ValueLabel.js
 
+import { withStyles } from "@material-ui/core";
 import { ValueLabelProps } from "@material-ui/core/Slider";
-import { withStyles } from "@material-ui/styles";
 import clsx from "clsx";
 import * as React from "react";
 
@@ -48,14 +48,8 @@ const styles = (theme: any) => ({
  * @ignore - internal component.
  */
 function ValueLabel(props: any) {
-  const {
-    children,
-    classes,
-    className,
-    open,
-    value,
-    valueLabelDisplay,
-  } = props;
+  const { children, classes, className, open, value, valueLabelDisplay } =
+    props;
 
   if (valueLabelDisplay === "off") {
     return children;
