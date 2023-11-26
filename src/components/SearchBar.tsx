@@ -22,7 +22,8 @@ import {
   SkiAreaProperties,
 } from "openskidata-format";
 import * as React from "react";
-import OutsideClickHandler from "react-outside-click-handler";
+import { useCallback, useRef, useState } from "react";
+import { useDetectClickOutside } from "react-detect-click-outside";
 import { debounce, throttle } from "throttle-debounce";
 import EventBus from "./EventBus";
 import { formattedRunUse } from "./Formatters";
@@ -49,152 +50,150 @@ enum Activity {
 
 type Result = SkiAreaFeature | LiftFeature | RunFeature;
 
-export default class SearchBar extends React.Component<Props, State> {
-  searchDebounced: debounce<(query: string) => void>;
-  searchThrottled: throttle<(query: string) => void>;
+const SearchBar: React.FC<Props> = (props) => {
+  const { width, eventBus, filtersShown } = props;
+  const [state, setState] = useState<State>({
+    searchQuery: "",
+    selectedIndex: 0,
+    results: [],
+    hideResults: true,
+  });
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      searchQuery: "",
-      selectedIndex: 0,
-      results: [],
-      hideResults: true,
-    };
-    this.searchDebounced = debounce(500, this.search);
-    this.searchThrottled = throttle(500, this.search);
-  }
+  const results = state.results;
+  const hideResults = state.hideResults;
 
-  private updateSearchQuery = (query: string) => {
-    this.setState({ searchQuery: query }, () => {
-      // If the query term is short or ends with a
-      // space, trigger the more impatient version.
-      if (query.length < 5 || query.endsWith(" ")) {
-        this.searchThrottled(query);
-      } else {
-        this.searchDebounced(query);
-      }
-    });
-  };
+  const stateRef = useRef<State>();
+  stateRef.current = state;
 
-  private search = (query: string) => {
+  const search = (query: string) => {
     fetch(
       "https://api.openskimap.org/search?query=" + encodeURIComponent(query)
     ).then((response) => {
-      if (this.state.searchQuery === query) {
+      if (stateRef.current?.searchQuery === query) {
         response.json().then((results) => {
-          this.setState({ results: results });
+          setState((prevState) => ({ ...prevState, results }));
         });
       }
     });
   };
 
-  private handleKeyNavigation = (e: React.KeyboardEvent) => {
+  const searchDebounced = useCallback(debounce(500, search), []);
+  const searchThrottled = useCallback(throttle(500, search), []);
+
+  const handleKeyNavigation = (e: React.KeyboardEvent) => {
     if (e.keyCode == 38) {
       e.preventDefault();
-      this.setState({
-        selectedIndex: Math.max(0, this.state.selectedIndex - 1),
-      });
+      setState((prevState) => ({
+        ...prevState,
+        selectedIndex: Math.max(0, state.selectedIndex - 1),
+      }));
     } else if (e.keyCode == 40) {
       e.preventDefault();
-      this.setState({
+      setState((prevState) => ({
+        ...prevState,
         selectedIndex: Math.min(
-          this.state.results.length - 1,
-          this.state.selectedIndex + 1
+          state.results.length - 1,
+          state.selectedIndex + 1
         ),
-      });
+      }));
     }
   };
 
-  render() {
-    const width = this.props.width;
-    const results = this.state.results;
-    const hideResults = this.state.hideResults;
-    const showResult = (result: Result) => {
-      this.setState({
-        searchQuery: "",
-        selectedIndex: 0,
-        results: [],
-        hideResults: true,
-      });
-      this.props.eventBus.showInfo(infoDataForResult(result));
-    };
+  const updateSearchQuery = (query: string) => {
+    setState((prevState) => {
+      const newState = { ...prevState, searchQuery: query };
+      // If the query term is short or ends with a space, trigger the more impatient version.
+      if (query.length < 5 || query.endsWith(" ")) {
+        searchThrottled(query);
+      } else {
+        searchDebounced(query);
+      }
+      return newState;
+    });
+  };
 
-    return (
-      <OutsideClickHandler
-        onOutsideClick={() => {
-          this.setState({ hideResults: true });
-        }}
-      >
-        <Paper style={{ width: width }} elevation={1}>
-          <div style={{ alignItems: "center", display: "flex" }}>
-            <IconButton
-              style={{ padding: "10" }}
-              aria-label="Menu"
-              onClick={this.props.eventBus.openSidebar}
-            >
-              <MenuIcon />
-            </IconButton>
-            <InputBase
-              onFocus={() => {
-                this.setState({ hideResults: false });
-              }}
-              style={{ marginLeft: "8", flex: "1" }}
-              placeholder="Search Ski Areas, Lifts, and Runs"
-              onChange={(e) => {
-                this.setState({ hideResults: false });
-                this.updateSearchQuery(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                this.handleKeyNavigation(e);
-                if (
-                  e.keyCode === 13 &&
-                  results.length > this.state.selectedIndex
-                ) {
-                  showResult(results[this.state.selectedIndex]);
-                }
-              }}
-              value={this.state.searchQuery}
-            />
-            <IconButton
-              style={{ padding: "10" }}
-              aria-label="Search"
-              disabled={this.state.searchQuery.length == 0}
-              onClick={() => {
-                if (results.length > 0) {
-                  showResult(results[0]);
-                }
-              }}
-            >
-              <SearchIcon />
-            </IconButton>
-            <Divider orientation="vertical" />
-            <IconButton
-              style={{ padding: "10" }}
-              color={this.props.filtersShown ? "primary" : "default"}
-              aria-label="Filters"
-              onClick={() => {
-                this.props.eventBus.showFilters();
-              }}
-            >
-              <FilterListIcon />
-            </IconButton>
-          </div>
-          {results.length > 0 && !hideResults ? (
-            <React.Fragment>
-              <Divider />
-              <SearchResults
-                onSelect={showResult}
-                selectedIndex={this.state.selectedIndex}
-                results={results}
-              />
-            </React.Fragment>
-          ) : null}
-        </Paper>
-      </OutsideClickHandler>
-    );
-  }
-}
+  const showResult = (result: Result) => {
+    setState((prevState) => ({
+      ...prevState,
+      searchQuery: "",
+      selectedIndex: 0,
+      results: [],
+      hideResults: true,
+    }));
+    eventBus.showInfo(infoDataForResult(result));
+  };
+
+  const ref = useDetectClickOutside({
+    onTriggered: () => {
+      setState((prevState) => ({ ...prevState, hideResults: true }));
+    },
+  });
+
+  return (
+    <Paper style={{ width: width }} elevation={1} ref={ref}>
+      <div style={{ alignItems: "center", display: "flex" }}>
+        <IconButton
+          style={{ padding: "10" }}
+          aria-label="Menu"
+          onClick={eventBus.openSidebar}
+        >
+          <MenuIcon />
+        </IconButton>
+        <InputBase
+          onFocus={() => {
+            setState((prevState) => ({ ...prevState, hideResults: false }));
+          }}
+          style={{ marginLeft: "8", flex: "1" }}
+          placeholder="Search Ski Areas, Lifts, and Runs"
+          onChange={(e) => {
+            setState((prevState) => ({ ...prevState, hideResults: false }));
+            updateSearchQuery(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            handleKeyNavigation(e);
+            if (e.keyCode === 13 && results.length > state.selectedIndex) {
+              showResult(results[state.selectedIndex]);
+            }
+          }}
+          value={state.searchQuery}
+        />
+        <IconButton
+          style={{ padding: "10" }}
+          aria-label="Search"
+          disabled={state.searchQuery.length == 0}
+          onClick={() => {
+            if (results.length > 0) {
+              showResult(results[0]);
+            }
+          }}
+        >
+          <SearchIcon />
+        </IconButton>
+        <Divider orientation="vertical" />
+        <IconButton
+          style={{ padding: "10" }}
+          color={filtersShown ? "primary" : "default"}
+          aria-label="Filters"
+          onClick={eventBus.showFilters}
+        >
+          <FilterListIcon />
+        </IconButton>
+      </div>
+      {results.length > 0 && !hideResults ? (
+        <React.Fragment>
+          <Divider />
+          <SearchResults
+            onSelect={showResult}
+            selectedIndex={state.selectedIndex}
+            results={results}
+          />
+        </React.Fragment>
+      ) : null}
+    </Paper>
+  );
+};
+
+export default SearchBar;
 
 export const SearchResults: React.FunctionComponent<{
   onSelect: (result: Result) => void;
