@@ -5,8 +5,10 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   Switch,
 } from "@material-ui/core";
+import { Map } from "@material-ui/icons";
 import EditIcon from "@material-ui/icons/Edit";
 import InfoIcon from "@material-ui/icons/Info";
 import SatelliteIcon from "@material-ui/icons/Satellite";
@@ -40,6 +42,20 @@ export default class Sidebar extends React.Component<Props, {}> {
             <List>
               <ListItem
                 button
+                key={"legend"}
+                onClick={() => {
+                  this.props.eventBus.setMapStyle(MapStyle.Terrain);
+                }}
+              >
+                <ListItemIcon>
+                  <Map />
+                </ListItemIcon>
+                <ListItemText primary={"Legend"} />
+              </ListItem>
+              <Divider />
+              <ListSubheader>Style</ListSubheader>
+              <ListItem
+                button
                 key={"terrain"}
                 onClick={() => {
                   this.props.eventBus.setMapStyle(MapStyle.Terrain);
@@ -64,9 +80,8 @@ export default class Sidebar extends React.Component<Props, {}> {
                 </ListItemIcon>
                 <ListItemText primary={"Satellite"} />
               </ListItem>
-            </List>
-            <Divider />
-            <List>
+              <Divider />
+              <ListSubheader>Overlays</ListSubheader>
               <ListItem key={"slope_classes"}>
                 <ListItemIcon>
                   <Warning />
@@ -83,9 +98,8 @@ export default class Sidebar extends React.Component<Props, {}> {
                   checked={this.props.mapFilters.slopeClassesEnabled}
                 />
               </ListItem>
-            </List>
-            <Divider />
-            <List>
+              <Divider />
+              <ListSubheader>More</ListSubheader>
               <ListItem
                 button
                 key={"edit"}
@@ -106,9 +120,7 @@ export default class Sidebar extends React.Component<Props, {}> {
                 </ListItemIcon>
                 <ListItemText primary={"About"} />
               </ListItem>
-            </List>
-            <Divider />
-            <List>
+              <Divider />
               <ListItem button onClick={ExternalURLOpener.openPrivacyPolicy}>
                 <ListItemText primary={"Privacy Policy"} />
               </ListItem>
