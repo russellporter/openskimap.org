@@ -6,6 +6,7 @@ export default interface MapFilters {
   minVertical: number | null;
   minRunLength: number | null;
   selectedObjectID: string | null;
+  slopeClassesEnabled: boolean;
 }
 
 export const defaultMapFilters = {
@@ -14,4 +15,5 @@ export const defaultMapFilters = {
   minElevation: null,
   minRunLength: null,
   selectedObjectID: null,
+  slopeClassesEnabled: false,
 };

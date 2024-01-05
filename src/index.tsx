@@ -74,6 +74,7 @@ function initialize() {
             eventBus={store}
             open={state.sidebarOpen}
             selectedMapStyle={state.mapStyle}
+            mapFilters={state.mapFilters}
           />
         </Themed>,
         document.getElementById("sidebar")

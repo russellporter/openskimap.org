@@ -19,6 +19,7 @@ export default class MapFiltersManager {
       [this.runLayers(), rules.runs],
       [this.liftLayers(), rules.lifts],
       [this.selectedLayers(), rules.selected],
+      [this.slopeClassLayers(), rules.slopeClasses],
     ];
 
     const rulesByLayer = layersAndRules.reduce(
@@ -98,6 +99,12 @@ export default class MapFiltersManager {
       .map((layer) => layer.id);
   };
 
+  private slopeClassLayers = () => {
+    return this.layers()
+      .filter((layer) => layer["id"] === "slope-classes")
+      .map((layer) => layer.id);
+  };
+
   private selectedLayers = () => {
     return ["selected-run", "selected-lift"];
   };
@@ -106,7 +113,10 @@ export default class MapFiltersManager {
     return this.map.getStyle().layers || [];
   };
 
-  private setFilterOverride = (layerName: string, rules: any[] | "hidden") => {
+  private setFilterOverride = (
+    layerName: string,
+    rules: any[] | "hidden" | "visible"
+  ) => {
     const layer = this.map.getLayer(layerName);
     assert(layer.type !== "custom", "Custom layers are not supported");
     if (!layer) {
@@ -118,6 +128,10 @@ export default class MapFiltersManager {
       return;
     } else {
       this.map.setLayoutProperty(layer.id, "visibility", "visible");
+    }
+
+    if (rules === "visible") {
+      return;
     }
 
     if (!this.originalFilters.has(layerName)) {
@@ -149,17 +163,18 @@ export default class MapFiltersManager {
   };
 }
 
-type ObjectFilterRules = any[] | "hidden";
+type ObjectFilterRules = any[] | "hidden" | "visible";
 
 interface MapFilterRules {
   runs: ObjectFilterRules;
   skiAreas: ObjectFilterRules;
   lifts: ObjectFilterRules;
   selected: ObjectFilterRules;
+  slopeClasses: ObjectFilterRules;
 }
 
 function noRules(): MapFilterRules {
-  return { runs: [], skiAreas: [], lifts: [], selected: [] };
+  return { runs: [], skiAreas: [], lifts: [], selected: [], slopeClasses: [] };
 }
 
 function getFilterRules(filters: MapFilters): MapFilterRules {
@@ -169,12 +184,14 @@ function getFilterRules(filters: MapFilters): MapFilterRules {
     getVerticalFilterRules(filters),
     getRunLengthFilterRules(filters),
     getSelectedObjectFilterRules(filters),
+    getSlopeClassesFilterRules(filters),
   ].reduce((previous, rules) => {
     return {
       runs: combine(previous.runs, rules.runs),
       lifts: combine(previous.lifts, rules.lifts),
       skiAreas: combine(previous.skiAreas, rules.skiAreas),
       selected: combine(previous.selected, rules.selected),
+      slopeClasses: combine(previous.slopeClasses, rules.slopeClasses),
     };
   }, noRules());
 }
@@ -182,6 +199,10 @@ function getFilterRules(filters: MapFilters): MapFilterRules {
 function combine(left: ObjectFilterRules, right: ObjectFilterRules) {
   if (left === "hidden" || right === "hidden") {
     return "hidden";
+  }
+
+  if (left === "visible" || right === "visible") {
+    return "visible";
   }
 
   return left.concat(right);
@@ -196,6 +217,7 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
       lifts: "hidden",
       runs: [["has", "other"]],
       selected: [],
+      slopeClasses: [],
     };
   } else if (hasDownhill && !hasNordic) {
     return {
@@ -203,6 +225,7 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
       lifts: [],
       runs: [["any", ["has", "downhill"], ["has", "skitour"]]],
       selected: [],
+      slopeClasses: [],
     };
   } else if (hasNordic && !hasDownhill) {
     return {
@@ -210,6 +233,7 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
       lifts: "hidden",
       runs: [["has", "nordic"]],
       selected: [],
+      slopeClasses: [],
     };
   } else {
     return noRules();
@@ -223,6 +247,7 @@ function getElevationFilterRules(filters: MapFilters): MapFilterRules {
       lifts: [],
       runs: [],
       selected: [],
+      slopeClasses: [],
     };
   } else {
     return noRules();
@@ -236,6 +261,7 @@ function getVerticalFilterRules(filters: MapFilters): MapFilterRules {
       lifts: [],
       runs: [],
       selected: [],
+      slopeClasses: [],
     };
   } else {
     return noRules();
@@ -263,6 +289,7 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
     lifts: [],
     runs: [],
     selected: [],
+    slopeClasses: [],
   };
 }
 
@@ -281,4 +308,14 @@ function getSelectedObjectFilterRules(filters: MapFilters): MapFilterRules {
   }
 
   return rules;
+}
+
+function getSlopeClassesFilterRules(filters: MapFilters): MapFilterRules {
+  return {
+    skiAreas: [],
+    lifts: [],
+    runs: [],
+    selected: [],
+    slopeClasses: filters.slopeClassesEnabled ? "visible" : "hidden",
+  };
 }

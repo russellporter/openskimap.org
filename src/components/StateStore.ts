@@ -1,4 +1,5 @@
 import { Activity } from "openskidata-format";
+import { MapOverlay } from "../MapOverlay";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import { InfoData } from "./InfoData";
@@ -83,6 +84,15 @@ export default class StateStore implements EventBus {
       },
     });
   };
+
+  setOverlayEnabled(overlay: MapOverlay, enabled: boolean): void {
+    const updatedMapFilters = { ...this._state.mapFilters };
+    switch (overlay) {
+      case MapOverlay.SlopeClasses:
+        updatedMapFilters.slopeClassesEnabled = enabled;
+    }
+    this.update({ mapFilters: updatedMapFilters });
+  }
 
   setMinimumElevation(elevation: number) {
     this.update({

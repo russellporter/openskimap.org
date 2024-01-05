@@ -5,12 +5,16 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Switch,
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import InfoIcon from "@material-ui/icons/Info";
 import SatelliteIcon from "@material-ui/icons/Satellite";
 import TerrainIcon from "@material-ui/icons/Terrain";
+import Warning from "@material-ui/icons/Warning";
 import * as React from "react";
+import MapFilters from "../MapFilters";
+import { MapOverlay } from "../MapOverlay";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import * as ExternalURLOpener from "./ExternalURLOpener";
@@ -18,6 +22,7 @@ import * as ExternalURLOpener from "./ExternalURLOpener";
 interface Props {
   eventBus: EventBus;
   selectedMapStyle: MapStyle;
+  mapFilters: MapFilters;
   open: boolean;
 }
 
@@ -58,6 +63,25 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <SatelliteIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Satellite"} />
+              </ListItem>
+            </List>
+            <Divider />
+            <List>
+              <ListItem key={"slope_classes"}>
+                <ListItemIcon>
+                  <Warning />
+                </ListItemIcon>
+                <ListItemText primary={"Slope Class"} />
+                <Switch
+                  edge="end"
+                  onChange={(_, checked) => {
+                    this.props.eventBus.setOverlayEnabled(
+                      MapOverlay.SlopeClasses,
+                      checked
+                    );
+                  }}
+                  checked={this.props.mapFilters.slopeClassesEnabled}
+                />
               </ListItem>
             </List>
             <Divider />
