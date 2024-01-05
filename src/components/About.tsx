@@ -99,6 +99,14 @@ export default class About extends React.Component<Props> {
             </li>
           </ul>
         </Typography>
+        <Typography paragraph={true}>
+          Mapbox Vector Tiles based on the above GeoJSON are also available
+          under the license. See the{" "}
+          <Link href="https://tiles.skimap.org/openskimap.json">
+            TileJSON definition
+          </Link>{" "}
+          for usage.
+        </Typography>
       </>
     );
   }
