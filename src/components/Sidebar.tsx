@@ -71,7 +71,7 @@ export default class Sidebar extends React.Component<Props, {}> {
                 <ListItemIcon>
                   <Warning />
                 </ListItemIcon>
-                <ListItemText primary={"Slope Class"} />
+                <ListItemText primary={"Slope Class"} secondary={"Alps only"} />
                 <Switch
                   edge="end"
                   onChange={(_, checked) => {
