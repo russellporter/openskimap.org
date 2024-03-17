@@ -6,7 +6,9 @@ interface LabelWithIconProps {
   text: string;
 }
 
-export const LabelWithIcon: React.SFC<LabelWithIconProps> = (props) => {
+export const LabelWithIcon: React.FunctionComponent<LabelWithIconProps> = (
+  props
+) => {
   return (
     <span className={"label label-" + props.appearance}>
       {props.text}

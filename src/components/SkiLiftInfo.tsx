@@ -1,4 +1,4 @@
-import { Card, CardActions, CardContent, Typography } from "@material-ui/core";
+import { Card, CardActions, CardContent, Typography } from "@mui/material";
 import { getLiftNameAndType, LiftFeature } from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";

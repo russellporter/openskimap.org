@@ -1,8 +1,10 @@
-import { Link, Typography } from "@material-ui/core";
+import { Link, Typography } from "@mui/material";
 import Source, { SourceType } from "openskidata-format/dist/Source";
 import * as React from "react";
 
-export const SourceSummary: React.SFC<{ sources: Source[] }> = (props) => {
+export const SourceSummary: React.FunctionComponent<{ sources: Source[] }> = (
+  props
+) => {
   const hasOpenStreetMapSource = props.sources.some(
     (source) => source.type === SourceType.OPENSTREETMAP
   );

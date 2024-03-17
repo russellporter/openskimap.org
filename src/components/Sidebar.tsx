@@ -5,11 +5,11 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
-import InfoIcon from "@material-ui/icons/Info";
-import SatelliteIcon from "@material-ui/icons/Satellite";
-import TerrainIcon from "@material-ui/icons/Terrain";
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import InfoIcon from "@mui/icons-material/Info";
+import SatelliteIcon from "@mui/icons-material/Satellite";
+import TerrainIcon from "@mui/icons-material/Terrain";
 import * as React from "react";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";

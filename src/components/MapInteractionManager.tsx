@@ -60,5 +60,5 @@ export class MapInteractionManager {
     });
   };
 
-  _onClickItem = debounce(10, true, this._onClickItemUnthrottled);
+  _onClickItem = debounce(10, this._onClickItemUnthrottled, { atBegin: true });
 }

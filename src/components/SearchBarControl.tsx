@@ -1,13 +1,14 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-import controlWidth from "./controlWidth";
+import * as ReactDOM from "react-dom/client";
 import EventBus from "./EventBus";
 import SearchBar from "./SearchBar";
 import { Themed } from "./Themed";
+import controlWidth from "./controlWidth";
 
 export class SearchBarControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
+  _root: ReactDOM.Root;
   _map: mapboxgl.Map | null = null;
   _eventBus: EventBus;
   _filtersShown: boolean = false;
@@ -16,6 +17,7 @@ export class SearchBarControl implements mapboxgl.IControl {
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
+    this._root = ReactDOM.createRoot(this._container);
   }
 
   onAdd = (map: mapboxgl.Map) => {
@@ -38,15 +40,14 @@ export class SearchBarControl implements mapboxgl.IControl {
   };
 
   private render = () => {
-    ReactDOM.render(
+    this._root.render(
       <Themed>
         <SearchBar
           eventBus={this._eventBus}
           width={controlWidth(this._map!)}
           filtersShown={this._filtersShown}
         />
-      </Themed>,
-      this._container
+      </Themed>
     );
   };
 

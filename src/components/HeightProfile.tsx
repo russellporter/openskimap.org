@@ -1,20 +1,36 @@
 import turfLineSliceAlong from "@turf/line-slice-along";
 import turfNearestPointOnLine from "@turf/nearest-point-on-line";
-import { PluginServiceRegistrationOptions } from "chart.js";
+import {
+  CategoryScale,
+  Chart,
+  ChartData,
+  ChartEvent,
+  Filler,
+  LineElement,
+  LinearScale,
+  Plugin,
+  PointElement,
+} from "chart.js";
 import * as mapboxgl from "mapbox-gl";
 import memoize from "memoize-one";
 import {
   ElevationProfile,
-  getRunColor,
   RunDifficulty,
   RunFeature,
   RunProperties,
-  RunUse
+  RunUse,
+  getRunColor,
 } from "openskidata-format";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
 import "whatwg-fetch";
 import { ElevationData } from "./ElevationData";
+
+Chart.register(LinearScale);
+Chart.register(CategoryScale);
+Chart.register(PointElement);
+Chart.register(LineElement);
+Chart.register(Filler);
 
 export interface HeightProfileHighlightProps {
   chartHighlightPosition: mapboxgl.LngLat | null;
@@ -47,21 +63,22 @@ export class HeightProfile extends React.Component<
     );
   }
 
-  onHover(chart: Chart, event: MouseEvent, activeElements: Array<{}>): any {
+  onHover(event: ChartEvent, chart: Chart): any {
     let area = chart.chartArea;
-    if (area === undefined) {
+    let x = event.x;
+    let y = event.y;
+
+    if (x === null || y === null) {
       this.props.onHoverChartPosition(null);
       return;
     }
     let left = area.left;
     let right = area.right;
-    let x = event.offsetX;
     if (x < left || x > right) {
       this.props.onHoverChartPosition(null);
       return;
     }
 
-    let y = event.offsetY;
     if (y > area.bottom || y < area.top) {
       this.props.onHoverChartPosition(null);
       return;
@@ -97,17 +114,13 @@ export class HeightProfile extends React.Component<
       return null;
     }
 
-    const highlightIndex = this.convertedChartHighlightPosition(
-      this.props.chartHighlightPosition,
-      feature
-    );
     const elevations = elevationData.coordinatesWithElevation.map(
       (coordinate) => {
         return coordinate[2];
       }
     );
 
-    const data = {
+    const data: ChartData<"line", number[], string> = {
       labels: chartLabels(elevations, elevationData.heightProfileResolution),
       datasets: [
         {
@@ -119,13 +132,24 @@ export class HeightProfile extends React.Component<
       ],
     };
 
-    const plugins: PluginServiceRegistrationOptions[] = [
+    const plugins: Plugin[] = [
       {
+        id: "gradient",
         beforeRender: function (chart) {
           // Based on https://github.com/chartjs/Chart.js/issues/3071
-          const context = chart.ctx!;
-          const xScale = (chart as any).scales["x-axis-0"] as any;
-          const dataset = chart.data.datasets![0]!;
+          const context = chart.ctx;
+          const xScale = chart.scales.x;
+
+          if (!xScale || !chart.data.datasets) {
+            return;
+          }
+
+          const dataset = chart.data.datasets[0];
+
+          // Avoid duplicate work
+          if (dataset.backgroundColor instanceof CanvasGradient) {
+            return;
+          }
 
           const left = xScale.getPixelForValue(xScale.min);
           const right = xScale.getPixelForValue(xScale.max);
@@ -136,14 +160,13 @@ export class HeightProfile extends React.Component<
 
           const gradientFill = context.createLinearGradient(left, 0, right, 0);
 
-          var model = (chart as any).data.datasets[0]._meta[
-            Object.keys((dataset as any)._meta)[0]
-          ].dataset._model;
-          model.backgroundColor = configureChartGradient(
+          dataset.backgroundColor = configureChartGradient(
             feature,
             elevationProfile,
             gradientFill
           );
+
+          chart.update();
         },
       },
     ];
@@ -151,41 +174,38 @@ export class HeightProfile extends React.Component<
     let that = this;
     return (
       <div className="height-profile">
-        <LineChart
+        <Line
           data={data}
           plugins={plugins}
           options={{
-            legend: {
-              display: false,
-            },
             animation: {
               duration: 0, // general animation time
             },
-            tooltips: {
-              enabled: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                enabled: false,
+              },
             },
             scales: {
-              yAxes: [
-                {
-                  ticks: {
-                    suggestedMax:
-                      Math.max(
-                        elevationData.maxElevation - elevationData.minElevation,
-                        100
-                      ) + elevationData.minElevation,
-                    callback: (elevation: any) => {
-                      return elevation + "m";
-                    },
+              y: {
+                type: "linear",
+                suggestedMax:
+                  Math.max(
+                    elevationData.maxElevation - elevationData.minElevation,
+                    100
+                  ) + elevationData.minElevation,
+                ticks: {
+                  callback: (elevation: any) => {
+                    return elevation + "m";
                   },
                 },
-              ],
+              },
             },
-            onHover: function (
-              this: Chart,
-              event: MouseEvent,
-              activeElements: Array<{}>
-            ): any {
-              that.onHover(this, event, activeElements);
+            onHover: function (event, _, chart): any {
+              that.onHover(event, chart);
             },
           }}
         />

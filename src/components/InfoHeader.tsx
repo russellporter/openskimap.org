@@ -1,38 +1,37 @@
-import { makeStyles } from "@material-ui/core";
+import { styled } from "@mui/material/styles";
 import * as React from "react";
 import { TopRightCloseButton } from "./CloseButton";
 import { InfoBreadcrumbs, InfoBreadcrumbsProps } from "./InfoBreadcrumbs";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+const Root = styled("div")({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+});
+
+const Content = styled("span")(({ theme }) => ({
+  display: "inline-flex",
+  "&:last-child": {
+    marginRight: 0,
   },
-  breadcrumbsAndContent: {},
-  content: {
-    display: "inline-flex",
-    "&:last-child": {
-      marginRight: 0,
-    },
-    "& > *": {
-      marginRight: theme.spacing(1),
-    },
+  "& > *": {
+    marginRight: theme.spacing(1),
   },
 }));
 
-export const InfoHeader: React.FunctionComponent<{
-  onClose: () => void;
-  breadcrumbs?: InfoBreadcrumbsProps;
-}> = (props) => {
-  const classes = useStyles();
+export const InfoHeader: React.FunctionComponent<
+  React.PropsWithChildren<{
+    onClose: () => void;
+    breadcrumbs?: InfoBreadcrumbsProps;
+  }>
+> = (props) => {
   return (
-    <div className={classes.root}>
-      <div className={classes.breadcrumbsAndContent}>
+    <Root>
+      <div>
         {props.breadcrumbs && <InfoBreadcrumbs {...props.breadcrumbs} />}
-        <span className={classes.content}>{props.children}</span>
+        <Content>{props.children}</Content>
       </div>
       <TopRightCloseButton onClick={props.onClose} />
-    </div>
+    </Root>
   );
 };

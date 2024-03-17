@@ -1,4 +1,5 @@
-import { Breadcrumbs, Link, makeStyles } from "@material-ui/core";
+import { Breadcrumbs, Link } from "@mui/material";
+import { styled } from "@mui/system";
 import {
   FeatureType,
   LiftFeature,
@@ -12,27 +13,27 @@ import {
 import * as React from "react";
 import EventBus from "./EventBus";
 
-const useStyles = makeStyles((theme) => ({
-  breadcrumbs: {
-    marginBottom: theme.spacing(0.5),
-  },
-  breadcrumb: {
-    maxWidth: "250px",
-    whiteSpace: "nowrap",
-    display: "inline-block",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    verticalAlign: "bottom",
-  },
+const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
+  marginBottom: theme.spacing(0.5),
 }));
+
+const StyledBreadcrumb = styled("span")({
+  maxWidth: "250px",
+  whiteSpace: "nowrap",
+  display: "inline-block",
+  textOverflow: "ellipsis",
+  overflow: "hidden",
+  verticalAlign: "bottom",
+});
 
 export type InfoBreadcrumbsProps = {
   feature: LiftFeature | RunFeature | SkiAreaFeature;
   eventBus: EventBus;
 };
 
-export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
-  const classes = useStyles();
+export const InfoBreadcrumbs: React.FunctionComponent<InfoBreadcrumbsProps> = (
+  props
+) => {
   const properties = props.feature.properties;
   const breadcrumbs = getBreadcrumbs(properties, props.eventBus);
 
@@ -43,36 +44,28 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
   return (
     <>
       {
-        <Breadcrumbs
-          classes={{ root: classes.breadcrumbs }}
-          separator="›"
-          aria-label="breadcrumb"
-        >
+        <StyledBreadcrumbs separator="›" aria-label="breadcrumb">
           {breadcrumbs.map((breadcrumbsGroup, groupIndex) => (
             <span key={groupIndex}>
               {breadcrumbsGroup
                 .map((breadcrumb) => {
                   if (breadcrumb.onClick) {
                     return (
-                      <Link
-                        classes={{ root: classes.breadcrumb }}
-                        color="inherit"
-                        key={breadcrumb.id}
-                        href={"#"}
-                        onClick={breadcrumb.onClick}
-                      >
-                        {breadcrumb.text}
-                      </Link>
+                      <StyledBreadcrumb key={breadcrumb.id}>
+                        <Link
+                          color="inherit"
+                          href={"#"}
+                          onClick={breadcrumb.onClick}
+                        >
+                          {breadcrumb.text}
+                        </Link>
+                      </StyledBreadcrumb>
                     );
                   } else {
                     return (
-                      <span
-                        className={classes.breadcrumb}
-                        color="inherit"
-                        key={breadcrumb.id}
-                      >
+                      <StyledBreadcrumb color="inherit" key={breadcrumb.id}>
                         {breadcrumb.text}
-                      </span>
+                      </StyledBreadcrumb>
                     );
                   }
                 })
@@ -93,7 +86,7 @@ export const InfoBreadcrumbs: React.SFC<InfoBreadcrumbsProps> = (props) => {
                 )}
             </span>
           ))}
-        </Breadcrumbs>
+        </StyledBreadcrumbs>
       }
     </>
   );

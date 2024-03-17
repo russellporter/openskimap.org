@@ -1,4 +1,4 @@
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import * as React from "react";
 
 export function getWebsiteActions(websites: string[]): JSX.Element[] {

@@ -1,6 +1,6 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom/client";
 import "../taginfo.json";
 import "./assets/robots.txt";
 import { AboutModal } from "./components/AboutModal";
@@ -15,13 +15,17 @@ import { updatePageMetadata } from "./components/utils/PageMetadata";
 import * as Config from "./Config";
 import "./index.css";
 
-let map: Map | null = null;
-
 function initialize() {
   registerServiceWorker();
 
+  const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
+  const aboutRoot = ReactDOM.createRoot(
+    document.getElementById("about-modal")!
+  );
+
   const store = new StateStore(getInitialState(), update);
 
+  window.addEventListener("pagehide", onPageHide);
   window.addEventListener(
     "popstate",
     () => {
@@ -47,10 +51,10 @@ function initialize() {
     zoom = 2;
   }
 
-  map = new Map(center, zoom, "map", store);
+  const map = new Map(center, zoom, "map", store);
 
   store.editMapHandler = () => {
-    editMap(map!);
+    editMap(map);
   };
 
   store.urlUpdate(getURLState());
@@ -64,56 +68,53 @@ function initialize() {
     });
 
     if (changes.mapStyle !== undefined) {
-      map!.setStyle(state.mapStyle);
+      map.setStyle(state.mapStyle);
     }
 
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
-      ReactDOM.render(
+      sidebarRoot.render(
         <Themed>
           <Sidebar
             eventBus={store}
             open={state.sidebarOpen}
             selectedMapStyle={state.mapStyle}
           />
-        </Themed>,
-        document.getElementById("sidebar")
+        </Themed>
       );
     }
 
     if (changes.aboutInfoOpen !== undefined) {
-      ReactDOM.render(
+      aboutRoot.render(
         <Themed>
           <AboutModal eventBus={store} open={state.aboutInfoOpen} />
-        </Themed>,
-        document.getElementById("about-modal")
+        </Themed>
       );
     }
 
     if (changes.mapFiltersOpen !== undefined) {
-      map!.setFiltersVisible(changes.mapFiltersOpen);
+      map.setFiltersVisible(changes.mapFiltersOpen);
     }
 
     if (changes.info !== undefined) {
       if (changes.info === null) {
         updatePageMetadata(null);
       }
-      map!.setInfo(changes.info);
+      map.setInfo(changes.info);
     }
 
     if (changes.mapFilters !== undefined) {
-      map!.setFilters(state.mapFilters);
+      map.setFilters(state.mapFilters);
     }
+  }
+
+  function onPageHide() {
+    localStorage.setItem("slippy.lat", map.getCenter().lat.toString());
+    localStorage.setItem("slippy.lng", map.getCenter().lng.toString());
+    localStorage.setItem("slippy.zoom", map.getZoom().toString());
   }
 }
 
-function unload() {
-  localStorage.setItem("slippy.lat", map!.getCenter().lat.toString());
-  localStorage.setItem("slippy.lng", map!.getCenter().lng.toString());
-  localStorage.setItem("slippy.zoom", map!.getZoom().toString());
-}
-
 window.addEventListener("load", initialize);
-window.addEventListener("unload", unload);
 
 async function registerServiceWorker(): Promise<void> {
   // Check that service workers are supported

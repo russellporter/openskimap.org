@@ -5,21 +5,11 @@
     "strict": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "target": "es6",
+    "esModuleInterop": true,
+    "target": "ES2020",
     "jsx": "react",
     "importHelpers": true,
-    "lib": [
-      "dom",
-      "es6",
-      "es2015.promise",
-      "es2015.collection",
-      "es2016.array.include",
-      "es2019.array"
-    ],
-    "typeRoots": ["./node_modules/@types"],
-    "paths": {
-      "*": ["types/*"]
-    },
+    "lib": ["dom", "ES2020"],
     "baseUrl": "."
   },
   "include": ["./src/**/*"]

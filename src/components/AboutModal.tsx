@@ -1,20 +1,13 @@
-import { Dialog, makeStyles } from "@material-ui/core";
+import { Dialog } from "@mui/material";
+import { Box } from "@mui/system";
 import * as React from "react";
 import About from "./About";
 import EventBus from "./EventBus";
-
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    padding: theme.spacing(4),
-  },
-}));
 
 export const AboutModal: React.FunctionComponent<{
   open: boolean;
   eventBus: EventBus;
 }> = (props) => {
-  const classes = useStyles();
-
   return (
     <Dialog
       open={props.open}
@@ -22,9 +15,9 @@ export const AboutModal: React.FunctionComponent<{
         props.eventBus.closeAboutInfo();
       }}
     >
-      <div className={classes.paper}>
+      <Box sx={{ p: 4 }}>
         <About eventBus={props.eventBus} />
-      </div>
+      </Box>
     </Dialog>
   );
 };

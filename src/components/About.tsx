@@ -1,4 +1,4 @@
-import { Link, Typography } from "@material-ui/core";
+import { Link, Typography } from "@mui/material";
 import * as React from "react";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
@@ -80,7 +80,7 @@ export default class About extends React.Component<Props> {
           GeoJSON data is available under the license. Note that the data format
           is not stable and changes on a regular basis as the project evolves.
         </Typography>
-        <Typography>
+        <Typography component="div">
           <ul>
             <li>
               <Link href="https://tiles.skimap.org/geojson/ski_areas.geojson">

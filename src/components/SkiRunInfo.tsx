@@ -1,16 +1,15 @@
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import HighlightIcon from "@mui/icons-material/Highlight";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import WarningIcon from "@mui/icons-material/Warning";
 import {
   Avatar,
   Card,
   CardActions,
   CardContent,
   Chip,
-  makeStyles,
   Typography,
-} from "@material-ui/core";
-import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
-import HighlightIcon from "@material-ui/icons/Highlight";
-import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
-import WarningIcon from "@material-ui/icons/Warning";
+} from "@mui/material";
 import turfLength from "@turf/length";
 import { LineString } from "geojson";
 import {
@@ -35,19 +34,7 @@ interface Props extends HeightProfileHighlightProps {
   eventBus: EventBus;
 }
 
-const useStyles = makeStyles((theme) => ({
-  chips: {
-    "&:last-child": {
-      marginRight: 0,
-    },
-    "& > *": {
-      marginRight: theme.spacing(1),
-    },
-  },
-}));
-
 export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
-  const classes = useStyles();
   const feature = props.feature;
   const properties = feature.properties;
   const geometry = props.feature.geometry;
@@ -94,51 +81,49 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
           </Typography>
         </InfoHeader>
         {subtitle && <Typography>{subtitle}</Typography>}
-        <div className={classes.chips}>
-          <GroomingLabel feature={feature} />
-          {properties.oneway === true &&
-          !properties.uses.includes(RunUse.Downhill) ? (
-            <Chip
-              avatar={
-                <Avatar>
-                  <ArrowForwardIcon />
-                </Avatar>
-              }
-              label="One Way"
-            />
-          ) : null}
-          {properties.lit === true ? (
-            <Chip
-              avatar={
-                <Avatar>
-                  <HighlightIcon />
-                </Avatar>
-              }
-              label="Night Lit"
-            />
-          ) : null}
-          {properties.gladed === true ? <Chip label="Gladed" /> : null}
-          {properties.patrolled === true ? (
-            <Chip
-              avatar={
-                <Avatar>
-                  <LocalHospitalIcon />
-                </Avatar>
-              }
-              label="Patrolled"
-            />
-          ) : null}
-          {properties.patrolled === false ? (
-            <Chip
-              avatar={
-                <Avatar>
-                  <WarningIcon />
-                </Avatar>
-              }
-              label="Not Patrolled"
-            />
-          ) : null}
-        </div>
+        <GroomingLabel feature={feature} />
+        {properties.oneway === true &&
+        !properties.uses.includes(RunUse.Downhill) ? (
+          <Chip
+            avatar={
+              <Avatar>
+                <ArrowForwardIcon />
+              </Avatar>
+            }
+            label="One Way"
+          />
+        ) : null}
+        {properties.lit === true ? (
+          <Chip
+            avatar={
+              <Avatar>
+                <HighlightIcon />
+              </Avatar>
+            }
+            label="Night Lit"
+          />
+        ) : null}
+        {properties.gladed === true ? <Chip label="Gladed" /> : null}
+        {properties.patrolled === true ? (
+          <Chip
+            avatar={
+              <Avatar>
+                <LocalHospitalIcon />
+              </Avatar>
+            }
+            label="Patrolled"
+          />
+        ) : null}
+        {properties.patrolled === false ? (
+          <Chip
+            avatar={
+              <Avatar>
+                <WarningIcon />
+              </Avatar>
+            }
+            label="Not Patrolled"
+          />
+        ) : null}
         <Typography className={"distance-and-elevation-info"}>
           {inclinedDistance ? (
             <span>Distance: {Math.round(inclinedDistance)}m</span>
@@ -181,7 +166,9 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
   );
 };
 
-const GroomingLabel: React.SFC<{ feature: RunFeature }> = (props) => {
+const GroomingLabel: React.FunctionComponent<{ feature: RunFeature }> = (
+  props
+) => {
   const grooming = props.feature.properties.grooming;
   const isNordic = props.feature.properties.uses.includes(RunUse.Nordic);
 

@@ -1,13 +1,13 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-import controlWidth from "./controlWidth";
+import * as ReactDOM from "react-dom/client";
 import EventBus from "./EventBus";
 import HighlightManager, { ChartHighlighter } from "./HighlightManager";
 import { Info } from "./Info";
 import { InfoData } from "./InfoData";
 import { panToZoomLevel } from "./SkiAreaInfo";
 import { Themed } from "./Themed";
+import controlWidth from "./controlWidth";
 import { getFirstPoint } from "./utils/GeoJSON";
 
 export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
@@ -18,6 +18,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _highlightManager: HighlightManager | null = null;
   _chartHighlightPosition: mapboxgl.LngLat | null = null;
   _panToPositionAfterLoad: boolean = false;
+  _root: ReactDOM.Root;
 
   constructor(info: InfoData, eventBus: EventBus) {
     this._id = info.id;
@@ -25,6 +26,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
+    this._root = ReactDOM.createRoot(this._container);
   }
 
   onAdd = (map: mapboxgl.Map) => {
@@ -56,7 +58,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     if (!map) {
       return;
     }
-    ReactDOM.render(
+    this._root.render(
       <Themed>
         <Info
           id={this._id}
@@ -74,8 +76,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
           }}
           onHoverChartPosition={this._highlightManager!.hoveredChartPosition}
         />
-      </Themed>,
-      this._container
+      </Themed>
     );
   }
 }

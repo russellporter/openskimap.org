@@ -1,11 +1,11 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom/client";
 import MapFilters, { defaultMapFilters } from "../MapFilters";
-import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import { FilterForm } from "./FilterForm";
 import { Themed } from "./Themed";
+import controlWidth from "./controlWidth";
 
 export class FilterControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
@@ -13,11 +13,13 @@ export class FilterControl implements mapboxgl.IControl {
   _eventBus: EventBus;
   _filters: MapFilters = defaultMapFilters;
   _visibleSkiAreasCount: number = 0;
+  _root: ReactDOM.Root;
 
   constructor(eventBus: EventBus) {
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
+    this._root = ReactDOM.createRoot(this._container);
   }
 
   onAdd = (map: mapboxgl.Map) => {
@@ -47,7 +49,7 @@ export class FilterControl implements mapboxgl.IControl {
     if (!this._container.isConnected) {
       return;
     }
-    ReactDOM.render(
+    this._root.render(
       <Themed>
         <FilterForm
           eventBus={this._eventBus}
@@ -55,8 +57,7 @@ export class FilterControl implements mapboxgl.IControl {
           width={controlWidth(this._map!)}
           visibleSkiAreasCount={this._visibleSkiAreasCount}
         />
-      </Themed>,
-      this._container
+      </Themed>
     );
   };
 

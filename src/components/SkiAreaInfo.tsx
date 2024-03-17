@@ -4,12 +4,10 @@ import {
   CardContent,
   Tooltip,
   Typography,
-} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
+} from "@mui/material";
+import Button from "@mui/material/Button";
 import {
   Activity,
-  getFormattedLiftType,
-  getRunColor,
   LiftStatistics,
   LiftStatisticsByTypeKey,
   LiftType,
@@ -19,6 +17,8 @@ import {
   SkiAreaProperties,
   SkiAreaStatistics,
   SourceType,
+  getFormattedLiftType,
+  getRunColor,
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
@@ -143,7 +143,7 @@ function elevationSummary(
   );
 }
 
-const SkiAreaStatisticsSummary: React.SFC<{
+const SkiAreaStatisticsSummary: React.FunctionComponent<{
   activities: Activity[];
   statistics: SkiAreaStatistics;
   runConvention: RunConvention;
@@ -163,28 +163,26 @@ const SkiAreaStatisticsSummary: React.SFC<{
     RunDifficulty.EXTREME,
     null,
   ];
-  const runStatistics: [
-    Activity,
-    [RunDifficulty | null, number][]
-  ][] = allActivities.flatMap((activity) => {
-    const statisticsForActivity = props.statistics.runs.byActivity[activity];
-    if (statisticsForActivity !== undefined) {
-      return [
-        [
-          activity,
-          difficulties.flatMap((difficulty) => {
-            const statisticsForDifficulty =
-              statisticsForActivity.byDifficulty[difficulty || "other"];
-            if (statisticsForDifficulty !== undefined) {
-              return [[difficulty, statisticsForDifficulty.lengthInKm]];
-            }
-            return [];
-          }),
-        ],
-      ];
-    }
-    return [];
-  });
+  const runStatistics: [Activity, [RunDifficulty | null, number][]][] =
+    allActivities.flatMap((activity) => {
+      const statisticsForActivity = props.statistics.runs.byActivity[activity];
+      if (statisticsForActivity !== undefined) {
+        return [
+          [
+            activity,
+            difficulties.flatMap((difficulty) => {
+              const statisticsForDifficulty =
+                statisticsForActivity.byDifficulty[difficulty || "other"];
+              if (statisticsForDifficulty !== undefined) {
+                return [[difficulty, statisticsForDifficulty.lengthInKm]];
+              }
+              return [];
+            }),
+          ],
+        ];
+      }
+      return [];
+    });
 
   return (
     <>
@@ -306,7 +304,7 @@ function getLiftCategoryName(category: LiftCategory) {
   }
 }
 
-const RunDifficultyBarChart: React.SFC<{
+const RunDifficultyBarChart: React.FunctionComponent<{
   runConvention: RunConvention;
   activity: Activity;
   totalRunKm: number;
@@ -328,16 +326,20 @@ const RunDifficultyBarChart: React.SFC<{
         placement="bottom"
         PopperProps={{
           popperOptions: {
-            modifiers: {
-              offset: {
-                enabled: true,
-                offset: "0px, -8px",
+            modifiers: [
+              {
+                name: "offset",
+                options: {
+                  offset: "0px, -8px",
+                },
               },
-              flip: {
-                enabled: false,
-                padding: 0,
+              {
+                name: "flip",
+                options: {
+                  padding: 0,
+                },
               },
-            },
+            ],
           },
         }}
       >

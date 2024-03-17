@@ -3,18 +3,16 @@
   "typescript.preferences.importModuleSpecifier": "relative",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.tabSize": 2,
-  "prettier.packageManager": "yarn",
   "prettier.tabWidth": 2,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    "source.organizeImports": "explicit"
   },
-  "eslint.packageManager": "yarn",
   "npm.packageManager": "yarn",
   "search.exclude": {
     "**/.yarn": true,
     "**/.pnp.*": true
   },
-  "prettier.prettierPath": ".yarn/sdks/prettier/index.js",
+  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
   "typescript.enablePromptUseWorkspaceTsdk": true
 }

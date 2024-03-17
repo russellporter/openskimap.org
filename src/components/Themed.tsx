@@ -1,7 +1,11 @@
-import { MuiThemeProvider } from "@material-ui/core";
+import { StyledEngineProvider, ThemeProvider } from "@mui/material";
 import * as React from "react";
 import { theme } from "./Theme";
 
-export const Themed: React.FunctionComponent = (props) => (
-  <MuiThemeProvider theme={theme}>{props.children}</MuiThemeProvider>
+export const Themed: React.FunctionComponent<React.PropsWithChildren<{}>> = (
+  props
+) => (
+  <StyledEngineProvider injectFirst>
+    <ThemeProvider theme={theme}>{props.children}</ThemeProvider>
+  </StyledEngineProvider>
 );

@@ -1,25 +1,19 @@
-import {
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-} from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import InputBase from "@material-ui/core/InputBase";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import MenuIcon from "@material-ui/icons/Menu";
-import SearchIcon from "@material-ui/icons/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
+import { Divider, List, ListItem, ListItemText, Paper } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import InputBase from "@mui/material/InputBase";
 import centroid from "@turf/centroid";
 import {
   FeatureType,
-  getLiftNameAndType,
   LiftFeature,
   LiftProperties,
   RunFeature,
   RunProperties,
   SkiAreaFeature,
   SkiAreaProperties,
+  getLiftNameAndType,
 } from "openskidata-format";
 import * as React from "react";
 import { useCallback, useRef, useState } from "react";
@@ -136,10 +130,12 @@ const SearchBar: React.FC<Props> = (props) => {
           style={{ padding: "10" }}
           aria-label="Menu"
           onClick={eventBus.openSidebar}
+          size="large"
         >
           <MenuIcon />
         </IconButton>
         <InputBase
+          name="search"
           onFocus={() => {
             setState((prevState) => ({ ...prevState, hideResults: false }));
           }}
@@ -166,6 +162,7 @@ const SearchBar: React.FC<Props> = (props) => {
               showResult(results[0]);
             }
           }}
+          size="large"
         >
           <SearchIcon />
         </IconButton>
@@ -175,6 +172,7 @@ const SearchBar: React.FC<Props> = (props) => {
           color={filtersShown ? "primary" : "default"}
           aria-label="Filters"
           onClick={eventBus.showFilters}
+          size="large"
         >
           <FilterListIcon />
         </IconButton>

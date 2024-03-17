@@ -1,7 +1,7 @@
-import { Tooltip } from "@material-ui/core";
-import CancelIcon from "@material-ui/icons/Cancel";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import HelpIcon from "@material-ui/icons/Help";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HelpIcon from "@mui/icons-material/Help";
+import { Tooltip } from "@mui/material";
 import { Status } from "openskidata-format";
 import * as React from "react";
 
@@ -11,7 +11,7 @@ interface Props {
   hideIfOperating: Boolean;
 }
 
-export const StatusIcon: React.SFC<Props> = (props) => {
+export const StatusIcon: React.FunctionComponent<Props> = (props) => {
   if (props.hideIfOperating && props.status === Status.Operating) {
     return null;
   }

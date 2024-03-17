@@ -1,5 +1,5 @@
-import { IconButton } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
 
 export const TopRightCloseButton: React.FunctionComponent<{
@@ -10,7 +10,7 @@ export const TopRightCloseButton: React.FunctionComponent<{
       style={{ marginRight: "-16px", marginTop: "-16px" }}
       aria-label="Close"
       onClick={props.onClick}
-    >
+      size="large">
       <CloseIcon />
     </IconButton>
   );

@@ -1,32 +1,24 @@
-import { Chip, makeStyles } from "@material-ui/core";
+import { Chip, styled } from "@mui/material";
 import * as React from "react";
 
-const useStyles = makeStyles((theme) => ({
-  label: {
+const StyledChip = styled(Chip)(({ theme }) => ({
+  "& .MuiChip-label": {
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
     color: "white",
     fontSize: "1.25rem",
   },
-  root: {
-    minWidth: "32px",
-    flexShrink: 0,
-  },
+  minWidth: "32px",
+  flexShrink: 0,
 }));
 
 export const Badge: React.FunctionComponent<{
   text: string;
   color: string;
 }> = (props) => {
-  const classes = useStyles();
-
   return (
-    <Chip
+    <StyledChip
       label={props.text}
-      classes={{
-        root: classes.root,
-        label: classes.label,
-      }}
       style={{
         backgroundColor: props.color,
       }}
