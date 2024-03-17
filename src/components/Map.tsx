@@ -6,6 +6,7 @@ import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
 import { InfoControl } from "./InfoControl";
 import { InfoData } from "./InfoData";
+import { LegendControl } from "./LegendControl";
 import MapFilterManager from "./MapFilterManager";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
@@ -17,6 +18,7 @@ export class Map {
   private eventBus: EventBus;
   private infoControl: InfoControl | null = null;
   private filterControl: FilterControl;
+  private legendControl: LegendControl;
   private searchBarControl: SearchBarControl;
   private loaded = false;
   private filtersVisible = false;
@@ -39,6 +41,7 @@ export class Map {
       attributionControl: false,
     });
     this.filterControl = new FilterControl(eventBus);
+    this.legendControl = new LegendControl(eventBus);
     this.searchBarControl = new SearchBarControl(eventBus);
 
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
@@ -127,6 +130,16 @@ export class Map {
       }
 
       this.updateVisibleSkiAreasCountUnthrottled();
+    });
+  };
+
+  setLegendVisible = (visible: boolean) => {
+    this.waitForMapLoaded(() => {
+      if (visible) {
+        this.map.addControl(this.legendControl);
+      } else {
+        this.map.removeControl(this.legendControl);
+      }
     });
   };
 

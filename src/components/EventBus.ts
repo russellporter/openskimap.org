@@ -9,6 +9,8 @@ export default interface EventBus {
   closeSidebar(): void;
   openAboutInfo(): void;
   closeAboutInfo(): void;
+  openLegend(): void;
+  closeLegend(): void;
   setMapStyle(style: MapStyle): void;
   setOverlayEnabled(overlay: MapOverlay, enabled: boolean): void;
   toggleActivity(activity: Activity): void;

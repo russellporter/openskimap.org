@@ -23,6 +23,14 @@ export default class StateStore implements EventBus {
     this.editMapHandler!();
   };
 
+  openLegend = () => {
+    this.update({ legendOpen: true });
+  };
+
+  closeLegend = () => {
+    this.update({ legendOpen: false });
+  };
+
   openSidebar = () => {
     this.update({ sidebarOpen: true });
   };

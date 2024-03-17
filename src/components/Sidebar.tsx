@@ -44,13 +44,33 @@ export default class Sidebar extends React.Component<Props, {}> {
                 button
                 key={"legend"}
                 onClick={() => {
-                  this.props.eventBus.setMapStyle(MapStyle.Terrain);
+                  this.props.eventBus.openLegend();
                 }}
               >
                 <ListItemIcon>
                   <Map />
                 </ListItemIcon>
                 <ListItemText primary={"Legend"} />
+              </ListItem>
+              <ListItem
+                button
+                key={"edit"}
+                onClick={this.props.eventBus.editMap}
+              >
+                <ListItemIcon>
+                  <EditIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Edit"} />
+              </ListItem>
+              <ListItem
+                button
+                key={"about"}
+                onClick={this.props.eventBus.openAboutInfo}
+              >
+                <ListItemIcon>
+                  <InfoIcon />
+                </ListItemIcon>
+                <ListItemText primary={"About"} />
               </ListItem>
               <Divider />
               <ListSubheader>Style</ListSubheader>
@@ -97,28 +117,6 @@ export default class Sidebar extends React.Component<Props, {}> {
                   }}
                   checked={this.props.mapFilters.slopeClassesEnabled}
                 />
-              </ListItem>
-              <Divider />
-              <ListSubheader>More</ListSubheader>
-              <ListItem
-                button
-                key={"edit"}
-                onClick={this.props.eventBus.editMap}
-              >
-                <ListItemIcon>
-                  <EditIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Edit"} />
-              </ListItem>
-              <ListItem
-                button
-                key={"about"}
-                onClick={this.props.eventBus.openAboutInfo}
-              >
-                <ListItemIcon>
-                  <InfoIcon />
-                </ListItemIcon>
-                <ListItemText primary={"About"} />
               </ListItem>
               <Divider />
               <ListItem button onClick={ExternalURLOpener.openPrivacyPolicy}>

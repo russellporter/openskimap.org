@@ -67,7 +67,11 @@ function initialize() {
       map!.setStyle(state.mapStyle);
     }
 
-    if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
+    if (
+      changes.sidebarOpen !== undefined ||
+      changes.mapStyle !== undefined ||
+      changes.mapFilters !== undefined
+    ) {
       ReactDOM.render(
         <Themed>
           <Sidebar
@@ -88,6 +92,10 @@ function initialize() {
         </Themed>,
         document.getElementById("about-modal")
       );
+    }
+
+    if (changes.legendOpen !== undefined) {
+      map!.setLegendVisible(changes.legendOpen);
     }
 
     if (changes.mapFiltersOpen !== undefined) {

@@ -13,6 +13,7 @@ export default interface State {
 
 export interface StateChanges {
   sidebarOpen?: boolean;
+  legendOpen?: boolean;
   aboutInfoOpen?: boolean;
   mapFiltersOpen?: boolean;
   mapStyle?: MapStyle;
