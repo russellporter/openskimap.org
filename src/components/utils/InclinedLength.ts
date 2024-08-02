@@ -1,6 +1,6 @@
 import distance from "@turf/distance";
-import { LineString } from "@turf/helpers";
 import { segmentReduce } from "@turf/meta";
+import { LineString } from "geojson";
 
 export default function getInclinedLengthInMeters(
   geometry: LineString
