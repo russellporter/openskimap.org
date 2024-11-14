@@ -51,10 +51,10 @@ export class MapStyleControl implements mapboxgl.IControl {
     );
     if (enabled) {
       this._satelliteButton.classList.add("openskimap-style-enabled");
-      map && map.setStyle("https://tiles.skimap.org/styles/satellite.json");
+      map && map.setStyle("https://tiles.openskimap.org/styles/satellite.json");
     } else {
       this._satelliteButton.classList.remove("openskimap-style-enabled");
-      map && map.setStyle("https://tiles.skimap.org/styles/terrain.json");
+      map && map.setStyle("https://tiles.openskimap.org/styles/terrain.json");
     }
   };
 

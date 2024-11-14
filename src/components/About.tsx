@@ -83,17 +83,17 @@ export default class About extends React.Component<Props> {
         <Typography component="div">
           <ul>
             <li>
-              <Link href="https://tiles.skimap.org/geojson/ski_areas.geojson">
+              <Link href="https://tiles.openskimap.org/geojson/ski_areas.geojson">
                 Ski Areas
               </Link>
             </li>
             <li>
-              <Link href="https://tiles.skimap.org/geojson/lifts.geojson">
+              <Link href="https://tiles.openskimap.org/geojson/lifts.geojson">
                 Lifts
               </Link>
             </li>
             <li>
-              <Link href="https://tiles.skimap.org/geojson/runs.geojson">
+              <Link href="https://tiles.openskimap.org/geojson/runs.geojson">
                 Runs
               </Link>
             </li>
