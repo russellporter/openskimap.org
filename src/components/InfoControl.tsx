@@ -38,6 +38,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   };
 
   onRemove = () => {
+    this._highlightManager?.clearMarker();
     this._map!.off("resize", this.render);
     const parent = this._container.parentNode;
     parent && parent.removeChild(this._container);

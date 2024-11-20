@@ -18,7 +18,7 @@ export default class HighlightManager {
     this.map.on("mouseleave", "selected-run", this._onHoverOut);
   }
 
-  private clearMarker() {
+  clearMarker() {
     const marker = this.marker;
     if (marker !== null) {
       marker.remove();
