@@ -108,10 +108,11 @@ export default class MapFiltersManager {
 
   private setFilterOverride = (layerName: string, rules: any[] | "hidden") => {
     const layer = this.map.getLayer(layerName);
-    assert(layer.type !== "custom", "Custom layers are not supported");
     if (!layer) {
       return;
     }
+
+    assert(layer.type !== "custom", "Custom layers are not supported");
 
     if (rules === "hidden") {
       this.map.setLayoutProperty(layer.id, "visibility", "none");
