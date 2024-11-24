@@ -5,8 +5,9 @@ const webpack = require("webpack");
 module.exports = {
   entry: "./src/index.tsx",
   output: {
-    filename: "[name].bundle.js",
-    chunkFilename: "[name].chunk.js",
+    // include content hash to ensure CDN is invalidated when JS changes
+    filename: "[name].[contenthash].bundle.js",
+    chunkFilename: "[name].[contenthash].chunk.js",
     path: __dirname + "/dist",
     clean: true,
   },
