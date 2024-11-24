@@ -110,6 +110,13 @@ export default class StateStore implements EventBus {
     });
   }
 
+  addMarker(marker: MapMarker): void {
+    this.update({
+      markers: [...this._state.markers, marker],
+      latestMarker: marker,
+    });
+  }
+
   showFilters = () => {
     this.update({ mapFiltersOpen: true });
   };

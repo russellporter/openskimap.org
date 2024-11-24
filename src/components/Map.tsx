@@ -18,6 +18,7 @@ export class Map {
   private infoControl: InfoControl | null = null;
   private filterControl: FilterControl;
   private searchBarControl: SearchBarControl;
+  private markers: mapboxgl.Marker[];
   private loaded = false;
   private filtersVisible = false;
 
@@ -38,6 +39,7 @@ export class Map {
       hash: true,
       attributionControl: false,
     });
+    this.markers = [];
     this.filterControl = new FilterControl(eventBus);
     this.searchBarControl = new SearchBarControl(eventBus);
 
@@ -88,7 +90,7 @@ export class Map {
 
   setInfo = (info: InfoData | null) => {
     if (info && info.panToPosition && info.panToPosition !== "afterLoad") {
-      this.map.flyTo({ center: info.panToPosition, zoom: panToZoomLevel });
+      this.flyTo(info.panToPosition);
     }
     if (this.infoControl !== null) {
       this.map.removeControl(this.infoControl);
@@ -98,6 +100,10 @@ export class Map {
     if (this.infoControl !== null) {
       this.map.addControl(this.infoControl);
     }
+  };
+
+  flyTo = (center: mapboxgl.LngLatLike) => {
+    this.map.flyTo({ center: center, zoom: panToZoomLevel });
   };
 
   setStyle = (style: MapStyle) => {
@@ -136,6 +142,19 @@ export class Map {
 
   getZoom = () => {
     return this.map.getZoom();
+  };
+
+  setMarkers = (markers: MapMarker[]) => {
+    for (const marker of this.markers) {
+      marker.remove();
+    }
+    this.markers = [];
+    for (const marker of markers) {
+      const mapboxMarker = new mapboxgl.Marker()
+        .setLngLat([marker.coordinates[0], marker.coordinates[1]])
+        .addTo(this.map);
+      this.markers.push(mapboxMarker);
+    }
   };
 
   private updateVisibleSkiAreasCountUnthrottled = () => {

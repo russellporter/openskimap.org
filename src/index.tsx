@@ -105,6 +105,15 @@ function initialize() {
     if (changes.mapFilters !== undefined) {
       map.setFilters(state.mapFilters);
     }
+
+    if (changes.markers !== undefined) {
+      map.setMarkers(changes.markers);
+    }
+
+    if (changes.latestMarker !== undefined) {
+      const coordinates = changes.latestMarker.coordinates;
+      map.flyTo([coordinates[0], coordinates[1]]);
+    }
   }
 
   function onPageHide() {

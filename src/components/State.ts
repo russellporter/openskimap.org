@@ -9,6 +9,7 @@ export default interface State {
   mapStyle: MapStyle;
   mapFilters: MapFilters;
   info: InfoData | null;
+  markers: MapMarker[];
 }
 
 export interface StateChanges {
@@ -18,9 +19,11 @@ export interface StateChanges {
   mapStyle?: MapStyle;
   mapFilters?: MapFilters;
   info?: InfoData | null;
+  markers?: MapMarker[];
+  latestMarker?: MapMarker;
 }
 
-export function getInitialState() {
+export function getInitialState(): State {
   return {
     sidebarOpen: false,
     aboutInfoOpen: false,
@@ -28,5 +31,6 @@ export function getInitialState() {
     mapStyle: MapStyle.Terrain,
     mapFilters: defaultMapFilters,
     info: null,
+    markers: [],
   };
 }

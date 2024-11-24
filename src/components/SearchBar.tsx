@@ -1,7 +1,13 @@
 import FilterListIcon from "@mui/icons-material/FilterList";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Divider, List, ListItem, ListItemText, Paper } from "@mui/material";
+import {
+  Divider,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import centroid from "@turf/centroid";
@@ -42,7 +48,12 @@ enum Activity {
   Backcountry = "backcountry",
 }
 
-type Result = SkiAreaFeature | LiftFeature | RunFeature;
+type CommandResult = { type: "add_marker"; data: MapMarker };
+type LocationResult = {
+  type: "location";
+  data: SkiAreaFeature | LiftFeature | RunFeature;
+};
+type Result = CommandResult | LocationResult;
 
 const SearchBar: React.FC<Props> = (props) => {
   const { width, eventBus, filtersShown } = props;
@@ -59,14 +70,52 @@ const SearchBar: React.FC<Props> = (props) => {
   const stateRef = useRef<State>();
   stateRef.current = state;
 
+  const processSearchResults = (
+    query: string,
+    locationResultsData: LocationResult["data"][]
+  ) => {
+    let results: Result[] = [];
+
+    // If query is a valid coordinate, add a command to add a marker.
+    const coordinates = query
+      .split(",")
+      .map((s) => parseFloat(s.trim()))
+      // Represent as [longitude, latitude] (GeoJSON format)
+      .reverse();
+    if (
+      coordinates.length === 2 &&
+      coordinates.every((c) => !isNaN(c)) &&
+      coordinates[1] >= -90 &&
+      coordinates[1] <= 90 &&
+      coordinates[0] >= -180 &&
+      coordinates[0] <= 180
+    ) {
+      results.push({
+        type: "add_marker",
+        data: { type: "Point", coordinates },
+      });
+    }
+
+    results = results.concat(
+      locationResultsData.map((resultData: LocationResult["data"]) => ({
+        type: "location",
+        data: resultData,
+      }))
+    );
+
+    setState((prevState: State) => ({ ...prevState, results }));
+  };
+
   const search = (query: string) => {
     fetch(
       "https://api.openskimap.org/search?query=" + encodeURIComponent(query)
     ).then((response) => {
       if (stateRef.current?.searchQuery === query) {
-        response.json().then((results) => {
-          setState((prevState) => ({ ...prevState, results }));
-        });
+        response
+          .json()
+          .then((locationResultsData: LocationResult["data"][]) => {
+            processSearchResults(query, locationResultsData);
+          });
       }
     });
   };
@@ -114,7 +163,14 @@ const SearchBar: React.FC<Props> = (props) => {
       results: [],
       hideResults: true,
     }));
-    eventBus.showInfo(infoDataForResult(result));
+    switch (result.type) {
+      case "add_marker":
+        eventBus.addMarker(result.data);
+        break;
+      case "location":
+        eventBus.showInfo(infoDataForResult(result));
+        break;
+    }
   };
 
   const ref = useDetectClickOutside({
@@ -209,7 +265,7 @@ export const SearchResults: React.FunctionComponent<{
                 props.onSelect(result);
               }}
               selected={props.selectedIndex === index}
-              key={result.properties.id}
+              key={resultID(result)}
               result={result}
             />
           );
@@ -226,10 +282,20 @@ export const SearchResults: React.FunctionComponent<{
   );
 };
 
-function infoDataForResult(result: Result): InfoData {
-  const geometry = centroid(result).geometry;
+function resultID(result: Result): string {
+  switch (result.type) {
+    case "add_marker":
+      return "add_marker";
+    case "location":
+      return "location_" + result.data.properties.id;
+  }
+}
+
+function infoDataForResult(result: LocationResult): InfoData {
+  const feature = result.data;
+  const geometry = centroid(feature).geometry;
   return {
-    id: result.properties.id,
+    id: resultID(result),
     panToPosition: geometry && [
       geometry.coordinates[0],
       geometry.coordinates[1],
@@ -243,29 +309,42 @@ const SearchResult: React.FunctionComponent<{
   selected: boolean;
 }> = (props) => {
   return (
-    <ListItem button onClick={props.onSelect} selected={props.selected}>
+    <ListItemButton onClick={props.onSelect} selected={props.selected}>
       <ListItemText
         primary={getPrimaryText(props.result)}
-        secondary={getSecondaryText(props.result.properties)}
+        secondary={getSecondaryText(props.result)}
       />
-    </ListItem>
+    </ListItemButton>
   );
 };
 
 function getPrimaryText(result: Result): string | null {
-  return (
-    result.properties.name ||
-    result.properties.location?.localized.en.locality ||
-    null
-  );
+  switch (result.type) {
+    case "add_marker":
+      return "Mark Location";
+    case "location":
+      const data = result.data;
+      return (
+        data.properties.name ||
+        data.properties.location?.localized.en.locality ||
+        null
+      );
+  }
 }
 
-function getSecondaryText(
-  properties: SkiAreaProperties | LiftProperties | RunProperties
-): string {
-  return [getFeatureDetails(properties), getLocation(properties)]
-    .filter(isString)
-    .join(" - ");
+function getSecondaryText(result: Result): string {
+  switch (result.type) {
+    case "add_marker":
+      const [longitude, latitude] = result.data.coordinates;
+      const latDirection = latitude >= 0 ? "N" : "S";
+      const lonDirection = longitude >= 0 ? "E" : "W";
+      return `Location: ${Math.abs(latitude)}°${latDirection}, ${Math.abs(longitude)}°${lonDirection}`;
+    case "location":
+      const properties = result.data.properties;
+      return [getFeatureDetails(properties), getLocation(properties)]
+        .filter(isString)
+        .join(" - ");
+  }
 }
 
 function getFeatureDetails(

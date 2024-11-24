@@ -13,6 +13,7 @@ export default interface EventBus {
   setMinimumElevation(elevation: number): void;
   setMinimumVertical(vertical: number): void;
   setMinimumRunLength(runLength: number): void;
+  addMarker(marker: MapMarker): void;
   showInfo(info: InfoData): void;
   hideInfo(): void;
   showFilters(): void;
