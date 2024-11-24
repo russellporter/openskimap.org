@@ -1,4 +1,5 @@
 import { Activity } from "openskidata-format";
+import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import { InfoData } from "./InfoData";
@@ -52,6 +53,7 @@ export default class StateStore implements EventBus {
         ...this._state.mapFilters,
         selectedObjectID: state.selectedObjectID,
       },
+      markers: state.markers,
     });
   };
 

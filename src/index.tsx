@@ -65,6 +65,7 @@ function initialize() {
     updateURL({
       aboutInfoOpen: state.aboutInfoOpen,
       selectedObjectID: state.info?.id ?? null,
+      markers: state.markers,
     });
 
     if (changes.mapStyle !== undefined) {

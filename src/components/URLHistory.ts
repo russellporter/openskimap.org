@@ -1,8 +1,10 @@
 import queryString from "query-string";
 import { shallowEqualObjects } from "shallow-equal";
+import { MapMarker, parseMarkers, stringifyMarkers } from "../MapMarker";
 
 export interface URLState {
   aboutInfoOpen: boolean;
+  markers: MapMarker[];
   selectedObjectID: string | null;
 }
 
@@ -18,6 +20,8 @@ export function updateURL(state: URLState) {
   const query = queryString.stringify({
     about: state.aboutInfoOpen ? null : undefined,
     obj: state.selectedObjectID !== null ? state.selectedObjectID : undefined,
+    markers:
+      state.markers.length > 0 ? stringifyMarkers(state.markers) : undefined,
   });
   window.history.pushState(
     state,
@@ -34,5 +38,9 @@ export function getURLState(): URLState {
       query.obj !== undefined && typeof query.obj === "string"
         ? query.obj
         : null,
+    markers:
+      query.markers !== undefined && typeof query.markers === "string"
+        ? parseMarkers(query.markers)
+        : [],
   };
 }
