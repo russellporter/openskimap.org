@@ -1,6 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
+import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";

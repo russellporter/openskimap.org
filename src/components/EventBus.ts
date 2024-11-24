@@ -1,4 +1,5 @@
 import { Activity } from "openskidata-format";
+import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
 import { InfoData } from "./InfoData";
 

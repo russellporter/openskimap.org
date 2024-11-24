@@ -25,6 +25,7 @@ import * as React from "react";
 import { useCallback, useRef, useState } from "react";
 import { useDetectClickOutside } from "react-detect-click-outside";
 import { debounce, throttle } from "throttle-debounce";
+import { MapMarker } from "../MapMarker";
 import EventBus from "./EventBus";
 import { formattedRunUse } from "./Formatters";
 import { InfoData } from "./InfoData";

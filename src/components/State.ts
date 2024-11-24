@@ -1,4 +1,5 @@
 import MapFilters, { defaultMapFilters } from "../MapFilters";
+import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
 import { InfoData } from "./InfoData";
 
