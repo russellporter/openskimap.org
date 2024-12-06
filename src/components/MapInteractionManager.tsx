@@ -8,7 +8,7 @@ export class MapInteractionManager {
     this.map = map;
     this.eventBus = eventBus;
 
-    map.on("load", () => {
+    map.on("style.load", () => {
       this.attachListeners();
     });
   }
