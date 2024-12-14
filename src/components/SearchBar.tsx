@@ -296,7 +296,7 @@ function infoDataForResult(result: LocationResult): InfoData {
   const feature = result.data;
   const geometry = centroid(feature).geometry;
   return {
-    id: resultID(result),
+    id: result.data.properties.id,
     panToPosition: geometry && [
       geometry.coordinates[0],
       geometry.coordinates[1],
