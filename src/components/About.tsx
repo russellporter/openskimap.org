@@ -53,12 +53,20 @@ export default class About extends React.Component<Props> {
           Map data is{" "}
           <Link href="https://www.openstreetmap.org/copyright" target="_blank">
             © OpenStreetMap contributors
-          </Link>
-          .
+          </Link>{" "}
+          and <Link href="https://openskimap.org/?about">OpenSkiMap.org</Link>.
         </Typography>
         <Typography paragraph={true}>
           Use is subject to the Open Database license. You must attribute
           OpenSkiMap.org and OpenStreetMap appropriately.
+        </Typography>
+        <Typography variant="h6" id="modal-title">
+          Acceptable Use
+        </Typography>
+        <Typography paragraph={true}>
+          To manage costs, embedding of the website and direct use of tiles
+          hosted at tiles.openskimap.org is not permitted. Please prepare and
+          host your own tiles using the data below instead.
         </Typography>
         <Typography variant="h6" id="modal-title">
           Code
@@ -74,11 +82,12 @@ export default class About extends React.Component<Props> {
           .
         </Typography>
         <Typography variant="h6" id="modal-title">
-          Data
+          GeoJSON Data
         </Typography>
         <Typography paragraph={true}>
-          GeoJSON data is available under the license. Note that the data format
-          is not stable and changes on a regular basis as the project evolves.
+          GeoJSON data is available for download under the license. Note that
+          the data format is not stable and changes on a regular basis as the
+          project evolves.
         </Typography>
         <Typography component="div">
           <ul>
@@ -98,6 +107,10 @@ export default class About extends React.Component<Props> {
               </Link>
             </li>
           </ul>
+        </Typography>
+        <Typography paragraph={true}>
+          The data is generally updated daily. It's permitted to automatically
+          download the above files once per day.
         </Typography>
       </>
     );
