@@ -28,10 +28,12 @@ import { InfoHeader } from "./InfoHeader";
 import { SourceSummary } from "./SourceSummary";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
 import { getRunTitleAndSubtitle } from "./utils/PageMetadata";
+import * as UnitHelpers from "./utils/UnitHelpers";
 
 interface Props extends HeightProfileHighlightProps {
   feature: RunFeature;
   eventBus: EventBus;
+  unitSystem: UnitHelpers.UnitSystem;
 }
 
 export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
@@ -126,13 +128,25 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
         ) : null}
         <Typography className={"distance-and-elevation-info"}>
           {inclinedDistance ? (
-            <span>Distance: {Math.round(inclinedDistance)}m</span>
+            <span>
+              Distance:{" "}
+              {UnitHelpers.distanceText({
+                distanceInMeters: inclinedDistance,
+                unitSystem: props.unitSystem,
+              })}
+            </span>
           ) : null}
           {elevationData && elevationData.ascent > 1 ? (
-            <span>Ascent: {Math.round(elevationData.ascent)}m</span>
+            <span>
+              Ascent:{" "}
+              {UnitHelpers.heightText(elevationData.ascent, props.unitSystem)}
+            </span>
           ) : null}
           {elevationData && elevationData.descent > 1 ? (
-            <span>Descent: {Math.round(elevationData.descent)}m</span>
+            <span>
+              Descent:{" "}
+              {UnitHelpers.heightText(elevationData.descent, props.unitSystem)}
+            </span>
           ) : null}
         </Typography>
         {slopeInfo && (
@@ -157,6 +171,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             elevationData={elevationData}
             chartHighlightPosition={props.chartHighlightPosition}
             onHoverChartPosition={props.onHoverChartPosition}
+            unitSystem={props.unitSystem}
           />
         )}
         {<SourceSummary sources={properties.sources} />}

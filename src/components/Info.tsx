@@ -13,6 +13,7 @@ import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";
 import { updatePageMetadata } from "./utils/PageMetadata";
+import * as UnitHelpers from "./utils/UnitHelpers";
 
 type MapFeature = RunFeature | LiftFeature | SkiAreaFeature;
 
@@ -21,6 +22,7 @@ export const Info: React.FunctionComponent<{
   width: number;
   eventBus: EventBus;
   chartHighlightPosition: mapboxgl.LngLat | null;
+  unitSystem: UnitHelpers.UnitSystem;
   onLoadFeature: (feature: MapFeature) => void;
   onHoverChartPosition: (position: mapboxgl.LngLat | null) => void;
 }> = (props) => {
@@ -50,6 +52,7 @@ export const Info: React.FunctionComponent<{
         <SkiLiftInfo
           feature={feature as LiftFeature}
           eventBus={props.eventBus}
+          unitSystem={props.unitSystem}
         />
       )}
       {feature && feature.properties.type == FeatureType.Run && (
@@ -58,12 +61,14 @@ export const Info: React.FunctionComponent<{
           chartHighlightPosition={props.chartHighlightPosition}
           onHoverChartPosition={props.onHoverChartPosition}
           eventBus={props.eventBus}
+          unitSystem={props.unitSystem}
         />
       )}
       {feature && feature.properties.type == FeatureType.SkiArea && (
         <SkiAreaInfo
           feature={feature as SkiAreaFeature}
           eventBus={props.eventBus}
+          unitSystem={props.unitSystem}
         />
       )}
     </Card>

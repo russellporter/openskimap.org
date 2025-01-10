@@ -25,6 +25,7 @@ import * as React from "react";
 import { Line } from "react-chartjs-2";
 import "whatwg-fetch";
 import { ElevationData } from "./ElevationData";
+import * as UnitHelpers from "./utils/UnitHelpers";
 
 Chart.register(LinearScale);
 Chart.register(CategoryScale);
@@ -41,6 +42,7 @@ interface HeightProfileProps extends HeightProfileHighlightProps {
   feature: GeoJSON.Feature<GeoJSON.LineString, RunProperties>;
   distance: number;
   elevationData: ElevationData;
+  unitSystem: UnitHelpers.UnitSystem;
 }
 
 export class HeightProfile extends React.Component<
@@ -121,7 +123,11 @@ export class HeightProfile extends React.Component<
     );
 
     const data: ChartData<"line", number[], string> = {
-      labels: chartLabels(elevations, elevationData.heightProfileResolution),
+      labels: chartLabels(
+        elevations,
+        elevationData.heightProfileResolution,
+        this.props.unitSystem
+      ),
       datasets: [
         {
           fill: true,
@@ -199,7 +205,10 @@ export class HeightProfile extends React.Component<
                   ) + elevationData.minElevation,
                 ticks: {
                   callback: (elevation: any) => {
-                    return elevation + "m";
+                    return UnitHelpers.heightText(
+                      elevation,
+                      this.props.unitSystem
+                    );
                   },
                 },
               },
@@ -214,11 +223,22 @@ export class HeightProfile extends React.Component<
   }
 }
 
-function chartLabels(elevations: number[], heightProfileResolution: number) {
+function chartLabels(
+  elevations: number[],
+  heightProfileResolution: number,
+  unitSystem: UnitHelpers.UnitSystem
+) {
   let distance = 0;
   const labels = [];
   for (let _ of elevations) {
-    labels.push((distance / 1000).toFixed(2) + " km");
+    labels.push(
+      UnitHelpers.distanceText({
+        distanceInMeters: distance,
+        unitSystem,
+        forceLongestUnit: true,
+        withSpace: true,
+      })
+    );
     distance += heightProfileResolution;
   }
   return labels;

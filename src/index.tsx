@@ -6,10 +6,12 @@ import "./assets/robots.txt";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
 import { Map } from "./components/Map";
+import { SettingsModal } from "./components/SettingsModal";
 import Sidebar from "./components/Sidebar";
 import State, { getInitialState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import { Themed } from "./components/Themed";
+import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
 import * as Config from "./Config";
@@ -21,6 +23,9 @@ function initialize() {
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
   const aboutRoot = ReactDOM.createRoot(
     document.getElementById("about-modal")!
+  );
+  const settingsRoot = ReactDOM.createRoot(
+    document.getElementById("settings-modal")!
   );
 
   const store = new StateStore(getInitialState(), update);
@@ -92,6 +97,21 @@ function initialize() {
       );
     }
 
+    if (
+      changes.settingsOpen !== undefined ||
+      changes.unitSystem !== undefined
+    ) {
+      settingsRoot.render(
+        <Themed>
+          <SettingsModal
+            eventBus={store}
+            open={state.settingsOpen}
+            unitSystem={state.unitSystem}
+          />
+        </Themed>
+      );
+    }
+
     if (changes.mapFiltersOpen !== undefined) {
       map.setFiltersVisible(changes.mapFiltersOpen);
     }
@@ -114,6 +134,10 @@ function initialize() {
     if (changes.latestMarker !== undefined) {
       const coordinates = changes.latestMarker.coordinates;
       map.flyTo([coordinates[0], coordinates[1]]);
+    }
+
+    if (changes.unitSystem !== undefined) {
+      setUnitSystem(changes.unitSystem);
     }
   }
 

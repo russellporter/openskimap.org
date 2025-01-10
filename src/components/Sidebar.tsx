@@ -1,3 +1,9 @@
+import EditIcon from "@mui/icons-material/Edit";
+import InfoIcon from "@mui/icons-material/Info";
+import SatelliteIcon from "@mui/icons-material/Satellite";
+import SettingsIcon from "@mui/icons-material/Settings";
+
+import TerrainIcon from "@mui/icons-material/Terrain";
 import {
   Divider,
   Drawer,
@@ -6,10 +12,6 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import InfoIcon from "@mui/icons-material/Info";
-import SatelliteIcon from "@mui/icons-material/Satellite";
-import TerrainIcon from "@mui/icons-material/Terrain";
 import * as React from "react";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
@@ -62,6 +64,16 @@ export default class Sidebar extends React.Component<Props, {}> {
             </List>
             <Divider />
             <List>
+              <ListItem
+                button
+                key={"settings"}
+                onClick={this.props.eventBus.openSettings}
+              >
+                <ListItemIcon>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Settings"} />
+              </ListItem>
               <ListItem
                 button
                 key={"edit"}

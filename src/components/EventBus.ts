@@ -2,6 +2,7 @@ import { Activity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
 import { InfoData } from "./InfoData";
+import { UnitSystem } from "./utils/UnitHelpers";
 
 export default interface EventBus {
   editMap(): void;
@@ -9,7 +10,10 @@ export default interface EventBus {
   closeSidebar(): void;
   openAboutInfo(): void;
   closeAboutInfo(): void;
+  openSettings(): void;
+  closeSettings(): void;
   setMapStyle(style: MapStyle): void;
+  setUnitSystem(unitSystem: UnitSystem): void;
   toggleActivity(activity: Activity): void;
   setMinimumElevation(elevation: number): void;
   setMinimumVertical(vertical: number): void;

@@ -13,12 +13,14 @@ import MapFilters from "../MapFilters";
 import { DownhillCheckbox, NordicCheckbox } from "./Checkbox";
 import EventBus from "./EventBus";
 import { InfoHeader } from "./InfoHeader";
+import * as UnitHelpers from "./utils/UnitHelpers";
 
 export const FilterForm: React.FunctionComponent<{
   eventBus: EventBus;
   filters: MapFilters;
   width: number;
   visibleSkiAreasCount: number;
+  unitSystem: UnitHelpers.UnitSystem;
 }> = (props) => {
   const isDownhillEnabled = !props.filters.hiddenActivities.includes(
     Activity.Downhill
@@ -75,14 +77,22 @@ export const FilterForm: React.FunctionComponent<{
           </FormGroup>
         </div>
         <div style={formSectionStyle}>
-          <FormLabel component="legend">Minimum Elevation (m)</FormLabel>
+          <FormLabel component="legend">
+            Minimum Elevation (
+            {UnitHelpers.labelForLengthUnit(
+              UnitHelpers.closestEquivalent("meters", props.unitSystem)
+            )}
+            )
+          </FormLabel>
           <FormGroup style={sliderMargins}>
             <Slider
               defaultValue={initialMinElevationValue}
               min={0}
               max={5000}
               valueLabelDisplay="auto"
-              valueLabelFormat={(value) => value + " m"}
+              valueLabelFormat={(value) =>
+                UnitHelpers.heightText(value, props.unitSystem, true)
+              }
               onChange={(_, value) =>
                 props.eventBus.setMinimumElevation(value as number)
               }
@@ -90,14 +100,22 @@ export const FilterForm: React.FunctionComponent<{
           </FormGroup>
         </div>
         <div style={formSectionStyle}>
-          <FormLabel component="legend">Minimum Vertical (m)</FormLabel>
+          <FormLabel component="legend">
+            Minimum Vertical (
+            {UnitHelpers.labelForLengthUnit(
+              UnitHelpers.closestEquivalent("meters", props.unitSystem)
+            )}
+            )
+          </FormLabel>
           <FormGroup style={sliderMargins}>
             <Slider
               defaultValue={initialMinVerticalValue}
               min={0}
               max={2000}
               valueLabelDisplay="auto"
-              valueLabelFormat={(value) => value + " m"}
+              valueLabelFormat={(value) =>
+                UnitHelpers.heightText(value, props.unitSystem, true)
+              }
               onChange={(_, value) =>
                 props.eventBus.setMinimumVertical(value as number)
               }
@@ -105,14 +123,28 @@ export const FilterForm: React.FunctionComponent<{
           </FormGroup>
         </div>
         <div style={formSectionStyle}>
-          <FormLabel component="legend">Run Length (km)</FormLabel>
+          <FormLabel component="legend">
+            Run Length (
+            {UnitHelpers.labelForLengthUnit(
+              UnitHelpers.closestEquivalent("kilometers", props.unitSystem)
+            )}
+            )
+          </FormLabel>
           <FormGroup style={sliderMargins}>
             <Slider
               defaultValue={initialMinRunLengthValue}
               min={0}
               max={500}
               valueLabelDisplay="auto"
-              valueLabelFormat={(value) => value + " km"}
+              valueLabelFormat={(value) =>
+                UnitHelpers.distanceText({
+                  distanceInMeters: value * 1000,
+                  unitSystem: props.unitSystem,
+                  forceLongestUnit: true,
+                  withSpace: true,
+                  roundToNearestDecimal: true,
+                })
+              }
               onChange={(_, value) =>
                 props.eventBus.setMinimumRunLength(value as number)
               }

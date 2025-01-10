@@ -11,6 +11,11 @@ import MapFilterManager from "./MapFilterManager";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
 import { panToZoomLevel } from "./SkiAreaInfo";
+import {
+  addUnitSystemChangeListener_NonReactive,
+  getUnitSystem_NonReactive,
+} from "./UnitSystemManager";
+import { UnitSystem, labelForLengthUnit } from "./utils/UnitHelpers";
 
 export class Map {
   private map: mapboxgl.Map;
@@ -22,6 +27,7 @@ export class Map {
   private markers: mapboxgl.Marker[];
   private loaded = false;
   private filtersVisible = false;
+  private mapScaleControl: mapboxgl.ScaleControl | null;
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
@@ -47,13 +53,15 @@ export class Map {
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
     this.filterManager = new MapFilterManager(this.map);
 
-    this.map.addControl(
-      new mapboxgl.ScaleControl({
-        maxWidth: 80,
-        unit: "metric",
-      }),
-      "bottom-left"
-    );
+    this.mapScaleControl = null;
+
+    addUnitSystemChangeListener_NonReactive({
+      onUnitSystemChange: (unitSystem) => {
+        this.updateCountourLabelUnits(unitSystem);
+        this.updateScaleControlUnits(unitSystem);
+      },
+      triggerWhenInitialized: true,
+    });
 
     this.map.addControl(this.searchBarControl);
 
@@ -79,6 +87,51 @@ export class Map {
     this.map.once("load", () => {
       this.loaded = true;
     });
+  }
+
+  private updateCountourLabelUnits(unitSystem: UnitSystem) {
+    this.waitForMapLoaded(() => {
+      const loadedStyle = { ...this.map.getStyle() };
+
+      const contourLabel = loadedStyle.layers.find(
+        (layer) => layer.id === "contour-label"
+      ) as mapboxgl.SymbolLayer | null;
+
+      if (contourLabel) {
+        switch (unitSystem) {
+          case "imperial":
+            contourLabel.layout!["text-field"] = [
+              "concat",
+              ["to-string", ["*", ["get", "ele"], 3.3]],
+              ` ${labelForLengthUnit("feet")}`,
+            ];
+            break;
+          case "metric":
+            contourLabel.layout!["text-field"] = [
+              "concat",
+              ["get", "ele"],
+              ` ${labelForLengthUnit("meters")}`,
+            ];
+            break;
+        }
+
+        this.map.removeLayer("contour-label");
+        this.map.addLayer({ ...contourLabel });
+      }
+    });
+  }
+
+  private updateScaleControlUnits(unitSystem: UnitSystem) {
+    if (this.mapScaleControl !== null) {
+      this.map.removeControl(this.mapScaleControl);
+    }
+
+    this.mapScaleControl = new mapboxgl.ScaleControl({
+      maxWidth: 80,
+      unit: unitSystem,
+    });
+
+    this.map.addControl(this.mapScaleControl, "bottom-left");
   }
 
   private waitForMapLoaded = (closure: () => void) => {
@@ -109,6 +162,8 @@ export class Map {
 
   setStyle = (style: MapStyle) => {
     this.map.setStyle(style);
+
+    this.updateCountourLabelUnits(getUnitSystem_NonReactive());
   };
 
   private setFiltersUnthrottled = (filters: MapFilters) => {
