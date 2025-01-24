@@ -1,5 +1,5 @@
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { FeatureType, SkiAreaProperties } from "openskidata-format";
 import React, { useEffect, useState } from "react";
 import { FeatureFavoriteService } from "./services/FeatureFavoriteService";
@@ -31,15 +31,17 @@ export const SkiAreaFavoriteControl: React.FunctionComponent<
   };
 
   return (
-    <IconButton
-      key="favorite"
-      size="small"
-      style={{
-        marginInlineStart: "auto",
-      }}
-      onClick={toggleFavorite}
-    >
-      {isFavorite ? <Favorite color="primary" /> : <FavoriteBorder />}
-    </IconButton>
+    <Tooltip title={isFavorite ? "Remove from favorites" : "Add to favorites"}>
+      <IconButton
+        key="favorite"
+        size="small"
+        style={{
+          marginInlineStart: "auto",
+        }}
+        onClick={toggleFavorite}
+      >
+        {isFavorite ? <Favorite color="primary" /> : <FavoriteBorder />}
+      </IconButton>
+    </Tooltip>
   );
 };
