@@ -1,3 +1,7 @@
+import EditIcon from "@mui/icons-material/Edit";
+import InfoIcon from "@mui/icons-material/Info";
+import SatelliteIcon from "@mui/icons-material/Satellite";
+import TerrainIcon from "@mui/icons-material/Terrain";
 import {
   Divider,
   Drawer,
@@ -6,14 +10,11 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import InfoIcon from "@mui/icons-material/Info";
-import SatelliteIcon from "@mui/icons-material/Satellite";
-import TerrainIcon from "@mui/icons-material/Terrain";
 import * as React from "react";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import * as ExternalURLOpener from "./ExternalURLOpener";
+import { FeatureFavorites } from "./FeatureFavorites";
 
 interface Props {
   eventBus: EventBus;
@@ -92,6 +93,7 @@ export default class Sidebar extends React.Component<Props, {}> {
                 <ListItemText primary={"Cookie Policy"} />
               </ListItem>
             </List>
+            <FeatureFavorites eventBus={this.props.eventBus} />
           </div>
         </div>
       </Drawer>

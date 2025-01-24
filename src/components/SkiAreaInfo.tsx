@@ -25,6 +25,7 @@ import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
 import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { InfoHeader } from "./InfoHeader";
+import { SkiAreaFavoriteControl } from "./SkiAreaFavoriteControl";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
 
@@ -90,6 +91,10 @@ function getActions(properties: SkiAreaProperties): JSX.Element[] {
   }
 
   actions = actions.concat(getWebsiteActions(properties.websites));
+
+  actions = actions.concat(
+    <SkiAreaFavoriteControl skiAreaProperties={properties} />
+  );
 
   return actions;
 }
@@ -277,9 +282,9 @@ function getFormattedLiftStatistics(statistics: LiftStatistics) {
 
       return [
         statistics.count +
-          " " +
-          getLiftCategoryName(category) +
-          (statistics.count === 1 ? "" : "s"),
+        " " +
+        getLiftCategoryName(category) +
+        (statistics.count === 1 ? "" : "s"),
       ];
     }
   );
