@@ -15,7 +15,7 @@ import {
   addUnitSystemChangeListener_NonReactive,
   getUnitSystem_NonReactive,
 } from "./UnitSystemManager";
-import { UnitSystem, labelForLengthUnit } from "./utils/UnitHelpers";
+import { UnitSystem } from "./utils/UnitHelpers";
 
 export class Map {
   private map: mapboxgl.Map;
@@ -91,47 +91,39 @@ export class Map {
 
   private updateContourLabelUnits(unitSystem: UnitSystem) {
     this.waitForMapLoaded(() => {
-      const loadedStyle = { ...this.map.getStyle() };
-
-      const contourLabel = loadedStyle.layers.find(
-        (layer) => layer.id === "contour-label"
-      ) as mapboxgl.SymbolLayer | null;
-
-      if (contourLabel) {
-        switch (unitSystem) {
-          case "imperial":
-            contourLabel.layout!["text-field"] = [
-              "concat",
-              ["to-string", ["*", ["get", "ele"], 3.3]],
-              ` ${labelForLengthUnit("feet")}`,
-            ];
-            break;
-          case "metric":
-            contourLabel.layout!["text-field"] = [
-              "concat",
-              ["get", "ele"],
-              ` ${labelForLengthUnit("meters")}`,
-            ];
-            break;
-        }
-
-        this.map.removeLayer("contour-label");
-        this.map.addLayer({ ...contourLabel });
+      const contourLabel = this.map.getLayer("contour-label");
+      if (!contourLabel) {
+        return;
+      }
+      switch (unitSystem) {
+        case "imperial":
+          this.map.setLayoutProperty("contour-label", "text-field", [
+            "concat",
+            ["to-string", ["*", ["get", "ele"], 3.3]],
+            " ft",
+          ]);
+          break;
+        case "metric":
+          this.map.setLayoutProperty("contour-label", "text-field", [
+            "concat",
+            ["get", "ele"],
+            " m",
+          ]);
+          break;
       }
     });
   }
 
   private updateScaleControlUnits(unitSystem: UnitSystem) {
-    if (this.mapScaleControl !== null) {
-      this.map.removeControl(this.mapScaleControl);
+    if (this.mapScaleControl === null) {
+      this.mapScaleControl = new mapboxgl.ScaleControl({
+        maxWidth: 80,
+        unit: unitSystem,
+      });
+      this.map.addControl(this.mapScaleControl, "bottom-left");
+    } else {
+      this.mapScaleControl.setUnit(unitSystem);
     }
-
-    this.mapScaleControl = new mapboxgl.ScaleControl({
-      maxWidth: 80,
-      unit: unitSystem,
-    });
-
-    this.map.addControl(this.mapScaleControl, "bottom-left");
   }
 
   private waitForMapLoaded = (closure: () => void) => {
@@ -161,9 +153,11 @@ export class Map {
   };
 
   setStyle = (style: MapStyle) => {
-    this.map.setStyle(style);
+    this.map.once("style.load", () => {
+      this.updateContourLabelUnits(getUnitSystem_NonReactive());
+    });
 
-    this.updateContourLabelUnits(getUnitSystem_NonReactive());
+    this.map.setStyle(style);
   };
 
   private setFiltersUnthrottled = (filters: MapFilters) => {
