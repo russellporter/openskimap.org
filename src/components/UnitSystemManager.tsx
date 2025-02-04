@@ -1,7 +1,8 @@
 import * as React from "react";
+import { SettingsEvent } from "./SettingsEvent";
 import { UnitSystem, unitSystemFromString } from "./utils/UnitHelpers";
 
-const UNIT_SYSTEM_SETTING_KEY = "setting.unitSystem";
+const UNIT_SYSTEM_SETTING_LOCAL_STORAGE_KEY = "setting.unitSystem";
 
 export const UnitSystemManager: React.FunctionComponent<{
   render: (unitSystem: UnitSystem) => React.ReactNode;
@@ -11,16 +12,22 @@ export const UnitSystemManager: React.FunctionComponent<{
   );
 
   React.useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === UNIT_SYSTEM_SETTING_KEY) {
+    const handleSettingsChange = (event: Event) => {
+      if (
+        (event as SettingsEvent).detail.settingsProperty ===
+        SettingsEvent.UNIT_SYSTEM_SETTINGS_PROPERTY
+      ) {
         setUnitSystem(getUnitSystem_NonReactive());
       }
     };
 
-    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(SettingsEvent.EVENT_TYPE, handleSettingsChange);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        SettingsEvent.EVENT_TYPE,
+        handleSettingsChange
+      );
     };
   }, []);
 
@@ -28,19 +35,19 @@ export const UnitSystemManager: React.FunctionComponent<{
 };
 
 export function setUnitSystem(unitSystem: UnitSystem) {
-  const storageEvent = new StorageEvent("storage", {
-    oldValue: getUnitSystem_NonReactive(),
-    newValue: unitSystem,
-    key: UNIT_SYSTEM_SETTING_KEY,
+  const event = new SettingsEvent({
+    settingsProperty: SettingsEvent.UNIT_SYSTEM_SETTINGS_PROPERTY,
   });
 
-  localStorage.setItem(UNIT_SYSTEM_SETTING_KEY, unitSystem);
+  localStorage.setItem(UNIT_SYSTEM_SETTING_LOCAL_STORAGE_KEY, unitSystem);
 
-  window.dispatchEvent(storageEvent);
+  window.dispatchEvent(event);
 }
 
 export function getUnitSystem_NonReactive(): UnitSystem {
-  return unitSystemFromString(localStorage.getItem(UNIT_SYSTEM_SETTING_KEY));
+  return unitSystemFromString(
+    localStorage.getItem(UNIT_SYSTEM_SETTING_LOCAL_STORAGE_KEY)
+  );
 }
 
 export function addUnitSystemChangeListener_NonReactive({
@@ -50,13 +57,16 @@ export function addUnitSystemChangeListener_NonReactive({
   onUnitSystemChange: (unitSystem: UnitSystem) => void;
   triggerWhenInitialized: boolean;
 }) {
-  const handleStorageChange = (event: StorageEvent) => {
-    if (event.key === UNIT_SYSTEM_SETTING_KEY) {
+  const handleSettingsChange = (event: Event) => {
+    if (
+      (event as SettingsEvent).detail.settingsProperty ===
+      SettingsEvent.UNIT_SYSTEM_SETTINGS_PROPERTY
+    ) {
       onUnitSystemChange(getUnitSystem_NonReactive());
     }
   };
 
-  window.addEventListener("storage", handleStorageChange);
+  window.addEventListener(SettingsEvent.EVENT_TYPE, handleSettingsChange);
   if (triggerWhenInitialized) {
     onUnitSystemChange(getUnitSystem_NonReactive());
   }
