@@ -52,9 +52,9 @@ export default class StateStore implements EventBus {
     this.update({ mapStyle: style });
   };
 
-  setUnitSystem(unitSystem: UnitSystem): void {
+  setUnitSystem = (unitSystem: UnitSystem) => {
     this.update({ unitSystem });
-  }
+  };
 
   urlUpdate = (state: URLState) => {
     this.update({

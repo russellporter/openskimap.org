@@ -84,7 +84,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
               }
             />
           )}
-        ></UnitSystemManager>
+        />
       </Themed>
     );
   }

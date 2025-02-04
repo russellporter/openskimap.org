@@ -57,7 +57,7 @@ export class Map {
 
     addUnitSystemChangeListener_NonReactive({
       onUnitSystemChange: (unitSystem) => {
-        this.updateCountourLabelUnits(unitSystem);
+        this.updateContourLabelUnits(unitSystem);
         this.updateScaleControlUnits(unitSystem);
       },
       triggerWhenInitialized: true,
@@ -89,7 +89,7 @@ export class Map {
     });
   }
 
-  private updateCountourLabelUnits(unitSystem: UnitSystem) {
+  private updateContourLabelUnits(unitSystem: UnitSystem) {
     this.waitForMapLoaded(() => {
       const loadedStyle = { ...this.map.getStyle() };
 
@@ -163,7 +163,7 @@ export class Map {
   setStyle = (style: MapStyle) => {
     this.map.setStyle(style);
 
-    this.updateCountourLabelUnits(getUnitSystem_NonReactive());
+    this.updateContourLabelUnits(getUnitSystem_NonReactive());
   };
 
   private setFiltersUnthrottled = (filters: MapFilters) => {

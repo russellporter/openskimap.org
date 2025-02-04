@@ -2,7 +2,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
 import SatelliteIcon from "@mui/icons-material/Satellite";
 import SettingsIcon from "@mui/icons-material/Settings";
-
 import TerrainIcon from "@mui/icons-material/Terrain";
 import {
   Divider,

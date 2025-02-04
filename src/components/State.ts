@@ -14,7 +14,7 @@ export default interface State {
   mapFilters: MapFilters;
   info: InfoData | null;
   markers: MapMarker[];
-  unitSystem: "metric" | "imperial";
+  unitSystem: UnitHelpers.UnitSystem;
 }
 
 export interface StateChanges {
@@ -27,7 +27,7 @@ export interface StateChanges {
   info?: InfoData | null;
   markers?: MapMarker[];
   latestMarker?: MapMarker;
-  unitSystem?: "metric" | "imperial";
+  unitSystem?: UnitHelpers.UnitSystem;
 }
 
 export function getInitialState(): State {
@@ -40,6 +40,6 @@ export function getInitialState(): State {
     mapFilters: defaultMapFilters,
     info: null,
     markers: [],
-    unitSystem: UnitHelpers.unitSystemFromString(getUnitSystem_NonReactive()),
+    unitSystem: getUnitSystem_NonReactive(),
   };
 }

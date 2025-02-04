@@ -7,15 +7,13 @@ export const UnitSystemManager: React.FunctionComponent<{
   render: (unitSystem: UnitSystem) => React.ReactNode;
 }> = (props) => {
   const [unitSystem, setUnitSystem] = React.useState<UnitSystem>(
-    unitSystemFromString(getUnitSystem_NonReactive())
+    getUnitSystem_NonReactive()
   );
 
   React.useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
-      console.log(event);
-
       if (event.key === UNIT_SYSTEM_SETTING_KEY) {
-        setUnitSystem(unitSystemFromString(getUnitSystem_NonReactive()));
+        setUnitSystem(getUnitSystem_NonReactive());
       }
     };
 
@@ -53,8 +51,6 @@ export function addUnitSystemChangeListener_NonReactive({
   triggerWhenInitialized: boolean;
 }) {
   const handleStorageChange = (event: StorageEvent) => {
-    console.log(event);
-
     if (event.key === UNIT_SYSTEM_SETTING_KEY) {
       onUnitSystemChange(getUnitSystem_NonReactive());
     }
