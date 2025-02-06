@@ -27,12 +27,14 @@ import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { InfoHeader } from "./InfoHeader";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
+import * as UnitHelpers from "./utils/UnitHelpers";
 
 export const panToZoomLevel = 12.5;
 
 interface SkiAreaPopupProps {
   feature: SkiAreaFeature;
   eventBus: EventBus;
+  unitSystem: UnitHelpers.UnitSystem;
 }
 
 export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
@@ -61,6 +63,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
             activities={properties.activities}
             statistics={properties.statistics}
             runConvention={properties.runConvention}
+            unitSystem={props.unitSystem}
           />
         )}
         {<SourceSummary sources={properties.sources} />}
@@ -122,7 +125,8 @@ function getTitle(properties: SkiAreaProperties) {
 
 function elevationSummary(
   statistics: SkiAreaStatistics,
-  activities: Activity[]
+  activities: Activity[],
+  unitSystem: UnitHelpers.UnitSystem
 ) {
   const minElevation = statistics.minElevation;
   const maxElevation = statistics.maxElevation;
@@ -133,11 +137,17 @@ function elevationSummary(
 
   const vertical = maxElevation - minElevation;
   const minAndMaxElevation =
-    Math.round(minElevation) + "m - " + Math.round(maxElevation) + "m";
+    UnitHelpers.heightText(minElevation, unitSystem) +
+    " - " +
+    UnitHelpers.heightText(maxElevation, unitSystem);
   return (
     <Typography variant="subtitle1" color="textSecondary">
       {activities.includes(Activity.Downhill)
-        ? "Vertical: " + Math.round(vertical) + "m (" + minAndMaxElevation + ")"
+        ? "Vertical: " +
+          UnitHelpers.heightText(vertical, unitSystem) +
+          " (" +
+          minAndMaxElevation +
+          ")"
         : "Elevation: " + minAndMaxElevation}
     </Typography>
   );
@@ -147,6 +157,7 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
   activities: Activity[];
   statistics: SkiAreaStatistics;
   runConvention: RunConvention;
+  unitSystem: UnitHelpers.UnitSystem;
 }> = (props) => {
   const allActivities: Activity[] = [
     Activity.Downhill,
@@ -186,7 +197,7 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
 
   return (
     <>
-      {elevationSummary(props.statistics, props.activities)}
+      {elevationSummary(props.statistics, props.activities, props.unitSystem)}
       {runStatistics.map((activityStatistics) => {
         const totalRunKm = activityStatistics[1].reduce((previous, current) => {
           return previous + current[1];
@@ -202,13 +213,19 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
             <Typography variant="subtitle1" color="textSecondary">
               {formattedActivityName(activityStatistics[0])}
               {" runs: "}
-              {roundedTotalKm} km
+              {UnitHelpers.distanceText({
+                distanceInMeters: totalRunKm * 1000,
+                unitSystem: props.unitSystem,
+                forceLongestUnit: true,
+                roundToNearestDecimal: true,
+              })}
             </Typography>
             <RunDifficultyBarChart
               activity={activityStatistics[0]}
               totalRunKm={totalRunKm}
               runConvention={props.runConvention}
               data={activityStatistics[1]}
+              unitSystem={props.unitSystem}
             />
           </div>
         );
@@ -309,6 +326,7 @@ const RunDifficultyBarChart: React.FunctionComponent<{
   activity: Activity;
   totalRunKm: number;
   data: [RunDifficulty | null, number][];
+  unitSystem: UnitHelpers.UnitSystem;
 }> = (props) => {
   const parts = props.data.map((d) => {
     const runKm = d[1];
@@ -318,7 +336,12 @@ const RunDifficultyBarChart: React.FunctionComponent<{
     const difficultyText = difficulty
       ? formattedDifficultyName(difficulty)
       : "Other";
-    const distanceText = Math.round(runKm * 10) / 10 + "km";
+    const distanceText = UnitHelpers.distanceText({
+      distanceInMeters: runKm * 1000,
+      unitSystem: props.unitSystem,
+      forceLongestUnit: true,
+      roundToNearestDecimal: true,
+    });
     return (
       <Tooltip
         key={difficulty || "other"}

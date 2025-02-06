@@ -2,10 +2,11 @@ import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import MapFilters, { defaultMapFilters } from "../MapFilters";
+import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import { FilterForm } from "./FilterForm";
 import { Themed } from "./Themed";
-import controlWidth from "./controlWidth";
+import { UnitSystemManager } from "./UnitSystemManager";
 
 export class FilterControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
@@ -51,11 +52,16 @@ export class FilterControl implements mapboxgl.IControl {
     }
     this._root.render(
       <Themed>
-        <FilterForm
-          eventBus={this._eventBus}
-          filters={this._filters}
-          width={controlWidth(this._map!)}
-          visibleSkiAreasCount={this._visibleSkiAreasCount}
+        <UnitSystemManager
+          render={(unitSystem) => (
+            <FilterForm
+              eventBus={this._eventBus}
+              filters={this._filters}
+              width={controlWidth(this._map!)}
+              visibleSkiAreasCount={this._visibleSkiAreasCount}
+              unitSystem={unitSystem}
+            />
+          )}
         />
       </Themed>
     );

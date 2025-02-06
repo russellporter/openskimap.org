@@ -11,6 +11,11 @@ import MapFilterManager from "./MapFilterManager";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
 import { panToZoomLevel } from "./SkiAreaInfo";
+import {
+  addUnitSystemChangeListener_NonReactive,
+  getUnitSystem_NonReactive,
+} from "./UnitSystemManager";
+import { UnitSystem } from "./utils/UnitHelpers";
 
 export class Map {
   private map: mapboxgl.Map;
@@ -22,6 +27,7 @@ export class Map {
   private markers: mapboxgl.Marker[];
   private loaded = false;
   private filtersVisible = false;
+  private mapScaleControl: mapboxgl.ScaleControl | null;
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
@@ -47,13 +53,15 @@ export class Map {
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
     this.filterManager = new MapFilterManager(this.map);
 
-    this.map.addControl(
-      new mapboxgl.ScaleControl({
-        maxWidth: 80,
-        unit: "metric",
-      }),
-      "bottom-left"
-    );
+    this.mapScaleControl = null;
+
+    addUnitSystemChangeListener_NonReactive({
+      onUnitSystemChange: (unitSystem) => {
+        this.updateContourLabelUnits(unitSystem);
+        this.updateScaleControlUnits(unitSystem);
+      },
+      triggerWhenInitialized: true,
+    });
 
     this.map.addControl(this.searchBarControl);
 
@@ -79,6 +87,43 @@ export class Map {
     this.map.once("load", () => {
       this.loaded = true;
     });
+  }
+
+  private updateContourLabelUnits(unitSystem: UnitSystem) {
+    this.waitForMapLoaded(() => {
+      const contourLabel = this.map.getLayer("contour-label");
+      if (!contourLabel) {
+        return;
+      }
+      switch (unitSystem) {
+        case "imperial":
+          this.map.setLayoutProperty("contour-label", "text-field", [
+            "concat",
+            ["to-string", ["*", ["get", "ele"], 3.3]],
+            " ft",
+          ]);
+          break;
+        case "metric":
+          this.map.setLayoutProperty("contour-label", "text-field", [
+            "concat",
+            ["get", "ele"],
+            " m",
+          ]);
+          break;
+      }
+    });
+  }
+
+  private updateScaleControlUnits(unitSystem: UnitSystem) {
+    if (this.mapScaleControl === null) {
+      this.mapScaleControl = new mapboxgl.ScaleControl({
+        maxWidth: 80,
+        unit: unitSystem,
+      });
+      this.map.addControl(this.mapScaleControl, "bottom-left");
+    } else {
+      this.mapScaleControl.setUnit(unitSystem);
+    }
   }
 
   private waitForMapLoaded = (closure: () => void) => {
@@ -108,6 +153,10 @@ export class Map {
   };
 
   setStyle = (style: MapStyle) => {
+    this.map.once("style.load", () => {
+      this.updateContourLabelUnits(getUnitSystem_NonReactive());
+    });
+
     this.map.setStyle(style);
   };
 

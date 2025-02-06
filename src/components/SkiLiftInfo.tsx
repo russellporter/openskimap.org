@@ -9,9 +9,12 @@ import { InfoHeader } from "./InfoHeader";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
 import getInclinedLengthInMeters from "./utils/InclinedLength";
+import * as UnitHelpers from "./utils/UnitHelpers";
+
 export const SkiLiftInfo: React.FunctionComponent<{
   eventBus: EventBus;
   feature: LiftFeature;
+  unitSystem: UnitHelpers.UnitSystem;
 }> = (props) => {
   const properties = props.feature.properties;
   const geometry = props.feature.geometry;
@@ -59,16 +62,32 @@ export const SkiLiftInfo: React.FunctionComponent<{
         {
           <div className={"distance-and-elevation-info"}>
             {distance && (
-              <Typography>Distance: {Math.round(distance)}m</Typography>
+              <>
+                <Typography>
+                  Distance:{" "}
+                  {UnitHelpers.distanceText({
+                    distanceInMeters: distance,
+                    unitSystem: props.unitSystem,
+                  })}
+                </Typography>
+              </>
             )}
             {ascentAndDescent && ascentAndDescent.ascent > 1 && (
               <Typography>
-                Ascent: {Math.round(ascentAndDescent.ascent)}m
+                Ascent:{" "}
+                {UnitHelpers.heightText(
+                  ascentAndDescent.ascent,
+                  props.unitSystem
+                )}
               </Typography>
             )}
             {ascentAndDescent && ascentAndDescent.descent > 1 && (
               <Typography>
-                Descent: {Math.round(ascentAndDescent.descent)}m
+                Descent:{" "}
+                {UnitHelpers.heightText(
+                  ascentAndDescent.descent,
+                  props.unitSystem
+                )}
               </Typography>
             )}
             {speed && <Typography>Speed: {speed.toFixed(1)} m/s</Typography>}

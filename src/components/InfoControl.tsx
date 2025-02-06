@@ -7,6 +7,7 @@ import { Info } from "./Info";
 import { InfoData } from "./InfoData";
 import { panToZoomLevel } from "./SkiAreaInfo";
 import { Themed } from "./Themed";
+import { UnitSystemManager } from "./UnitSystemManager";
 import controlWidth from "./controlWidth";
 import { getFirstPoint } from "./utils/GeoJSON";
 
@@ -61,21 +62,28 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     }
     this._root.render(
       <Themed>
-        <Info
-          id={this._id}
-          eventBus={this._eventBus}
-          width={controlWidth(map)}
-          chartHighlightPosition={this._chartHighlightPosition}
-          onLoadFeature={(feature) => {
-            if (this._panToPositionAfterLoad) {
-              const point = getFirstPoint(feature.geometry);
-              this._map?.flyTo({
-                center: [point[0], point[1]],
-                zoom: panToZoomLevel,
-              });
-            }
-          }}
-          onHoverChartPosition={this._highlightManager!.hoveredChartPosition}
+        <UnitSystemManager
+          render={(unitSystem) => (
+            <Info
+              id={this._id}
+              eventBus={this._eventBus}
+              width={controlWidth(map)}
+              chartHighlightPosition={this._chartHighlightPosition}
+              unitSystem={unitSystem}
+              onLoadFeature={(feature) => {
+                if (this._panToPositionAfterLoad) {
+                  const point = getFirstPoint(feature.geometry);
+                  this._map?.flyTo({
+                    center: [point[0], point[1]],
+                    zoom: panToZoomLevel,
+                  });
+                }
+              }}
+              onHoverChartPosition={
+                this._highlightManager!.hoveredChartPosition
+              }
+            />
+          )}
         />
       </Themed>
     );

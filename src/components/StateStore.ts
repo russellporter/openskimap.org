@@ -5,6 +5,7 @@ import EventBus from "./EventBus";
 import { InfoData } from "./InfoData";
 import State, { StateChanges } from "./State";
 import { URLState } from "./URLHistory";
+import { UnitSystem } from "./utils/UnitHelpers";
 
 export default class StateStore implements EventBus {
   _state: State;
@@ -39,8 +40,20 @@ export default class StateStore implements EventBus {
     this.update({ aboutInfoOpen: false });
   };
 
+  openSettings = () => {
+    this.update({ settingsOpen: true });
+  };
+
+  closeSettings = () => {
+    this.update({ settingsOpen: false });
+  };
+
   setMapStyle = (style: MapStyle) => {
     this.update({ mapStyle: style });
+  };
+
+  setUnitSystem = (unitSystem: UnitSystem) => {
+    this.update({ unitSystem });
   };
 
   urlUpdate = (state: URLState) => {
