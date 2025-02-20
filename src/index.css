@@ -37,34 +37,8 @@ body {
   font-weight: 500;
 }
 
-.ski-popup {
-  max-width: 300px;
-}
-
-.ski-popup-header {
-  font-size: 14px;
-  margin-right: 4px;
-}
-
-.ski-popup-title {
-  font-weight: 500;
-}
-
-.ski-popup-labels {
-  margin-top: 4px;
-  position: flex;
-}
-
 .height-profile {
   margin-top: 20px;
-}
-
-.label-night {
-  background-color: #000000;
-}
-
-.ski-popup-labels > * {
-  margin-right: 4px;
 }
 
 .operating-status-icon {
