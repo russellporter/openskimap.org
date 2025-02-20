@@ -1,3 +1,4 @@
+import { Card } from "@mui/material";
 import {
   FeatureType,
   LiftFeature,
@@ -8,7 +9,6 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import EventBus from "./EventBus";
 import { loadGeoJSON } from "./GeoJSONLoader";
-import ResponsiveDrawer from "./ResponsiveDrawer";
 import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";
@@ -47,7 +47,7 @@ export const Info: React.FunctionComponent<{
   }, [props.id]);
 
   return (
-    <ResponsiveDrawer onClose={props.eventBus.hideInfo} cardWidth={props.width}>
+    <Card style={{ width: props.width }}>
       {feature && feature.properties.type == FeatureType.Lift && (
         <SkiLiftInfo
           feature={feature as LiftFeature}
@@ -71,6 +71,6 @@ export const Info: React.FunctionComponent<{
           unitSystem={props.unitSystem}
         />
       )}
-    </ResponsiveDrawer>
+    </Card>
   );
 };
