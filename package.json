@@ -42,6 +42,7 @@
     "shallow-equal": "^3.1.0",
     "throttle-debounce": "^5.0.2",
     "tslib": "^2.6.3",
+    "vaul": "https://github.com/russellporter/vaul/releases/download/1.1.2.fix2/vaul-1.1.2.tgz",
     "whatwg-fetch": "^3.6.20"
   },
   "devDependencies": {
@@ -71,6 +72,5 @@
   },
   "resolutions": {
     "@types/react": "^18.3.3"
-  },
-  "packageManager": "yarn@3.1.1"
+  }
 }
