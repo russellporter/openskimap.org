@@ -19,7 +19,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   _highlightManager: HighlightManager | null = null;
   _chartHighlightPosition: mapboxgl.LngLat | null = null;
   _panToPositionAfterLoad: boolean = false;
-  _root: ReactDOM.Root;
+  _root: ReactDOM.Root | null = null;
 
   constructor(info: InfoData, eventBus: EventBus) {
     this._id = info.id;
@@ -27,10 +27,10 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
-    this._root = ReactDOM.createRoot(this._container);
   }
 
   onAdd = (map: mapboxgl.Map) => {
+    this._root = ReactDOM.createRoot(this._container);
     this._map = map;
     this._highlightManager = new HighlightManager(this._map, this);
     this.render();
@@ -39,6 +39,8 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
   };
 
   onRemove = () => {
+    this._root?.unmount();
+    this._root = null;
     this._highlightManager?.clearMarker();
     this._map!.off("resize", this.render);
     const parent = this._container.parentNode;
@@ -60,7 +62,8 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     if (!map) {
       return;
     }
-    this._root.render(
+
+    this._root?.render(
       <Themed>
         <UnitSystemManager
           render={(unitSystem) => (

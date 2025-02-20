@@ -8,7 +8,7 @@ import controlWidth from "./controlWidth";
 
 export class SearchBarControl implements mapboxgl.IControl {
   _container: HTMLDivElement;
-  _root: ReactDOM.Root;
+  _root: ReactDOM.Root | null = null;
   _map: mapboxgl.Map | null = null;
   _eventBus: EventBus;
   _filtersShown: boolean = false;
@@ -17,10 +17,10 @@ export class SearchBarControl implements mapboxgl.IControl {
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
-    this._root = ReactDOM.createRoot(this._container);
   }
 
   onAdd = (map: mapboxgl.Map) => {
+    this._root = ReactDOM.createRoot(this._container);
     this._map = map;
     this.render();
     this._map.on("resize", this.render);
@@ -28,6 +28,8 @@ export class SearchBarControl implements mapboxgl.IControl {
   };
 
   onRemove = () => {
+    this._root?.unmount();
+    this._root = null;
     this._map!.off("resize", this.render);
     const parent = this._container.parentNode;
     parent && parent.removeChild(this._container);
@@ -40,7 +42,7 @@ export class SearchBarControl implements mapboxgl.IControl {
   };
 
   private render = () => {
-    this._root.render(
+    this._root?.render(
       <Themed>
         <SearchBar
           eventBus={this._eventBus}
