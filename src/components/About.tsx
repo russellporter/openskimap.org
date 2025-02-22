@@ -1,7 +1,7 @@
 import { Link, Typography } from "@mui/material";
 import * as React from "react";
 import EventBus from "./EventBus";
-import { InfoHeader } from "./InfoHeader";
+import { ModalHeader } from "./ModalHeader";
 
 interface Props {
   eventBus: EventBus;
@@ -11,11 +11,11 @@ export default class About extends React.Component<Props> {
   render() {
     return (
       <>
-        <InfoHeader onClose={() => this.props.eventBus.closeAboutInfo()}>
+        <ModalHeader onClose={() => this.props.eventBus.closeAboutInfo()}>
           <Typography variant="h5" id="modal-title">
             About
           </Typography>
-        </InfoHeader>
+        </ModalHeader>
         <Typography paragraph={true}>
           This map uses OpenStreetMap and Skimap.org data to show ski areas,
           runs, and lifts around the world. Backcountry ski routes, winter

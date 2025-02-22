@@ -4,22 +4,21 @@ import { TopRightCloseButton } from "./CloseButton";
 import { InfoBreadcrumbs, InfoBreadcrumbsProps } from "./InfoBreadcrumbs";
 
 const Root = styled("div")({
+  position: "sticky",
+  top: 0,
   display: "flex",
   justifyContent: "space-between",
   alignItems: "flex-start",
+  background: "white",
+  zIndex: 1,
 });
 
-const Content = styled("span")(({ theme }) => ({
-  display: "inline-flex",
-  "&:last-child": {
-    marginRight: 0,
-  },
-  "& > *": {
-    marginRight: theme.spacing(1),
-  },
+const Content = styled("div")(({ theme }) => ({
+  marginTop: theme.spacing(1),
+  marginLeft: theme.spacing(2),
 }));
 
-export const InfoHeader: React.FunctionComponent<
+export const CardHeader: React.FunctionComponent<
   React.PropsWithChildren<{
     onClose: () => void;
     breadcrumbs?: InfoBreadcrumbsProps;
@@ -27,10 +26,10 @@ export const InfoHeader: React.FunctionComponent<
 > = (props) => {
   return (
     <Root>
-      <div>
+      <Content>
         {props.breadcrumbs && <InfoBreadcrumbs {...props.breadcrumbs} />}
-        <Content>{props.children}</Content>
-      </div>
+        {props.children}
+      </Content>
       <TopRightCloseButton onClick={props.onClose} />
     </Root>
   );

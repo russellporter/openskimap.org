@@ -13,10 +13,6 @@ import {
 import * as React from "react";
 import EventBus from "./EventBus";
 
-const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
-  marginBottom: theme.spacing(0.5),
-}));
-
 const StyledBreadcrumb = styled("span")({
   maxWidth: "250px",
   whiteSpace: "nowrap",
@@ -44,7 +40,7 @@ export const InfoBreadcrumbs: React.FunctionComponent<InfoBreadcrumbsProps> = (
   return (
     <>
       {
-        <StyledBreadcrumbs separator="›" aria-label="breadcrumb">
+        <Breadcrumbs separator="›" aria-label="breadcrumb">
           {breadcrumbs.map((breadcrumbsGroup, groupIndex) => (
             <span key={groupIndex}>
               {breadcrumbsGroup
@@ -86,7 +82,7 @@ export const InfoBreadcrumbs: React.FunctionComponent<InfoBreadcrumbsProps> = (
                 )}
             </span>
           ))}
-        </StyledBreadcrumbs>
+        </Breadcrumbs>
       }
     </>
   );

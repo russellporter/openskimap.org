@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import EventBus from "./EventBus";
-import { InfoHeader } from "./InfoHeader";
+import { ModalHeader } from "./ModalHeader";
 import { UnitSystem } from "./utils/UnitHelpers";
 
 interface Props {
@@ -20,13 +20,13 @@ export default class Settings extends React.Component<Props> {
   render() {
     return (
       <>
-        <InfoHeader onClose={() => this.props.eventBus.closeSettings()}>
+        <ModalHeader onClose={() => this.props.eventBus.closeSettings()}>
           <Typography variant="h5" id="modal-title">
             Settings
           </Typography>
-        </InfoHeader>
+        </ModalHeader>
 
-        <div style={{ width: 500, padding: "8px 8px" }}>
+        <div style={{ minWidth: 300 }}>
           <FormControl>
             <FormLabel>
               {" "}

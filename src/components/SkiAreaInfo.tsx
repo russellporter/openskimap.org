@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardActions,
-  CardContent,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { CardActions, Tooltip, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import {
   Activity,
@@ -21,10 +15,11 @@ import {
   getRunColor,
 } from "openskidata-format";
 import * as React from "react";
+import { CardHeader } from "./CardHeader";
 import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
 import { formattedActivityName, formattedDifficultyName } from "./Formatters";
-import { InfoHeader } from "./InfoHeader";
+import { ScrollableCard } from "./ScrollableCard";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
 import * as UnitHelpers from "./utils/UnitHelpers";
@@ -35,6 +30,7 @@ interface SkiAreaPopupProps {
   feature: SkiAreaFeature;
   eventBus: EventBus;
   unitSystem: UnitHelpers.UnitSystem;
+  width?: number;
 }
 
 export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
@@ -43,33 +39,36 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
   const properties = props.feature.properties;
   const actions = getActions(properties);
   return (
-    <Card>
-      <CardContent>
-        <InfoHeader
-          onClose={props.eventBus.hideInfo}
+    <ScrollableCard
+      width={props.width}
+      header={
+        <CardHeader
           breadcrumbs={{ eventBus: props.eventBus, feature: props.feature }}
-        >
-          <StatusIcon
-            status={properties.status}
-            entityName={"ski area"}
-            hideIfOperating={true}
-          />
-          <Typography variant="h5" component="h2">
-            {getTitle(properties)}
-          </Typography>
-        </InfoHeader>
-        {properties.statistics && (
-          <SkiAreaStatisticsSummary
-            activities={properties.activities}
-            statistics={properties.statistics}
-            runConvention={properties.runConvention}
-            unitSystem={props.unitSystem}
-          />
-        )}
-        {<SourceSummary sources={properties.sources} />}
-      </CardContent>
-      {actions.length > 0 && <CardActions>{actions}</CardActions>}
-    </Card>
+          onClose={props.eventBus.hideInfo}
+        />
+      }
+      footer={
+        actions.length > 0 ? <CardActions>{actions}</CardActions> : undefined
+      }
+    >
+      <StatusIcon
+        status={properties.status}
+        entityName={"ski area"}
+        hideIfOperating={true}
+      />
+      <Typography variant="h5" component="h2">
+        {getTitle(properties)}
+      </Typography>
+      {properties.statistics && (
+        <SkiAreaStatisticsSummary
+          activities={properties.activities}
+          statistics={properties.statistics}
+          runConvention={properties.runConvention}
+          unitSystem={props.unitSystem}
+        />
+      )}
+      <SourceSummary sources={properties.sources} />
+    </ScrollableCard>
   );
 };
 

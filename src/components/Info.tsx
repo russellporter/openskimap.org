@@ -1,4 +1,3 @@
-import { Card } from "@mui/material";
 import {
   FeatureType,
   LiftFeature,
@@ -47,12 +46,13 @@ export const Info: React.FunctionComponent<{
   }, [props.id]);
 
   return (
-    <Card style={{ width: props.width }}>
+    <>
       {feature && feature.properties.type == FeatureType.Lift && (
         <SkiLiftInfo
           feature={feature as LiftFeature}
           eventBus={props.eventBus}
           unitSystem={props.unitSystem}
+          width={props.width}
         />
       )}
       {feature && feature.properties.type == FeatureType.Run && (
@@ -62,6 +62,7 @@ export const Info: React.FunctionComponent<{
           onHoverChartPosition={props.onHoverChartPosition}
           eventBus={props.eventBus}
           unitSystem={props.unitSystem}
+          width={props.width}
         />
       )}
       {feature && feature.properties.type == FeatureType.SkiArea && (
@@ -69,8 +70,9 @@ export const Info: React.FunctionComponent<{
           feature={feature as SkiAreaFeature}
           eventBus={props.eventBus}
           unitSystem={props.unitSystem}
+          width={props.width}
         />
       )}
-    </Card>
+    </>
   );
 };
