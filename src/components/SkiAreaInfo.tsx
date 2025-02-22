@@ -346,19 +346,13 @@ const RunDifficultyBarChart: React.FunctionComponent<{
         key={difficulty || "other"}
         title={difficultyText + " (" + distanceText + ")"}
         placement="bottom"
-        PopperProps={{
-          popperOptions: {
+        slotProps={{
+          popper: {
             modifiers: [
               {
                 name: "offset",
                 options: {
-                  offset: "0px, -8px",
-                },
-              },
-              {
-                name: "flip",
-                options: {
-                  padding: 0,
+                  offset: [0, -8],
                 },
               },
             ],
