@@ -18,7 +18,16 @@ export const ScrollableCard: React.FunctionComponent<
     >
       {props.header}
       <CardContent style={{ paddingTop: "0px" }}>{props.children}</CardContent>
-      {props.footer}
+      <div
+        style={{
+          position: "sticky",
+          bottom: 0,
+          backgroundColor: "white",
+          zIndex: 1,
+        }}
+      >
+        {props.footer}
+      </div>
     </Card>
   );
 };
