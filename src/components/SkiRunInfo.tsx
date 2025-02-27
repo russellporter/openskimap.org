@@ -89,7 +89,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             />
           </span>
         )}
-        {title}
+        <span style={{ verticalAlign: "middle" }}>{title}</span>
       </Typography>
       {subtitle && <Typography>{subtitle}</Typography>}
       <GroomingLabel feature={feature} />

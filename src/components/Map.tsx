@@ -27,7 +27,7 @@ export class Map {
   private markers: mapboxgl.Marker[];
   private loaded = false;
   private filtersVisible = false;
-  private mapScaleControl: mapboxgl.ScaleControl | null;
+  private mapScaleControl: mapboxgl.ScaleControl;
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
@@ -53,19 +53,15 @@ export class Map {
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
     this.filterManager = new MapFilterManager(this.map);
 
-    this.mapScaleControl = null;
-
-    addUnitSystemChangeListener_NonReactive({
-      onUnitSystemChange: (unitSystem) => {
-        this.updateContourLabelUnits(unitSystem);
-        this.updateScaleControlUnits(unitSystem);
-      },
-      triggerWhenInitialized: true,
+    this.mapScaleControl = new mapboxgl.ScaleControl({
+      maxWidth: 80,
     });
 
     this.map.addControl(this.searchBarControl);
 
-    this.map.addControl(new mapboxgl.AttributionControl());
+    this.map.addControl(this.mapScaleControl, "bottom-left");
+    this.map.addControl(new mapboxgl.AttributionControl(), "bottom-left");
+
     this.map.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
@@ -86,6 +82,14 @@ export class Map {
 
     this.map.once("load", () => {
       this.loaded = true;
+    });
+
+    addUnitSystemChangeListener_NonReactive({
+      onUnitSystemChange: (unitSystem) => {
+        this.updateContourLabelUnits(unitSystem);
+        this.updateScaleControlUnits(unitSystem);
+      },
+      triggerWhenInitialized: true,
     });
   }
 
@@ -115,15 +119,7 @@ export class Map {
   }
 
   private updateScaleControlUnits(unitSystem: UnitSystem) {
-    if (this.mapScaleControl === null) {
-      this.mapScaleControl = new mapboxgl.ScaleControl({
-        maxWidth: 80,
-        unit: unitSystem,
-      });
-      this.map.addControl(this.mapScaleControl, "bottom-left");
-    } else {
-      this.mapScaleControl.setUnit(unitSystem);
-    }
+    this.mapScaleControl.setUnit(unitSystem);
   }
 
   private waitForMapLoaded = (closure: () => void) => {

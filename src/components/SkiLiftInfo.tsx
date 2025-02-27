@@ -57,18 +57,27 @@ export const SkiLiftInfo: React.FunctionComponent<{
         actions.length > 0 ? <CardActions>{actions}</CardActions> : undefined
       }
     >
-      {properties.ref && (
-        <Badge text={properties.ref} color={getLiftColor(properties.status)} />
-      )}
-      {properties.status && (
-        <StatusIcon
-          status={properties.status}
-          entityName={"lift"}
-          hideIfOperating={true}
-        />
-      )}{" "}
-      <Typography variant="h5" component="h2">
-        {getLiftNameAndType(properties)}
+      <Typography gutterBottom variant="h5" component="h2">
+        {properties.ref && (
+          <span style={{ display: "inline-block", marginRight: "8px" }}>
+            <Badge
+              text={properties.ref}
+              color={getLiftColor(properties.status)}
+            />
+          </span>
+        )}
+        {properties.status && (
+          <span style={{ display: "inline-block", marginRight: "8px" }}>
+            <StatusIcon
+              status={properties.status}
+              entityName={"lift"}
+              hideIfOperating={true}
+            />
+          </span>
+        )}
+        <span style={{ verticalAlign: "middle" }}>
+          {getLiftNameAndType(properties)}
+        </span>
       </Typography>
       <div className={"distance-and-elevation-info"}>
         {distance && (

@@ -57,7 +57,7 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
     this.render();
   }
 
-  private render() {
+  private render = () => {
     const map = this._map;
     if (!map) {
       return;
@@ -90,5 +90,5 @@ export class InfoControl implements mapboxgl.IControl, ChartHighlighter {
         />
       </Themed>
     );
-  }
+  };
 }
