@@ -1,5 +1,5 @@
 import * as mapboxgl from "mapbox-gl";
-import { Activity, SkiAreaFeature } from "openskidata-format";
+import { SkiAreaActivity, SkiAreaFeature } from "openskidata-format";
 import MapFilters from "../MapFilters";
 import assert from "./utils/assert";
 export default class MapFiltersManager {
@@ -189,8 +189,10 @@ function combine(left: ObjectFilterRules, right: ObjectFilterRules) {
 }
 
 function getActivityFilterRules(filters: MapFilters): MapFilterRules {
-  const hasDownhill = !filters.hiddenActivities.includes(Activity.Downhill);
-  const hasNordic = !filters.hiddenActivities.includes(Activity.Nordic);
+  const hasDownhill = !filters.hiddenActivities.includes(
+    SkiAreaActivity.Downhill
+  );
+  const hasNordic = !filters.hiddenActivities.includes(SkiAreaActivity.Nordic);
   if (!hasDownhill && !hasNordic) {
     return {
       skiAreas: "hidden",
@@ -248,8 +250,10 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
     return noRules();
   }
 
-  const hasDownhill = !filters.hiddenActivities.includes(Activity.Downhill);
-  const hasNordic = !filters.hiddenActivities.includes(Activity.Nordic);
+  const hasDownhill = !filters.hiddenActivities.includes(
+    SkiAreaActivity.Downhill
+  );
+  const hasNordic = !filters.hiddenActivities.includes(SkiAreaActivity.Nordic);
 
   const rules: any[] = [];
   if (hasDownhill) {

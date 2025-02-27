@@ -1,4 +1,4 @@
-import { Activity } from "openskidata-format";
+import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
@@ -84,7 +84,7 @@ export default class StateStore implements EventBus {
     });
   };
 
-  toggleActivity = (activity: Activity) => {
+  toggleActivity = (activity: SkiAreaActivity) => {
     let hiddenActivities = this._state.mapFilters.hiddenActivities || [];
     if (hiddenActivities.includes(activity)) {
       hiddenActivities = hiddenActivities.filter((a) => a !== activity);

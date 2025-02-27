@@ -1,8 +1,8 @@
 import {
-  Activity,
   RunDifficulty,
   RunGrooming,
   RunUse,
+  SkiAreaActivity,
 } from "openskidata-format";
 
 export function formattedRunUse(uses: RunUse[], grooming: RunGrooming | null) {
@@ -55,7 +55,7 @@ export function formattedDifficultyName(difficulty: RunDifficulty) {
   return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 }
 
-export function formattedActivityName(activity: Activity) {
+export function formattedActivityName(activity: SkiAreaActivity) {
   return activity.charAt(0).toUpperCase() + activity.slice(1);
 }
 

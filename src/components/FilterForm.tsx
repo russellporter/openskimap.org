@@ -5,7 +5,7 @@ import {
   Slider,
   Typography,
 } from "@mui/material";
-import { Activity } from "openskidata-format";
+import { SkiAreaActivity } from "openskidata-format";
 import * as React from "react";
 import MapFilters from "../MapFilters";
 import { CardHeader } from "./CardHeader";
@@ -22,10 +22,10 @@ export const FilterForm: React.FunctionComponent<{
   unitSystem: UnitHelpers.UnitSystem;
 }> = (props) => {
   const isDownhillEnabled = !props.filters.hiddenActivities.includes(
-    Activity.Downhill
+    SkiAreaActivity.Downhill
   );
   const isNordicEnabled = !props.filters.hiddenActivities.includes(
-    Activity.Nordic
+    SkiAreaActivity.Nordic
   );
 
   const sliderMargins = { marginLeft: "8px", marginRight: "8px" };
@@ -59,7 +59,7 @@ export const FilterForm: React.FunctionComponent<{
               <DownhillCheckbox
                 checked={isDownhillEnabled}
                 onChange={() =>
-                  props.eventBus.toggleActivity(Activity.Downhill)
+                  props.eventBus.toggleActivity(SkiAreaActivity.Downhill)
                 }
               />
             }
@@ -69,7 +69,9 @@ export const FilterForm: React.FunctionComponent<{
             control={
               <NordicCheckbox
                 checked={isNordicEnabled}
-                onChange={() => props.eventBus.toggleActivity(Activity.Nordic)}
+                onChange={() =>
+                  props.eventBus.toggleActivity(SkiAreaActivity.Nordic)
+                }
               />
             }
             label="Nordic"

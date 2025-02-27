@@ -266,7 +266,7 @@ function configureChartGradient(
       feature.properties.difficulty;
 
     const color = hsla(
-      getRunColor(feature.properties.convention, difficulty),
+      getRunColor(feature.properties.difficultyConvention, difficulty),
       0.7
     );
     const middleIndex = index - stopSize / 2;

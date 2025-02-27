@@ -1,5 +1,9 @@
 import { CardActions, Typography } from "@mui/material";
-import { getLiftNameAndType, LiftFeature } from "openskidata-format";
+import {
+  getLiftColor,
+  getLiftNameAndType,
+  LiftFeature,
+} from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";
 import { CardHeader } from "./CardHeader";
@@ -54,7 +58,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
       }
     >
       {properties.ref && (
-        <Badge text={properties.ref} color={properties.color} />
+        <Badge text={properties.ref} color={getLiftColor(properties.status)} />
       )}
       {properties.status && (
         <StatusIcon

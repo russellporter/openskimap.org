@@ -6,6 +6,7 @@ import { Avatar, CardActions, Chip, Typography } from "@mui/material";
 import turfLength from "@turf/length";
 import { LineString } from "geojson";
 import {
+  getRunColor,
   RunFeature,
   RunGrooming,
   RunProperties,
@@ -79,7 +80,13 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
       <Typography gutterBottom variant="h5" component="h2">
         {properties.ref && (
           <span style={{ display: "inline-block", marginRight: "8px" }}>
-            <Badge text={properties.ref} color={properties.color} />
+            <Badge
+              text={properties.ref}
+              color={getRunColor(
+                properties.difficultyConvention,
+                properties.difficulty
+              )}
+            />
           </span>
         )}
         {title}

@@ -1,4 +1,4 @@
-import { Activity } from "openskidata-format";
+import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
 import { InfoData } from "./InfoData";
@@ -14,7 +14,7 @@ export default interface EventBus {
   closeSettings(): void;
   setMapStyle(style: MapStyle): void;
   setUnitSystem(unitSystem: UnitSystem): void;
-  toggleActivity(activity: Activity): void;
+  toggleActivity(activity: SkiAreaActivity): void;
   setMinimumElevation(elevation: number): void;
   setMinimumVertical(vertical: number): void;
   setMinimumRunLength(runLength: number): void;

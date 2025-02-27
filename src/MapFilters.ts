@@ -1,7 +1,7 @@
-import { Activity } from "openskidata-format";
+import { SkiAreaActivity } from "openskidata-format";
 
 export default interface MapFilters {
-  hiddenActivities: Activity[];
+  hiddenActivities: SkiAreaActivity[];
   minElevation: number | null;
   minVertical: number | null;
   minRunLength: number | null;

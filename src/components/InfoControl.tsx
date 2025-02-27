@@ -1,6 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
+import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import HighlightManager, { ChartHighlighter } from "./HighlightManager";
 import { Info } from "./Info";
@@ -8,7 +9,6 @@ import { InfoData } from "./InfoData";
 import { panToZoomLevel } from "./SkiAreaInfo";
 import { Themed } from "./Themed";
 import { UnitSystemManager } from "./UnitSystemManager";
-import controlWidth from "./controlWidth";
 import { getFirstPoint } from "./utils/GeoJSON";
 
 export class InfoControl implements mapboxgl.IControl, ChartHighlighter {

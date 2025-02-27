@@ -9,6 +9,7 @@ import {
   RunProperties,
   SkiAreaFeature,
   SkiAreaProperties,
+  SkiAreaSummaryFeature,
 } from "openskidata-format";
 import * as React from "react";
 import EventBus from "./EventBus";
@@ -98,7 +99,7 @@ function getBreadcrumbs(
   properties: SkiAreaProperties | LiftProperties | RunProperties,
   eventBus: EventBus
 ): Breadcrumb[][] {
-  let skiAreas: SkiAreaFeature[] = [];
+  let skiAreas: SkiAreaSummaryFeature[] = [];
   if (
     properties.type === FeatureType.Lift ||
     properties.type === FeatureType.Run
@@ -107,7 +108,7 @@ function getBreadcrumbs(
   }
 
   let locations: Location[];
-  if (properties.location) {
+  if (properties.type === FeatureType.SkiArea && properties.location) {
     locations = [properties.location];
   } else {
     locations = skiAreas.flatMap((skiArea) =>

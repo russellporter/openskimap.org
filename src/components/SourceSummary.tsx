@@ -1,5 +1,5 @@
 import { Link, Typography } from "@mui/material";
-import Source, { SourceType } from "openskidata-format/dist/Source";
+import { Source, SourceType } from "openskidata-format";
 import * as React from "react";
 
 export const SourceSummary: React.FunctionComponent<{ sources: Source[] }> = (

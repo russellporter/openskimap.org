@@ -5,6 +5,7 @@ import {
   RunFeature,
   RunProperties,
   SkiAreaFeature,
+  SkiAreaSummaryFeature,
 } from "openskidata-format";
 import {
   formattedDifficultyName,
@@ -41,7 +42,7 @@ function nullableToArray<T>(object: T | null): T[] {
   return object === null ? [] : [object];
 }
 
-function skiAreaNames(skiAreas: SkiAreaFeature[]): string | null {
+function skiAreaNames(skiAreas: SkiAreaSummaryFeature[]): string | null {
   const names = skiAreas
     .flatMap((skiArea) => {
       const name = skiArea.properties.name;
@@ -70,9 +71,10 @@ function getDetailedTitle(
   }
 }
 
-export function getRunTitleAndSubtitle(
-  properties: RunProperties
-): { title: string; subtitle: string | null } {
+export function getRunTitleAndSubtitle(properties: RunProperties): {
+  title: string;
+  subtitle: string | null;
+} {
   const summary = getRunSummary(properties);
   if (properties.name) {
     return { title: properties.name, subtitle: summary };

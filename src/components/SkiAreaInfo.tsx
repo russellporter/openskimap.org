@@ -1,12 +1,12 @@
 import { CardActions, Tooltip, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import {
-  Activity,
   LiftStatistics,
   LiftStatisticsByTypeKey,
   LiftType,
-  RunConvention,
   RunDifficulty,
+  RunDifficultyConvention,
+  SkiAreaActivity,
   SkiAreaFeature,
   SkiAreaProperties,
   SkiAreaStatistics,
@@ -102,8 +102,8 @@ function getTitle(properties: SkiAreaProperties) {
   }
 
   let summary: string;
-  const downhill = properties.activities.includes(Activity.Downhill);
-  const nordic = properties.activities.includes(Activity.Nordic);
+  const downhill = properties.activities.includes(SkiAreaActivity.Downhill);
+  const nordic = properties.activities.includes(SkiAreaActivity.Nordic);
   if (downhill && nordic) {
     summary = "Downhill & Nordic Ski Area";
   } else if (downhill) {
@@ -124,7 +124,7 @@ function getTitle(properties: SkiAreaProperties) {
 
 function elevationSummary(
   statistics: SkiAreaStatistics,
-  activities: Activity[],
+  activities: SkiAreaActivity[],
   unitSystem: UnitHelpers.UnitSystem
 ) {
   const minElevation = statistics.minElevation;
@@ -141,7 +141,7 @@ function elevationSummary(
     UnitHelpers.heightText(maxElevation, unitSystem);
   return (
     <Typography variant="subtitle1" color="textSecondary">
-      {activities.includes(Activity.Downhill)
+      {activities.includes(SkiAreaActivity.Downhill)
         ? "Vertical: " +
           UnitHelpers.heightText(vertical, unitSystem) +
           " (" +
@@ -153,15 +153,14 @@ function elevationSummary(
 }
 
 const SkiAreaStatisticsSummary: React.FunctionComponent<{
-  activities: Activity[];
+  activities: SkiAreaActivity[];
   statistics: SkiAreaStatistics;
-  runConvention: RunConvention;
+  runConvention: RunDifficultyConvention;
   unitSystem: UnitHelpers.UnitSystem;
 }> = (props) => {
-  const allActivities: Activity[] = [
-    Activity.Downhill,
-    Activity.Nordic,
-    Activity.Backcountry,
+  const allActivities: SkiAreaActivity[] = [
+    SkiAreaActivity.Downhill,
+    SkiAreaActivity.Nordic,
   ];
   const difficulties: (RunDifficulty | null)[] = [
     RunDifficulty.NOVICE,
@@ -173,7 +172,7 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
     RunDifficulty.EXTREME,
     null,
   ];
-  const runStatistics: [Activity, [RunDifficulty | null, number][]][] =
+  const runStatistics: [SkiAreaActivity, [RunDifficulty | null, number][]][] =
     allActivities.flatMap((activity) => {
       const statisticsForActivity = props.statistics.runs.byActivity[activity];
       if (statisticsForActivity !== undefined) {
@@ -321,8 +320,8 @@ function getLiftCategoryName(category: LiftCategory) {
 }
 
 const RunDifficultyBarChart: React.FunctionComponent<{
-  runConvention: RunConvention;
-  activity: Activity;
+  runConvention: RunDifficultyConvention;
+  activity: SkiAreaActivity;
   totalRunKm: number;
   data: [RunDifficulty | null, number][];
   unitSystem: UnitHelpers.UnitSystem;

@@ -13,13 +13,15 @@ import InputBase from "@mui/material/InputBase";
 import centroid from "@turf/centroid";
 import {
   FeatureType,
+  getLiftNameAndType,
   LiftFeature,
   LiftProperties,
+  Location,
   RunFeature,
   RunProperties,
+  SkiAreaActivity,
   SkiAreaFeature,
   SkiAreaProperties,
-  getLiftNameAndType,
 } from "openskidata-format";
 import * as React from "react";
 import { useCallback, useRef, useState } from "react";
@@ -324,12 +326,17 @@ function getPrimaryText(result: Result): string | null {
     case "add_marker":
       return "Mark Location";
     case "location":
-      const data = result.data;
-      return (
-        data.properties.name ||
-        data.properties.location?.localized.en.locality ||
-        null
-      );
+      const properties = result.data.properties;
+      const name = properties.name;
+      if (name) {
+        return name;
+      }
+
+      const locality =
+        properties.type === FeatureType.SkiArea
+          ? properties.location?.localized.en.locality
+          : null;
+      return locality ?? null;
   }
 }
 
@@ -357,12 +364,10 @@ function getFeatureDetails(
         properties.activities
           .map((activity) => {
             switch (activity) {
-              case Activity.Downhill:
+              case SkiAreaActivity.Downhill:
                 return "Downhill";
-              case Activity.Nordic:
+              case SkiAreaActivity.Nordic:
                 return "Nordic";
-              case Activity.Backcountry:
-                return "Backcountry";
             }
           })
           .join(" and ") + " Ski Area"
@@ -379,6 +384,7 @@ function getLocation(
 ): string | null {
   let components: string[] = [];
 
+  let locations: Location[];
   if (
     properties.type === FeatureType.Lift ||
     properties.type === FeatureType.Run
@@ -386,15 +392,25 @@ function getLocation(
     components.push(
       properties.skiAreas.map((skiArea) => skiArea.properties.name).join(" / ")
     );
+    locations = properties.skiAreas
+      .map((skiArea) => skiArea.properties.location)
+      .filter(
+        (location): location is NonNullable<typeof location> => location != null
+      );
+  } else if (properties.location) {
+    locations = [properties.location];
+  } else {
+    locations = [];
   }
 
-  const location = properties.location?.localized.en;
-  if (location?.region) {
-    components.push(location.region);
+  const regions = getUniqueLocalizedValues("region", locations);
+  if (regions.length > 0) {
+    components.push(regions.join(" / "));
   }
 
-  if (location?.country) {
-    components.push(location.country);
+  const countries = getUniqueLocalizedValues("country", locations);
+  if (countries.length > 0) {
+    components.push(countries.join(" / "));
   }
 
   const formatted = components.join(", ");
@@ -403,4 +419,17 @@ function getLocation(
 
 function isString(e: any): e is string {
   return !!e;
+}
+
+function getUniqueLocalizedValues<T extends keyof Location["localized"]["en"]>(
+  key: T,
+  locations: Location[]
+): string[] {
+  return [
+    ...new Set(
+      locations
+        .map((location) => location.localized.en[key])
+        .filter((value): value is NonNullable<typeof value> => value != null)
+    ),
+  ];
 }
