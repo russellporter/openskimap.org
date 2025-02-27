@@ -5635,12 +5635,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openskidata-format@npm:1.0.0":
-  version: 1.0.0
-  resolution: "openskidata-format@npm:1.0.0"
+"openskidata-format@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "openskidata-format@npm:2.0.0"
   dependencies:
     tslib: ^2
-  checksum: 58d022280b34635224087c9cd13f613a960e5fe47c82566b8952451d5258243619831dccfd81ec7b9e6afc00a98206fa0c6e42c70eeb2718c17e892af66935e2
+  checksum: 911499f9ded35fdb3503e0e10bbca4b026f370e10810f619ee627ab2a62357c948406fe91c039ea266fb00f50782a34fd9f12c7162cf4ab51cd6297fd9f6daba
   languageName: node
   linkType: hard
 
@@ -5679,7 +5679,7 @@ __metadata:
     css-loader: ^7.1.2
     html-webpack-plugin: ^5.6.0
     memoize-one: ^6.0.0
-    openskidata-format: 1.0.0
+    openskidata-format: ^2.0.0
     prettier: ^3.3.3
     query-string: ^9.1.0
     react: ^18.3.1
