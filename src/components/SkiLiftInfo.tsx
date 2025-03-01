@@ -3,6 +3,7 @@ import {
   getLiftColor,
   getLiftNameAndType,
   LiftFeature,
+  Status,
 } from "openskidata-format";
 import * as React from "react";
 import { Badge } from "./Badge";
@@ -66,13 +67,9 @@ export const SkiLiftInfo: React.FunctionComponent<{
             />
           </span>
         )}
-        {properties.status && (
+        {properties.status && properties.status !== Status.Operating && (
           <span style={{ display: "inline-block", marginRight: "8px" }}>
-            <StatusIcon
-              status={properties.status}
-              entityName={"lift"}
-              hideIfOperating={true}
-            />
+            <StatusIcon status={properties.status} entityName={"lift"} />
           </span>
         )}
         <span style={{ verticalAlign: "middle" }}>

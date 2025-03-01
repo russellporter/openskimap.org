@@ -8,14 +8,9 @@ import * as React from "react";
 interface Props {
   status: Status | null;
   entityName: string;
-  hideIfOperating: Boolean;
 }
 
 export const StatusIcon: React.FunctionComponent<Props> = (props) => {
-  if (props.hideIfOperating && props.status === Status.Operating) {
-    return null;
-  }
-
   return (
     <span style={{ flexShrink: 0 }}>
       <Tooltip

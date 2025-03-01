@@ -11,6 +11,7 @@ import {
   SkiAreaProperties,
   SkiAreaStatistics,
   SourceType,
+  Status,
   getFormattedLiftType,
   getRunColor,
 } from "openskidata-format";
@@ -51,13 +52,13 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
         actions.length > 0 ? <CardActions>{actions}</CardActions> : undefined
       }
     >
-      <StatusIcon
-        status={properties.status}
-        entityName={"ski area"}
-        hideIfOperating={true}
-      />
       <Typography variant="h5" component="h2">
-        {getTitle(properties)}
+        {properties.status !== Status.Operating && (
+          <span style={{ display: "inline-block", marginRight: "8px" }}>
+            <StatusIcon status={properties.status} entityName={"ski area"} />
+          </span>
+        )}
+        <span style={{ verticalAlign: "middle" }}>{getTitle(properties)}</span>
       </Typography>
       {properties.statistics && (
         <SkiAreaStatisticsSummary
