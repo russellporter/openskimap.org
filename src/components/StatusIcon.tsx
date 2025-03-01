@@ -14,6 +14,7 @@ export const StatusIcon: React.FunctionComponent<Props> = (props) => {
   return (
     <span style={{ flexShrink: 0 }}>
       <Tooltip
+        enterTouchDelay={0}
         title={tooltipText(props.status, props.entityName)}
         placement="right"
       >

@@ -347,6 +347,7 @@ const RunDifficultyBarChart: React.FunctionComponent<{
     });
     return (
       <Tooltip
+        enterTouchDelay={0}
         key={difficulty || "other"}
         title={difficultyText + " (" + distanceText + ")"}
         placement="bottom"

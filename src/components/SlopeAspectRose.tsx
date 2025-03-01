@@ -18,6 +18,8 @@ export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
       >
         Slope Aspect Rose
         <Tooltip
+          enterTouchDelay={0}
+          leaveTouchDelay={15000}
           title={
             <div>
               <Typography
@@ -93,7 +95,6 @@ export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
             style={{
               marginLeft: "8px",
               cursor: "pointer",
-              color: "rgba(0, 0, 0, 0.54)",
             }}
           />
         </Tooltip>
