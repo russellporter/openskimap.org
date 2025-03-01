@@ -20,9 +20,61 @@ export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
         <Tooltip
           title={
             <div>
-              <Typography variant="body2">
-                This rose shows the slope aspect distribution of downhill runs,
-                provided by{" "}
+              <Typography
+                variant="body2"
+                style={{ fontWeight: "bold", marginBottom: "8px" }}
+              >
+                How to read this rose diagram:
+              </Typography>
+
+              <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                • <strong>Petals:</strong> Show which compass directions the ski
+                runs face
+              </Typography>
+              <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                • <strong>Petal length:</strong> Longer petals = more terrain
+                facing that direction
+              </Typography>
+              <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                • <strong>Snowflake:</strong> Overall average slope aspect
+              </Typography>
+              <Typography variant="body2" style={{ marginBottom: "8px" }}>
+                • <strong>Sun lines:</strong> Winter sun paths across the sky
+              </Typography>
+
+              <Typography
+                variant="body2"
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: "8px",
+                  marginTop: "12px",
+                }}
+              >
+                Why aspect matters:
+              </Typography>
+
+              <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                • <strong>North (top):</strong> Retains snow longer, often
+                colder
+              </Typography>
+              <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                • <strong>South (bottom):</strong> More sun exposure, softens
+                faster
+              </Typography>
+              <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                • <strong>East (right):</strong> Morning sun, often good morning
+                skiing
+              </Typography>
+              <Typography variant="body2" style={{ marginBottom: "8px" }}>
+                • <strong>West (left):</strong> Afternoon sun, softens later in
+                day
+              </Typography>
+
+              <Typography
+                variant="body2"
+                style={{ fontSize: "0.8rem", marginTop: "8px" }}
+              >
+                Provided by{" "}
                 <Link
                   href="https://openskistats.org"
                   target="_blank"
@@ -31,7 +83,6 @@ export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
                 >
                   OpenSkiStats
                 </Link>
-                .
               </Typography>
             </div>
           }
