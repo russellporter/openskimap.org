@@ -21,6 +21,7 @@ import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
 import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { ScrollableCard } from "./ScrollableCard";
+import { SlopeAspectRose } from "./SlopeAspectRose";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
 import * as UnitHelpers from "./utils/UnitHelpers";
@@ -69,6 +70,9 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
         />
       )}
       <SourceSummary sources={properties.sources} />
+      {properties.activities.includes(SkiAreaActivity.Downhill) && (
+        <SlopeAspectRose id={properties.id} />
+      )}
     </ScrollableCard>
   );
 };
