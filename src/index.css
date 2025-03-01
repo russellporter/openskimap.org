@@ -76,8 +76,9 @@ body {
   margin-top: 4px;
 }
 
-.distance-and-elevation-info > * {
-  margin-right: 8px;
+.distance-and-elevation-info > *:after {
+  margin-right: 4px;
+  content: " ";
 }
 
 .mapboxgl-ctrl-top-left {
