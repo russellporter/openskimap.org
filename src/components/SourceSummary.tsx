@@ -1,5 +1,10 @@
 import { Link, Typography } from "@mui/material";
-import { Source, SourceType } from "openskidata-format";
+import {
+  getSourceName,
+  getSourceURL,
+  Source,
+  SourceType,
+} from "openskidata-format";
 import * as React from "react";
 
 export const SourceSummary: React.FunctionComponent<{ sources: Source[] }> = (
@@ -63,21 +68,3 @@ export const SourceSummary: React.FunctionComponent<{ sources: Source[] }> = (
     </Typography>
   );
 };
-
-function getSourceURL(source: Source): string {
-  switch (source.type) {
-    case SourceType.OPENSTREETMAP:
-      return "https://www.openstreetmap.org/" + source.id;
-    case SourceType.SKIMAP_ORG:
-      return "https://www.skimap.org/SkiAreas/view/" + source.id;
-  }
-}
-
-function getSourceName(type: SourceType): string {
-  switch (type) {
-    case SourceType.OPENSTREETMAP:
-      return "OpenStreetMap";
-    case SourceType.SKIMAP_ORG:
-      return "Skimap.org";
-  }
-}
