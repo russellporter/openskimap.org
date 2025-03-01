@@ -12,7 +12,7 @@ export const ScrollableCard: React.FunctionComponent<
     <Card
       style={{
         overflowY: "auto",
-        maxHeight: "calc(100dvh - 170px)",
+        maxHeight: "calc(100dvh - 78px)",
         width: props.width,
       }}
     >

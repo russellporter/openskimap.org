@@ -58,10 +58,9 @@ export class Map {
     });
 
     this.map.addControl(this.searchBarControl);
-
     this.map.addControl(this.mapScaleControl, "bottom-left");
-    this.map.addControl(new mapboxgl.AttributionControl(), "bottom-left");
 
+    this.map.addControl(new mapboxgl.AttributionControl(), "bottom-right");
     this.map.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {

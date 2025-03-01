@@ -79,3 +79,8 @@ body {
 .distance-and-elevation-info > * {
   margin-right: 8px;
 }
+
+.mapboxgl-ctrl-top-left {
+  /** Allow the info control to cover other controls if needed */
+  z-index: 3;
+}
