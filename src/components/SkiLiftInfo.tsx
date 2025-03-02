@@ -1,6 +1,7 @@
 import { CardActions, Typography } from "@mui/material";
 import {
   getLiftColor,
+  getLiftElevationData,
   getLiftNameAndType,
   LiftFeature,
   Status,
@@ -8,14 +9,13 @@ import {
 import * as React from "react";
 import { Badge } from "./Badge";
 import { CardHeader } from "./CardHeader";
-import { CoordinatesWithElevation, getAscentAndDescent } from "./ElevationData";
 import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
 import { ScrollableCard } from "./ScrollableCard";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
-import getInclinedLengthInMeters from "./utils/InclinedLength";
 import * as UnitHelpers from "./utils/UnitHelpers";
+import { formattedSlope } from "./utils/formattedSlope";
 
 export const SkiLiftInfo: React.FunctionComponent<{
   eventBus: EventBus;
@@ -24,23 +24,10 @@ export const SkiLiftInfo: React.FunctionComponent<{
   width?: number;
 }> = (props) => {
   const properties = props.feature.properties;
-  const geometry = props.feature.geometry;
-  const durationInSeconds = props.feature.properties.duration;
+  const elevationData = React.useMemo(() => {
+    return getLiftElevationData(props.feature);
+  }, [props.feature]);
 
-  const distance = React.useMemo(() => {
-    return geometry.type === "LineString"
-      ? getInclinedLengthInMeters(geometry)
-      : null;
-  }, [geometry]);
-
-  const ascentAndDescent = React.useMemo(() => {
-    return geometry.type === "LineString" && geometry.coordinates[0].length >= 3
-      ? getAscentAndDescent(geometry.coordinates as CoordinatesWithElevation)
-      : null;
-  }, [geometry]);
-
-  const speed =
-    distance && durationInSeconds ? distance / durationInSeconds : null;
   const actions = getWebsiteActions(properties.websites);
   return (
     <ScrollableCard
@@ -77,30 +64,36 @@ export const SkiLiftInfo: React.FunctionComponent<{
         </span>
       </Typography>
       <div className={"distance-and-elevation-info"}>
-        {distance && (
+        {elevationData && (
           <>
             <Typography>
               Distance:{" "}
               {UnitHelpers.distanceText({
-                distanceInMeters: distance,
+                distanceInMeters: elevationData.inclinedLengthInMeters,
                 unitSystem: props.unitSystem,
               })}
             </Typography>
           </>
         )}
-        {ascentAndDescent && ascentAndDescent.ascent > 1 && (
+        {elevationData && (
           <Typography>
-            Ascent:{" "}
-            {UnitHelpers.heightText(ascentAndDescent.ascent, props.unitSystem)}
+            Vertical:{" "}
+            {UnitHelpers.heightText(
+              elevationData.verticalInMeters,
+              props.unitSystem
+            )}
           </Typography>
         )}
-        {ascentAndDescent && ascentAndDescent.descent > 1 && (
+        {elevationData && elevationData.speedInMetersPerSecond && (
           <Typography>
-            Descent:{" "}
-            {UnitHelpers.heightText(ascentAndDescent.descent, props.unitSystem)}
+            Speed: {elevationData.speedInMetersPerSecond.toFixed(1)} m/s
           </Typography>
         )}
-        {speed && <Typography>Speed: {speed.toFixed(1)} m/s</Typography>}
+        {elevationData && elevationData.overallPitchInPercent && (
+          <Typography>
+            Average Slope: {formattedSlope(elevationData.overallPitchInPercent)}
+          </Typography>
+        )}
       </div>
       {properties.description && (
         <Typography>

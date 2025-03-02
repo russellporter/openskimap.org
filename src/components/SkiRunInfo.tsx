@@ -3,10 +3,10 @@ import HighlightIcon from "@mui/icons-material/Highlight";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import WarningIcon from "@mui/icons-material/Warning";
 import { Avatar, CardActions, Chip, Typography } from "@mui/material";
-import turfLength from "@turf/length";
 import { LineString } from "geojson";
 import {
   getRunColor,
+  getRunElevationData,
   RunFeature,
   RunGrooming,
   RunProperties,
@@ -15,13 +15,12 @@ import {
 import * as React from "react";
 import { Badge } from "./Badge";
 import { CardHeader } from "./CardHeader";
-import getElevationData from "./ElevationData";
 import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
 import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
 import { ScrollableCard } from "./ScrollableCard";
 import { SourceSummary } from "./SourceSummary";
-import getInclinedLengthInMeters from "./utils/InclinedLength";
+import { formattedSlope } from "./utils/formattedSlope";
 import { getRunTitleAndSubtitle } from "./utils/PageMetadata";
 import * as UnitHelpers from "./utils/UnitHelpers";
 
@@ -35,30 +34,10 @@ interface Props extends HeightProfileHighlightProps {
 export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
   const feature = props.feature;
   const properties = feature.properties;
-  const geometry = props.feature.geometry;
-  const elevationProfile = feature.properties.elevationProfile;
-
-  const distance = React.useMemo(() => {
-    return geometry.type === "LineString"
-      ? turfLength(
-          { type: "Feature", geometry: geometry, properties: {} },
-          { units: "meters" }
-        )
-      : null;
-  }, [geometry]);
-
-  const inclinedDistance = React.useMemo(() => {
-    return geometry.type === "LineString"
-      ? getInclinedLengthInMeters(geometry)
-      : null;
-  }, [geometry]);
 
   const elevationData = React.useMemo(() => {
-    return geometry.type === "LineString" && elevationProfile
-      ? getElevationData(geometry, elevationProfile)
-      : null;
-  }, [geometry, elevationProfile]);
-  const slopeInfo = elevationData && elevationData.slopeInfo;
+    return getRunElevationData(feature);
+  }, [feature]);
   const { title, subtitle } = getRunTitleAndSubtitle(props.feature.properties);
   const actions = getWebsiteActions(properties.websites);
   return (
@@ -136,36 +115,42 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
         />
       ) : null}
       <Typography className={"distance-and-elevation-info"}>
-        {inclinedDistance ? (
+        {elevationData && elevationData.inclinedLengthInMeters ? (
           <span>
             Distance:{" "}
             {UnitHelpers.distanceText({
-              distanceInMeters: inclinedDistance,
+              distanceInMeters: elevationData.inclinedLengthInMeters,
               unitSystem: props.unitSystem,
             })}
           </span>
         ) : null}
-        {elevationData && elevationData.ascent > 1 ? (
+        {elevationData && elevationData.ascentInMeters > 1 ? (
           <span>
             Ascent:{" "}
-            {UnitHelpers.heightText(elevationData.ascent, props.unitSystem)}
+            {UnitHelpers.heightText(
+              elevationData.ascentInMeters,
+              props.unitSystem
+            )}
           </span>
         ) : null}
-        {elevationData && elevationData.descent > 1 ? (
+        {elevationData && elevationData.descentInMeters > 1 ? (
           <span>
             Descent:{" "}
-            {UnitHelpers.heightText(elevationData.descent, props.unitSystem)}
+            {UnitHelpers.heightText(
+              elevationData.descentInMeters,
+              props.unitSystem
+            )}
           </span>
         ) : null}
       </Typography>
-      {slopeInfo && (
+      {elevationData && (
         <Typography className={"distance-and-elevation-info"}>
-          {slopeInfo.average !== null && (
-            <span>Average Slope: {formattedSlope(slopeInfo.average)}</span>
-          )}
-          {slopeInfo.max !== null && (
-            <span>Max Slope: {formattedSlope(slopeInfo.max)}</span>
-          )}
+          <span>
+            Average Slope: {formattedSlope(elevationData.averagePitchInPercent)}
+          </span>
+          <span>
+            Max Slope: {formattedSlope(elevationData.maxPitchInPercent)}
+          </span>
         </Typography>
       )}
       {properties.description && (
@@ -173,10 +158,9 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
           <span>Notes: {properties.description}</span>
         </Typography>
       )}
-      {distance !== null && elevationData !== null && (
+      {elevationData !== null && (
         <HeightProfile
           feature={feature as GeoJSON.Feature<LineString, RunProperties>}
-          distance={distance}
           elevationData={elevationData}
           chartHighlightPosition={props.chartHighlightPosition}
           onHoverChartPosition={props.onHoverChartPosition}
@@ -220,10 +204,3 @@ const GroomingLabel: React.FunctionComponent<{ feature: RunFeature }> = (
 
   return <Chip label={text} />;
 };
-
-function formattedSlope(slopePercent: number) {
-  const percent = Math.round(Math.abs(slopePercent * 100)) + "%";
-  const degrees =
-    Math.round(Math.abs((Math.atan(slopePercent) / Math.PI) * 180)) + "°";
-  return degrees + " (" + percent + ")";
-}

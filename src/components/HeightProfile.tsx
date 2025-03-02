@@ -1,3 +1,4 @@
+import turfDistance from "@turf/distance";
 import turfLineSliceAlong from "@turf/line-slice-along";
 import turfNearestPointOnLine from "@turf/nearest-point-on-line";
 import {
@@ -14,6 +15,7 @@ import {
 import * as mapboxgl from "mapbox-gl";
 import memoize from "memoize-one";
 import {
+  ElevationData,
   ElevationProfile,
   RunDifficulty,
   RunFeature,
@@ -24,7 +26,6 @@ import {
 import * as React from "react";
 import { Line } from "react-chartjs-2";
 import "whatwg-fetch";
-import { ElevationData } from "./ElevationData";
 import * as UnitHelpers from "./utils/UnitHelpers";
 
 Chart.register(LinearScale);
@@ -40,7 +41,6 @@ export interface HeightProfileHighlightProps {
 
 interface HeightProfileProps extends HeightProfileHighlightProps {
   feature: GeoJSON.Feature<GeoJSON.LineString, RunProperties>;
-  distance: number;
   elevationData: ElevationData;
   unitSystem: UnitHelpers.UnitSystem;
 }
@@ -65,7 +65,7 @@ export class HeightProfile extends React.Component<
     );
   }
 
-  onHover(event: ChartEvent, chart: Chart): any {
+  onHover(event: ChartEvent, chart: Chart, distance: number): any {
     let area = chart.chartArea;
     let x = event.x;
     let y = event.y;
@@ -86,10 +86,15 @@ export class HeightProfile extends React.Component<
       return;
     }
 
-    let position = ((x - left) / (right - left)) * this.props.distance;
-    let line = turfLineSliceAlong(this.props.feature, position, position, {
-      units: "meters",
-    });
+    let position = ((x - left) / (right - left)) * distance;
+    let line = turfLineSliceAlong(
+      this.props.elevationData.profileGeometry,
+      position,
+      position,
+      {
+        units: "meters",
+      }
+    );
     let geometry = line.geometry;
     if (geometry === null) {
       this.props.onHoverChartPosition(null);
@@ -107,6 +112,7 @@ export class HeightProfile extends React.Component<
     const feature = this.props.feature;
     const elevationData = this.props.elevationData;
     const elevationProfile = feature.properties.elevationProfile;
+    const unitSystem = this.props.unitSystem;
 
     if (
       LineChart === null ||
@@ -116,24 +122,43 @@ export class HeightProfile extends React.Component<
       return null;
     }
 
-    const elevations = elevationData.coordinatesWithElevation.map(
-      (coordinate) => {
-        return coordinate[2];
-      }
-    );
+    // Using turf/distance calculates the distance between each point. Returns an array of elevations by distance along the line
+    const elevationsAndDistance =
+      elevationData.profileGeometry.coordinates.reduce(
+        (result, coord, index, coords) => {
+          if (index === 0) {
+            // First point has zero distance
+            result.push({ x: 0, y: coord[2] });
+          } else {
+            const prevCoord = coords[index - 1];
+            const from = [prevCoord[0], prevCoord[1]];
+            const to = [coord[0], coord[1]];
+            const segmentDistance = turfDistance(from, to, { units: "meters" });
+            const totalDistance = result[index - 1].x + segmentDistance;
+            result.push({ x: totalDistance, y: coord[2] });
+          }
+          return result;
+        },
+        [] as { x: number; y: number }[]
+      );
 
-    const data: ChartData<"line", number[], string> = {
-      labels: chartLabels(
-        elevations,
-        elevationData.heightProfileResolution,
-        this.props.unitSystem
-      ),
+    const distance = elevationsAndDistance[elevationsAndDistance.length - 1].x;
+
+    const data: ChartData<"line", { x: string; y: number }[]> = {
       datasets: [
         {
           fill: true,
           borderWidth: 0,
           pointRadius: 0,
-          data: elevations,
+          data: elevationsAndDistance.map((point) => ({
+            x: UnitHelpers.distanceText({
+              distanceInMeters: point.x,
+              unitSystem,
+              forceLongestUnit: true,
+              withSpace: true,
+            }),
+            y: point.y,
+          })),
         },
       ],
     };
@@ -199,10 +224,8 @@ export class HeightProfile extends React.Component<
               y: {
                 type: "linear",
                 suggestedMax:
-                  Math.max(
-                    elevationData.maxElevation - elevationData.minElevation,
-                    100
-                  ) + elevationData.minElevation,
+                  Math.max(elevationData.verticalInMeters, 100) +
+                  elevationData.minElevationInMeters,
                 ticks: {
                   callback: (elevation: any) => {
                     return UnitHelpers.heightText(
@@ -214,34 +237,13 @@ export class HeightProfile extends React.Component<
               },
             },
             onHover: function (event, _, chart): any {
-              that.onHover(event, chart);
+              that.onHover(event, chart, distance);
             },
           }}
         />
       </div>
     );
   }
-}
-
-function chartLabels(
-  elevations: number[],
-  heightProfileResolution: number,
-  unitSystem: UnitHelpers.UnitSystem
-) {
-  let distance = 0;
-  const labels = [];
-  for (let _ of elevations) {
-    labels.push(
-      UnitHelpers.distanceText({
-        distanceInMeters: distance,
-        unitSystem,
-        forceLongestUnit: true,
-        withSpace: true,
-      })
-    );
-    distance += heightProfileResolution;
-  }
-  return labels;
 }
 
 function configureChartGradient(
