@@ -29,7 +29,7 @@
     "chart.js": "^4.4.3",
     "clsx": "^2.1.1",
     "memoize-one": "^6.0.0",
-    "openskidata-format": "^2.2.0",
+    "openskidata-format": "^3.0.0",
     "query-string": "^9.1.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
