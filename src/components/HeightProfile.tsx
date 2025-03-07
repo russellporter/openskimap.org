@@ -142,21 +142,17 @@ export class HeightProfile extends React.Component<
         [] as { x: number; y: number }[]
       );
 
+    // Note that this is the un-inclined distance used for the x-axis, unlike what we show in the stats section.
     const distance = elevationsAndDistance[elevationsAndDistance.length - 1].x;
 
-    const data: ChartData<"line", { x: string; y: number }[]> = {
+    const data: ChartData<"line", { x: number; y: number }[]> = {
       datasets: [
         {
           fill: true,
           borderWidth: 0,
           pointRadius: 0,
           data: elevationsAndDistance.map((point) => ({
-            x: UnitHelpers.distanceText({
-              distanceInMeters: point.x,
-              unitSystem,
-              forceLongestUnit: true,
-              withSpace: true,
-            }),
+            x: point.x,
             y: point.y,
           })),
         },
@@ -221,6 +217,21 @@ export class HeightProfile extends React.Component<
               },
             },
             scales: {
+              x: {
+                type: "linear",
+                min: 0,
+                max: distance,
+                ticks: {
+                  callback: (value: any) => {
+                    return UnitHelpers.distanceText({
+                      distanceInMeters: value,
+                      unitSystem,
+                      forceLongestUnit: true,
+                      withSpace: true,
+                    });
+                  },
+                },
+              },
               y: {
                 type: "linear",
                 suggestedMax:
