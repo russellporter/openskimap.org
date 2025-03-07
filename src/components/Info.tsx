@@ -20,10 +20,9 @@ export const Info: React.FunctionComponent<{
   id: string;
   width: number;
   eventBus: EventBus;
-  chartHighlightPosition: mapboxgl.LngLat | null;
   unitSystem: UnitHelpers.UnitSystem;
   onLoadFeature: (feature: MapFeature) => void;
-  onHoverChartPosition: (position: mapboxgl.LngLat | null) => void;
+  map: mapboxgl.Map;
 }> = (props) => {
   const [feature, setFeature] = useState<MapFeature | null>(null);
   useEffect(() => {
@@ -58,8 +57,7 @@ export const Info: React.FunctionComponent<{
       {feature && feature.properties.type == FeatureType.Run && (
         <SkiRunInfo
           feature={feature as RunFeature}
-          chartHighlightPosition={props.chartHighlightPosition}
-          onHoverChartPosition={props.onHoverChartPosition}
+          map={props.map}
           eventBus={props.eventBus}
           unitSystem={props.unitSystem}
           width={props.width}

@@ -40,6 +40,16 @@ body {
 
 .height-profile {
   margin-top: 20px;
+  position: relative;
+}
+
+.chart-position-marker {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  background-color: transparent;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .operating-status-icon {

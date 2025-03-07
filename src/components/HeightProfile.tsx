@@ -34,28 +34,39 @@ Chart.register(PointElement);
 Chart.register(LineElement);
 Chart.register(Filler);
 
-export interface HeightProfileHighlightProps {
-  chartHighlightPosition: mapboxgl.LngLat | null;
-  onHoverChartPosition: (position: mapboxgl.LngLat | null) => void;
-}
-
-interface HeightProfileProps extends HeightProfileHighlightProps {
+export interface HeightProfileProps {
   feature: GeoJSON.Feature<GeoJSON.LineString, RunProperties>;
   elevationData: ElevationData;
   unitSystem: UnitHelpers.UnitSystem;
+  map?: mapboxgl.Map; // Map is optional to allow the component to be used without highlight functionality
+}
+
+interface HeightProfileState {
+  LineChart: typeof Line | null;
+  chartHighlightPosition: mapboxgl.LngLat | null;
 }
 
 export class HeightProfile extends React.Component<
   HeightProfileProps,
-  { LineChart: typeof Line | null }
+  HeightProfileState
 > {
-  convertedChartHighlightPosition = memoize(convertChartHighlightPosition);
+  private marker: mapboxgl.Marker | null = null;
+
+  convertedChartHighlightPosition = memoize(
+    (chartHighlightPosition: mapboxgl.LngLat | null, feature: any) => {
+      return this.convertChartHighlightPosition(
+        chartHighlightPosition,
+        feature
+      );
+    }
+  );
 
   constructor(props: HeightProfileProps) {
     super(props);
 
     this.state = {
       LineChart: null,
+      chartHighlightPosition: null,
     };
   }
 
@@ -63,7 +74,51 @@ export class HeightProfile extends React.Component<
     import("react-chartjs-2").then((module) =>
       this.setState({ LineChart: module.Line })
     );
+
+    // Set up map event listeners if map is provided
+    if (this.props.map) {
+      this.props.map.on("mousemove", this._onMapMouseMove);
+      this.props.map.on("mouseout", this._onMapMouseOut);
+    }
   }
+
+  componentDidUpdate(prevProps: HeightProfileProps) {
+    // Handle map reference changes
+    if (prevProps.map !== this.props.map) {
+      if (prevProps.map) {
+        prevProps.map.off("mousemove", this._onMapMouseMove);
+        prevProps.map.off("mouseout", this._onMapMouseOut);
+      }
+
+      if (this.props.map) {
+        this.props.map.on("mousemove", this._onMapMouseMove);
+        this.props.map.on("mouseout", this._onMapMouseOut);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.props.map) {
+      this.props.map.off("mousemove", this._onMapMouseMove);
+      this.props.map.off("mouseout", this._onMapMouseOut);
+    }
+
+    // Clean up marker
+    this.clearMarker();
+  }
+
+  // Map event handlers
+  _onMapMouseMove = (e: mapboxgl.MapMouseEvent) => {
+    this.setChartHighlightPosition(e.lngLat);
+  };
+
+  _onMapMouseOut = () => {
+    this.setChartHighlightPosition(null);
+  };
+
+  setChartHighlightPosition = (position: mapboxgl.LngLat | null) => {
+    this.setState({ chartHighlightPosition: position });
+  };
 
   onHover(event: ChartEvent, chart: Chart, distance: number): any {
     let area = chart.chartArea;
@@ -71,18 +126,19 @@ export class HeightProfile extends React.Component<
     let y = event.y;
 
     if (x === null || y === null) {
-      this.props.onHoverChartPosition(null);
+      this.clearMarker();
       return;
     }
+
     let left = area.left;
     let right = area.right;
     if (x < left || x > right) {
-      this.props.onHoverChartPosition(null);
+      this.clearMarker();
       return;
     }
 
     if (y > area.bottom || y < area.top) {
-      this.props.onHoverChartPosition(null);
+      this.clearMarker();
       return;
     }
 
@@ -97,15 +153,48 @@ export class HeightProfile extends React.Component<
     );
     let geometry = line.geometry;
     if (geometry === null) {
-      this.props.onHoverChartPosition(null);
+      this.clearMarker();
       return;
     }
 
     const firstPoint = geometry.coordinates[0];
-    this.props.onHoverChartPosition(
-      new mapboxgl.LngLat(firstPoint[0], firstPoint[1])
-    );
+    this.markPositionOnMap(new mapboxgl.LngLat(firstPoint[0], firstPoint[1]));
   }
+
+  // Marker management
+  clearMarker = () => {
+    if (this.marker !== null) {
+      this.marker.remove();
+      this.marker = null;
+    }
+  };
+
+  markPositionOnMap = (position: mapboxgl.LngLat | null) => {
+    if (!this.props.map || position === null) {
+      this.clearMarker();
+      return;
+    }
+
+    if (this.marker === null) {
+      // Create a custom ring-style marker
+      const el = document.createElement("div");
+      el.className = "chart-position-marker";
+      el.style.width = "16px";
+      el.style.height = "16px";
+      el.style.borderRadius = "50%";
+      el.style.border = "2px solid #000";
+      el.style.backgroundColor = "transparent";
+
+      this.marker = new mapboxgl.Marker({
+        element: el,
+        anchor: "center",
+      })
+        .setLngLat(position)
+        .addTo(this.props.map);
+    } else {
+      this.marker.setLngLat(position);
+    }
+  };
 
   render() {
     const LineChart = this.state.LineChart;
@@ -145,21 +234,100 @@ export class HeightProfile extends React.Component<
     // Note that this is the un-inclined distance used for the x-axis, unlike what we show in the stats section.
     const distance = elevationsAndDistance[elevationsAndDistance.length - 1].x;
 
+    // Convert the highlight position to a distance along the line
+    const highlightPositionX = this.convertedChartHighlightPosition(
+      this.state.chartHighlightPosition,
+      feature
+    );
+
     const data: ChartData<"line", { x: number; y: number }[]> = {
       datasets: [
         {
           fill: true,
           borderWidth: 0,
+          // Don't show points on the line, we add our own through a plugin
           pointRadius: 0,
+          pointHitRadius: 5,
+          pointHoverRadius: 0,
+          // Set z-index (higher number = lower in stack)
+          order: 10,
           data: elevationsAndDistance.map((point) => ({
             x: point.x,
             y: point.y,
           })),
         },
+        // Add a second dataset for the highlight point if we have a position
+        ...(highlightPositionX !== null
+          ? [
+              {
+                fill: false,
+                borderWidth: 0,
+                borderColor: "rgba(0, 0, 0, 0)",
+                pointRadius: 0,
+                pointHitRadius: 16,
+                // Set a lower order value to ensure it appears on top (Chart.js renders lower values on top)
+                order: 1,
+                data: [
+                  {
+                    x: highlightPositionX,
+                    y: getInterpolatedElevation(
+                      elevationsAndDistance,
+                      highlightPositionX
+                    ),
+                  },
+                ],
+              },
+            ]
+          : []),
       ],
     };
 
     const plugins: Plugin[] = [
+      {
+        id: "customPointStyle",
+        afterDraw: function (chart) {
+          const datasets = chart.data.datasets;
+          if (!datasets) return;
+
+          const ctx = chart.ctx;
+          const POINT_RADIUS = 8;
+
+          // Helper function to draw a point marker
+          const drawPointMarker = (x: number, y: number) => {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, POINT_RADIUS, 0, Math.PI * 2);
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+          };
+
+          // Draw hovered point on the chart (first dataset)
+          if (chart.getActiveElements().length > 0) {
+            const activeElement = chart.getActiveElements()[0];
+            if (activeElement.datasetIndex === 0) {
+              const meta = chart.getDatasetMeta(0);
+              const point = meta.data[activeElement.index];
+              if (point) {
+                drawPointMarker(point.x, point.y);
+              }
+            }
+          }
+
+          // Draw highlight from map hovering (second dataset)
+          if (datasets.length > 1) {
+            const meta = chart.getDatasetMeta(1);
+            if (meta.data && meta.data.length > 0) {
+              const point = meta.data[0];
+              drawPointMarker(point.x, point.y);
+
+              // Hide the original point
+              point.options.radius = 0;
+            }
+          }
+        },
+      },
       {
         id: "gradient",
         beforeRender: function (chart) {
@@ -200,7 +368,7 @@ export class HeightProfile extends React.Component<
 
     let that = this;
     return (
-      <div className="height-profile">
+      <div className="height-profile" onMouseLeave={this.clearMarker}>
         <Line
           data={data}
           plugins={plugins}
@@ -208,6 +376,8 @@ export class HeightProfile extends React.Component<
             animation: {
               duration: 0, // general animation time
             },
+            responsive: true,
+            maintainAspectRatio: true,
             plugins: {
               legend: {
                 display: false,
@@ -215,6 +385,11 @@ export class HeightProfile extends React.Component<
               tooltip: {
                 enabled: false,
               },
+            },
+            hover: {
+              mode: "index",
+              intersect: false,
+              includeInvisible: true,
             },
             scales: {
               x: {
@@ -255,6 +430,41 @@ export class HeightProfile extends React.Component<
       </div>
     );
   }
+
+  convertChartHighlightPosition = (
+    chartHighlightPosition: mapboxgl.LngLat | null,
+    feature: any
+  ) => {
+    if (
+      chartHighlightPosition === null ||
+      feature === null ||
+      feature.geometry.type !== "LineString"
+    ) {
+      return null;
+    }
+
+    const point = turfNearestPointOnLine(
+      feature,
+      [chartHighlightPosition.lng, chartHighlightPosition.lat],
+      {
+        units: "meters",
+      }
+    );
+
+    // Only show the highlight if the cursor is within 200 meters of the run
+    const distanceToLine = point.properties.dist;
+    if (distanceToLine > 200) {
+      this.clearMarker();
+      return null;
+    }
+
+    // Show the point on the map as well
+    const coords = point.geometry.coordinates;
+    this.markPositionOnMap(new mapboxgl.LngLat(coords[0], coords[1]));
+
+    // Return the distance along the line in meters
+    return point.properties.location;
+  };
 }
 
 function configureChartGradient(
@@ -345,30 +555,32 @@ function getEstimatedRunDifficulty(
   );
 }
 
-function convertChartHighlightPosition(
-  chartHighlightPosition: mapboxgl.LngLat | null,
-  feature: any
-) {
-  if (
-    chartHighlightPosition === null ||
-    feature === null ||
-    feature.geometry.type !== "LineString"
-  ) {
-    return null;
-  }
-
-  const point = turfNearestPointOnLine(
-    feature,
-    [chartHighlightPosition.lng, chartHighlightPosition.lat],
-    {
-      units: "meters",
+// Get the interpolated elevation value for a given distance along the line
+function getInterpolatedElevation(
+  elevationsAndDistance: { x: number; y: number }[],
+  distance: number
+): number {
+  // Find the points before and after the target distance
+  let beforeIndex = 0;
+  for (let i = 0; i < elevationsAndDistance.length; i++) {
+    if (elevationsAndDistance[i].x > distance) {
+      break;
     }
-  );
-
-  let index = point.properties.index;
-  if (index !== undefined) {
-    return index / 2;
-  } else {
-    return null;
+    beforeIndex = i;
   }
+
+  // If the distance is at or past the end of the line, return the last elevation
+  if (beforeIndex === elevationsAndDistance.length - 1) {
+    return elevationsAndDistance[beforeIndex].y;
+  }
+
+  // Get the points before and after the target distance
+  const before = elevationsAndDistance[beforeIndex];
+  const after = elevationsAndDistance[beforeIndex + 1];
+
+  // Calculate how far between the two points we are (0-1)
+  const ratio = (distance - before.x) / (after.x - before.x);
+
+  // Interpolate the elevation
+  return before.y + ratio * (after.y - before.y);
 }

@@ -17,18 +17,20 @@ import { Badge } from "./Badge";
 import { CardHeader } from "./CardHeader";
 import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
-import { HeightProfile, HeightProfileHighlightProps } from "./HeightProfile";
+import { HeightProfile } from "./HeightProfile";
 import { ScrollableCard } from "./ScrollableCard";
 import { SourceSummary } from "./SourceSummary";
 import { formattedSlope } from "./utils/formattedSlope";
 import { getRunTitleAndSubtitle } from "./utils/PageMetadata";
 import * as UnitHelpers from "./utils/UnitHelpers";
+import * as mapboxgl from "mapbox-gl";
 
-interface Props extends HeightProfileHighlightProps {
+interface Props {
   feature: RunFeature;
   eventBus: EventBus;
   unitSystem: UnitHelpers.UnitSystem;
   width?: number;
+  map: mapboxgl.Map;
 }
 
 export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
@@ -162,8 +164,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
         <HeightProfile
           feature={feature as GeoJSON.Feature<LineString, RunProperties>}
           elevationData={elevationData}
-          chartHighlightPosition={props.chartHighlightPosition}
-          onHoverChartPosition={props.onHoverChartPosition}
+          map={props.map}
           unitSystem={props.unitSystem}
         />
       )}
