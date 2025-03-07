@@ -63,38 +63,54 @@ export const SkiLiftInfo: React.FunctionComponent<{
           {getLiftNameAndType(properties)}
         </span>
       </Typography>
-      <div className={"distance-and-elevation-info"}>
+      <Typography className={"distance-and-elevation-info"}>
         {elevationData && (
-          <>
-            <Typography>
-              Distance:{" "}
-              {UnitHelpers.distanceText({
-                distanceInMeters: elevationData.inclinedLengthInMeters,
-                unitSystem: props.unitSystem,
-              })}
-            </Typography>
-          </>
+          <span>
+            Distance:{" "}
+            {UnitHelpers.distanceText({
+              distanceInMeters: elevationData.inclinedLengthInMeters,
+              unitSystem: props.unitSystem,
+            })}
+          </span>
         )}
         {elevationData && (
-          <Typography>
+          <span>
             Vertical:{" "}
             {UnitHelpers.heightText(
               elevationData.verticalInMeters,
               props.unitSystem
             )}
-          </Typography>
+          </span>
         )}
+      </Typography>
+      <Typography className={"distance-and-elevation-info"}>
         {elevationData && elevationData.speedInMetersPerSecond && (
-          <Typography>
+          <span>
             Speed: {elevationData.speedInMetersPerSecond.toFixed(1)} m/s
-          </Typography>
+          </span>
         )}
-        {elevationData && elevationData.overallPitchInPercent && (
-          <Typography>
-            Average Slope: {formattedSlope(elevationData.overallPitchInPercent)}
-          </Typography>
+
+        {properties.duration && (
+          <span>Ride time: {Math.round(properties.duration / 60)} min</span>
         )}
-      </div>
+      </Typography>
+      <Typography className={"distance-and-elevation-info"}>
+        {elevationData && elevationData.verticalSpeedInMetersPerSecond && (
+          <span>
+            Vertical speed:{" "}
+            {Math.round(elevationData.verticalSpeedInMetersPerSecond * 60)}{" "}
+            m/min
+          </span>
+        )}
+        <Typography className={"distance-and-elevation-info"}>
+          {elevationData && elevationData.overallPitchInPercent && (
+            <span>
+              Average Slope:{" "}
+              {formattedSlope(elevationData.overallPitchInPercent)}
+            </span>
+          )}
+        </Typography>
+      </Typography>
       {properties.description && (
         <Typography>
           <span>Notes: {properties.description}</span>

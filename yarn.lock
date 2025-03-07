@@ -5715,15 +5715,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openskidata-format@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "openskidata-format@npm:3.0.0"
+"openskidata-format@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "openskidata-format@npm:3.2.0"
   dependencies:
     "@turf/length": ^7.2.0
     "@turf/line-chunk": ^7.2.0
     "@turf/meta": ^7.2.0
     tslib: ^2
-  checksum: 6368101b23ad99cbec5ce6a5696f398a52ab4d9517ef86e91cf262639e11087b1204f764af14c0391eaf0c17c259d9d5dac86ebd709d8341c7a2d57eb142cdf3
+  checksum: ca6023dd046fc113f72ba1757e742be78313cbcf72508865f1c410570bd37d93e1e3fbcca841045e31ba740e2ef1b86b2bded41bbb9e2f1f5c532701f0e36eaa
   languageName: node
   linkType: hard
 
@@ -5758,7 +5758,7 @@ __metadata:
     css-loader: ^7.1.2
     html-webpack-plugin: ^5.6.0
     memoize-one: ^6.0.0
-    openskidata-format: ^3.0.0
+    openskidata-format: ^3.2.0
     prettier: ^3.3.3
     query-string: ^9.1.0
     react: ^18.3.1
