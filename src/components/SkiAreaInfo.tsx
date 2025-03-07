@@ -71,7 +71,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
       )}
       <SourceSummary sources={properties.sources} />
       {properties.activities.includes(SkiAreaActivity.Downhill) && (
-        <SlopeAspectRose id={properties.id} />
+        <SlopeAspectRose feature={props.feature} />
       )}
     </ScrollableCard>
   );

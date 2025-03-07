@@ -1,13 +1,19 @@
 import InfoIcon from "@mui/icons-material/Info";
 import { Link, Tooltip, Typography } from "@mui/material";
-import { SkiAreaProperties } from "openskidata-format";
+import { centroid } from "@turf/centroid";
+import { SkiAreaFeature } from "openskidata-format";
 import React from "react";
 
-export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
-  id,
+export const SlopeAspectRose: React.FC<{ feature: SkiAreaFeature }> = ({
+  feature,
 }) => {
+  const id = feature.properties.id;
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const imageUrl = `https://openskistats.org/ski-areas/roses-openskimap/${id}.svg`;
+
+  // Determine hemisphere based on feature's centroid
+  const featureCentroid = centroid(feature);
+  const isNorthernHemisphere = featureCentroid.geometry.coordinates[1] >= 0;
 
   return (
     <div style={{ margin: "16px 0", display: imageLoaded ? "block" : "none" }}>
@@ -30,8 +36,8 @@ export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
               </Typography>
 
               <Typography variant="body2" style={{ marginBottom: "4px" }}>
-                • <strong>Petals:</strong> Show which compass directions the ski
-                runs face
+                • <strong>Petals:</strong> Show which compass directions the
+                downhill ski runs face
               </Typography>
               <Typography variant="body2" style={{ marginBottom: "4px" }}>
                 • <strong>Petal length:</strong> Longer petals = more terrain
@@ -55,21 +61,36 @@ export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
                 Why aspect matters:
               </Typography>
 
-              <Typography variant="body2" style={{ marginBottom: "4px" }}>
-                • <strong>North (top):</strong> Retains snow longer, often
-                colder
-              </Typography>
-              <Typography variant="body2" style={{ marginBottom: "4px" }}>
-                • <strong>South (bottom):</strong> More sun exposure, softens
-                faster
-              </Typography>
+              {isNorthernHemisphere ? (
+                <>
+                  <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                    • <strong>North (top):</strong> Retains snow longer, often
+                    colder
+                  </Typography>
+                  <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                    • <strong>South (bottom):</strong> More sun exposure,
+                    softens faster
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                    • <strong>South (bottom):</strong> Retains snow longer,
+                    often colder
+                  </Typography>
+                  <Typography variant="body2" style={{ marginBottom: "4px" }}>
+                    • <strong>North (top):</strong> More sun exposure, softens
+                    faster
+                  </Typography>
+                </>
+              )}
               <Typography variant="body2" style={{ marginBottom: "4px" }}>
                 • <strong>East (right):</strong> Morning sun, often good morning
-                skiing
+                skiing, typically colder than west-facing slopes
               </Typography>
               <Typography variant="body2" style={{ marginBottom: "8px" }}>
                 • <strong>West (left):</strong> Afternoon sun, softens later in
-                day
+                day, typically warmer than east-facing slopes
               </Typography>
 
               <Typography
@@ -99,6 +120,13 @@ export const SlopeAspectRose: React.FC<{ id: SkiAreaProperties["id"] }> = ({
           />
         </Tooltip>
       </Typography>
+      {feature.properties.activities.some(
+        (activity) => activity !== "downhill"
+      ) && (
+        <Typography variant="body2" color="textSecondary">
+          Only downhill runs are included in the analysis.
+        </Typography>
+      )}
       <div style={{ textAlign: "center" }}>
         <img
           src={imageUrl}
