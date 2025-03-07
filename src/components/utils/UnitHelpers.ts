@@ -159,3 +159,28 @@ export function distanceText({
       );
   }
 }
+
+export function speedInUnits(
+  speedInMetersPerSecond: number,
+  unitSystem: UnitSystem
+): string {
+  if (unitSystem === "metric") {
+    return `${speedInMetersPerSecond.toFixed(1)} m/s`;
+  } else {
+    const speedInFeetPerMinute = speedInMetersPerSecond * 3.28084 * 60;
+    return `${Math.round(speedInFeetPerMinute)} ft/min`;
+  }
+}
+
+export function verticalSpeedInUnits(
+  speedInMetersPerSecond: number,
+  unitSystem: UnitSystem
+): string {
+  if (unitSystem === "metric") {
+    const speedInMetersPerMinute = speedInMetersPerSecond * 60;
+    return `${Math.round(speedInMetersPerMinute)} m/min`;
+  } else {
+    const speedInFeetPerMinute = speedInMetersPerSecond * 3.28084 * 60;
+    return `${Math.round(speedInFeetPerMinute)} ft/min`;
+  }
+}

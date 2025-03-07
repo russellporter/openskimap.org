@@ -86,7 +86,11 @@ export const SkiLiftInfo: React.FunctionComponent<{
       <Typography className={"distance-and-elevation-info"}>
         {elevationData && elevationData.speedInMetersPerSecond && (
           <span>
-            Speed: {elevationData.speedInMetersPerSecond.toFixed(1)} m/s
+            Speed:{" "}
+            {UnitHelpers.speedInUnits(
+              elevationData.speedInMetersPerSecond,
+              props.unitSystem
+            )}
           </span>
         )}
 
@@ -98,14 +102,16 @@ export const SkiLiftInfo: React.FunctionComponent<{
         {elevationData && elevationData.verticalSpeedInMetersPerSecond && (
           <span>
             Vertical speed:{" "}
-            {Math.round(elevationData.verticalSpeedInMetersPerSecond * 60)}{" "}
-            m/min
+            {UnitHelpers.verticalSpeedInUnits(
+              elevationData.verticalSpeedInMetersPerSecond,
+              props.unitSystem
+            )}
           </span>
         )}
         <Typography className={"distance-and-elevation-info"}>
           {elevationData && elevationData.overallPitchInPercent && (
             <span>
-              Average Slope:{" "}
+              Slope (average):{" "}
               {formattedSlope(elevationData.overallPitchInPercent)}
             </span>
           )}
