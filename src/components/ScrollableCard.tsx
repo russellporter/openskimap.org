@@ -68,13 +68,16 @@ export const ScrollableCard: React.FunctionComponent<
         overflowY: "auto",
         maxHeight: "calc(100dvh - 78px)",
         width: props.width,
+        // Fix for iOS scroll indicators appearing behind sticky elements
+        WebkitOverflowScrolling: "touch",
+        position: "relative",
       }}
     >
       <div style={{ 
         position: "sticky", 
         top: 0, 
         backgroundColor: "white",
-        zIndex: 1,
+        zIndex: 2,
         borderBottom: showHeaderSeparator ? "1px solid rgba(0, 0, 0, 0.12)" : "none" 
       }}>
         {props.header}
@@ -88,7 +91,7 @@ export const ScrollableCard: React.FunctionComponent<
             position: "sticky",
             bottom: 0,
             backgroundColor: "white",
-            zIndex: 1,
+            zIndex: 2,
             borderTop: showFooterSeparator ? "1px solid rgba(0, 0, 0, 0.12)" : "none",
           }}
         >
