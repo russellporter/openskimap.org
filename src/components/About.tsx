@@ -1,4 +1,13 @@
-import { Link, Typography } from "@mui/material";
+import {
+  Link,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import * as React from "react";
 import EventBus from "./EventBus";
 import { ModalHeader } from "./ModalHeader";
@@ -82,32 +91,66 @@ export default class About extends React.Component<Props> {
           .
         </Typography>
         <Typography variant="h6" id="modal-title">
-          GeoJSON Data
+          Data Downloads
         </Typography>
         <Typography paragraph={true}>
-          GeoJSON data is available for download under the license. Note that
-          the data format is not stable and changes on a regular basis as the
-          project evolves.
+          The following data is available for download under the license.
+          GeoJSON format is spatial data with all attributes, while CSV is
+          tabular data for easier analysis. Note that data formats are not
+          stable and may change as the project evolves.
         </Typography>
-        <Typography component="div">
-          <ul>
-            <li>
-              <Link href="https://tiles.openskimap.org/geojson/ski_areas.geojson">
-                Ski Areas
-              </Link>
-            </li>
-            <li>
-              <Link href="https://tiles.openskimap.org/geojson/lifts.geojson">
-                Lifts
-              </Link>
-            </li>
-            <li>
-              <Link href="https://tiles.openskimap.org/geojson/runs.geojson">
-                Runs
-              </Link>
-            </li>
-          </ul>
-        </Typography>
+        <TableContainer sx={{ marginBottom: 2 }}>
+          <Table size="small">
+            <TableHead style={{ backgroundColor: "#f5f5f5" }}>
+              <TableRow>
+                <TableCell style={{ fontWeight: "bold" }}>Dataset</TableCell>
+                <TableCell style={{ fontWeight: "bold" }}>GeoJSON</TableCell>
+                <TableCell style={{ fontWeight: "bold" }}>CSV</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Ski Areas</TableCell>
+                <TableCell>
+                  <Link href="https://tiles.openskimap.org/geojson/ski_areas.geojson">
+                    Download
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <Link href="https://tiles.openskimap.org/csv/ski_areas.csv">
+                    Download
+                  </Link>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Lifts</TableCell>
+                <TableCell>
+                  <Link href="https://tiles.openskimap.org/geojson/lifts.geojson">
+                    Download
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <Link href="https://tiles.openskimap.org/csv/lifts.csv">
+                    Download
+                  </Link>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Runs</TableCell>
+                <TableCell>
+                  <Link href="https://tiles.openskimap.org/geojson/runs.geojson">
+                    Download
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <Link href="https://tiles.openskimap.org/csv/runs.csv">
+                    Download
+                  </Link>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
         <Typography paragraph={true}>
           The data is generally updated daily. It's permitted to automatically
           download the above files once per day.
