@@ -16,7 +16,6 @@ import * as mapboxgl from "mapbox-gl";
 import memoize from "memoize-one";
 import {
   ElevationData,
-  ElevationProfile,
   RunDifficulty,
   RunFeature,
   RunProperties,
@@ -53,11 +52,68 @@ export class HeightProfile extends React.Component<
   private marker: mapboxgl.Marker | null = null;
 
   convertedChartHighlightPosition = memoize(
-    (chartHighlightPosition: mapboxgl.LngLat | null, feature: any) => {
+    (
+      chartHighlightPosition: mapboxgl.LngLat | null,
+      elevationProfileGeometry: GeoJSON.LineString
+    ) => {
       return this.convertChartHighlightPosition(
         chartHighlightPosition,
-        feature
+        elevationProfileGeometry
       );
+    }
+  );
+
+  // Memoized function to calculate raw elevation and distance data points
+  calculateRawElevationsAndDistance = memoize(
+    (profileGeometry: GeoJSON.LineString) => {
+      return profileGeometry.coordinates.reduce(
+        (result, coord, index, coords) => {
+          if (index === 0) {
+            // First point has zero distance
+            result.push({ x: 0, y: coord[2] });
+          } else {
+            const prevCoord = coords[index - 1];
+            const from = [prevCoord[0], prevCoord[1]];
+            const to = [coord[0], coord[1]];
+            const segmentDistance = turfDistance(from, to, { units: "meters" });
+            const totalDistance = result[index - 1].x + segmentDistance;
+            result.push({ x: totalDistance, y: coord[2] });
+          }
+          return result;
+        },
+        [] as { x: number; y: number }[]
+      );
+    }
+  );
+
+  // Memoized function to calculate smoothed elevation and distance data points
+  calculateSmoothedElevationsAndDistance = memoize(
+    (rawElevationsAndDistance: { x: number; y: number }[]) => {
+      if (rawElevationsAndDistance.length === 0) return [];
+      
+      // Calculate the total distance
+      const totalRawDistance = rawElevationsAndDistance[rawElevationsAndDistance.length - 1].x;
+      
+      // Generate smoothed profile with uniform spacing for a cleaner visualization
+      const targetResolution = Math.max(10, Math.min(50, totalRawDistance / 25)); // Target points every ~50m, and min 25 points
+      const elevationsAndDistance: { x: number; y: number }[] = [];
+      
+      // Use a moving average to smooth elevation data
+      const windowSize = 3; // Window size for moving average
+      
+      // Create evenly spaced points along the line
+      const numPoints = Math.ceil(totalRawDistance / targetResolution);
+      for (let i = 0; i <= numPoints; i++) {
+        const distance = (i / numPoints) * totalRawDistance;
+        const elevation = getSmoothedElevation(
+          rawElevationsAndDistance,
+          distance,
+          windowSize
+        );
+        elevationsAndDistance.push({ x: distance, y: elevation });
+      }
+      
+      return elevationsAndDistance;
     }
   );
 
@@ -211,40 +267,36 @@ export class HeightProfile extends React.Component<
       return null;
     }
 
-    // Using turf/distance calculates the distance between each point. Returns an array of elevations by distance along the line
-    const elevationsAndDistance =
-      elevationData.profileGeometry.coordinates.reduce(
-        (result, coord, index, coords) => {
-          if (index === 0) {
-            // First point has zero distance
-            result.push({ x: 0, y: coord[2] });
-          } else {
-            const prevCoord = coords[index - 1];
-            const from = [prevCoord[0], prevCoord[1]];
-            const to = [coord[0], coord[1]];
-            const segmentDistance = turfDistance(from, to, { units: "meters" });
-            const totalDistance = result[index - 1].x + segmentDistance;
-            result.push({ x: totalDistance, y: coord[2] });
-          }
-          return result;
-        },
-        [] as { x: number; y: number }[]
-      );
+    // Use memoized functions to calculate elevation data points
+    const rawElevationsAndDistance = this.calculateRawElevationsAndDistance(
+      elevationData.profileGeometry
+    );
+    
+    // Calculate smoothed elevation data points
+    const elevationsAndDistance = this.calculateSmoothedElevationsAndDistance(
+      rawElevationsAndDistance
+    );
+    
+    // Get the total distance for chart configuration
+    const totalRawDistance = rawElevationsAndDistance.length > 0 ? 
+      rawElevationsAndDistance[rawElevationsAndDistance.length - 1].x : 0;
 
     // Note that this is the un-inclined distance used for the x-axis, unlike what we show in the stats section.
-    const distance = elevationsAndDistance[elevationsAndDistance.length - 1].x;
+    const distance = totalRawDistance;
 
     // Convert the highlight position to a distance along the line
     const highlightPositionX = this.convertedChartHighlightPosition(
       this.state.chartHighlightPosition,
-      feature
+      elevationData.profileGeometry
     );
 
     const data: ChartData<"line", { x: number; y: number }[]> = {
       datasets: [
         {
           fill: true,
-          borderWidth: 0,
+          borderWidth: 2,
+          borderColor: "rgba(0, 0, 0, 0.15)",
+          tension: 0.3, // Add bezier curve tension for smoothing
           // Don't show points on the line, we add our own through a plugin
           pointRadius: 0,
           pointHitRadius: 5,
@@ -355,9 +407,15 @@ export class HeightProfile extends React.Component<
 
           const gradientFill = context.createLinearGradient(left, 0, right, 0);
 
+          // Use the smoothed elevation data to configure the gradient
+          const chartData = chart.data.datasets[0].data as {
+            x: number;
+            y: number;
+          }[];
+
           dataset.backgroundColor = configureChartGradient(
             feature,
-            elevationProfile,
+            chartData,
             gradientFill
           );
 
@@ -378,6 +436,14 @@ export class HeightProfile extends React.Component<
             },
             responsive: true,
             maintainAspectRatio: true,
+            elements: {
+              line: {
+                tension: 0.3, // Bezier curve tension factor (0=straight lines, 1=maximum curves)
+              },
+              point: {
+                radius: 0, // Don't show points by default
+              },
+            },
             plugins: {
               legend: {
                 display: false,
@@ -396,7 +462,13 @@ export class HeightProfile extends React.Component<
                 type: "linear",
                 min: 0,
                 max: distance,
+                grid: {
+                  display: true,
+                  color: "rgba(0,0,0,0.05)",
+                },
                 ticks: {
+                  maxRotation: 0, // Keep labels horizontal
+                  autoSkipPadding: 20, // Ensure labels don't overlap
                   callback: (value: any) => {
                     return UnitHelpers.distanceText({
                       distanceInMeters: value,
@@ -412,6 +484,10 @@ export class HeightProfile extends React.Component<
                 suggestedMax:
                   Math.max(elevationData.verticalInMeters, 100) +
                   elevationData.minElevationInMeters,
+                grid: {
+                  display: true,
+                  color: "rgba(0,0,0,0.05)",
+                },
                 ticks: {
                   callback: (elevation: any) => {
                     return UnitHelpers.heightText(
@@ -433,18 +509,14 @@ export class HeightProfile extends React.Component<
 
   convertChartHighlightPosition = (
     chartHighlightPosition: mapboxgl.LngLat | null,
-    feature: any
+    elevationProfileGeometry: GeoJSON.LineString
   ) => {
-    if (
-      chartHighlightPosition === null ||
-      feature === null ||
-      feature.geometry.type !== "LineString"
-    ) {
+    if (chartHighlightPosition === null) {
       return null;
     }
 
     const point = turfNearestPointOnLine(
-      feature,
+      elevationProfileGeometry,
       [chartHighlightPosition.lng, chartHighlightPosition.lat],
       {
         units: "meters",
@@ -469,39 +541,149 @@ export class HeightProfile extends React.Component<
 
 function configureChartGradient(
   feature: RunFeature,
-  elevationProfile: ElevationProfile,
+  elevationsAndDistance: { x: number; y: number }[],
   gradient: CanvasGradient
 ): CanvasGradient {
   const difficultyScheme = getRunDifficultyScheme(feature);
-  const elevations = elevationProfile.heights;
-  const stopInterval = 1 / elevations.length;
-  const stopSize = 5;
-  elevations.forEach((elevation, index) => {
-    if (index < stopSize) {
-      return;
-    }
+  // Ensure we have a valid non-null difficulty
+  const defaultDifficulty = feature.properties.difficulty as RunDifficulty;
 
-    const steepness =
-      (elevations[index - stopSize] - elevation) /
-      (elevationProfile.resolution * stopSize);
-    const difficulty =
-      getEstimatedRunDifficulty(steepness, difficultyScheme) ||
-      feature.properties.difficulty;
-
+  // Verify we have enough elevation data
+  if (!elevationsAndDistance || elevationsAndDistance.length < 2) {
+    // Not enough data, use default difficulty color
     const color = hsla(
-      getRunColor(feature.properties.difficultyConvention, difficulty),
+      getRunColor(feature.properties.difficultyConvention, defaultDifficulty),
       0.7
     );
-    const middleIndex = index - stopSize / 2;
-    gradient.addColorStop(
-      stopInterval * (middleIndex - 0.5) + Number.EPSILON,
-      color
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, color);
+    return gradient;
+  }
+
+  // Get total distance from the last point
+  const totalDistance =
+    elevationsAndDistance[elevationsAndDistance.length - 1].x;
+  if (totalDistance === 0) {
+    // Zero-length path, use default color
+    const color = hsla(
+      getRunColor(feature.properties.difficultyConvention, defaultDifficulty),
+      0.7
     );
-    gradient.addColorStop(
-      stopInterval * (middleIndex + 0.5) - Number.EPSILON,
-      color
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, color);
+    return gradient;
+  }
+
+  // Calculate difficulties directly from the smoothed data
+  const samples: Array<{
+    distanceRatio: number;
+    difficulty: RunDifficulty;
+  }> = [];
+
+  // Since data is already smoothed, we can calculate slope between adjacent points
+  for (let i = 0; i < elevationsAndDistance.length - 1; i++) {
+    const current = elevationsAndDistance[i];
+    const next = elevationsAndDistance[i + 1];
+
+    // Calculate horizontal distance between points
+    const horizontalDistance = next.x - current.x;
+    if (horizontalDistance <= 0) continue; // Skip invalid segments
+
+    // Calculate elevation change (downhill is positive for steepness calculation)
+    const elevationChange = current.y - next.y;
+
+    // Calculate steepness
+    const steepness = elevationChange / horizontalDistance;
+
+    // Get difficulty based on steepness
+    let difficulty = defaultDifficulty;
+    const calculatedDifficulty = getEstimatedRunDifficulty(
+      steepness,
+      difficultyScheme
     );
-  });
+    if (calculatedDifficulty !== null) {
+      difficulty = calculatedDifficulty;
+    }
+
+    // Add sample at the current point
+    samples.push({
+      distanceRatio: current.x / totalDistance,
+      difficulty,
+    });
+
+    // Add the last point with the same difficulty as the last segment
+    if (i === elevationsAndDistance.length - 2) {
+      samples.push({
+        distanceRatio: 1,
+        difficulty,
+      });
+    }
+  }
+
+  // Add color stops for the gradient
+  if (samples.length > 0) {
+    // Track current difficulty to only add stops at transition points
+    let currentDifficulty = samples[0].difficulty;
+
+    // Add first color stop
+    gradient.addColorStop(
+      0,
+      hsla(
+        getRunColor(feature.properties.difficultyConvention, currentDifficulty),
+        0.7
+      )
+    );
+
+    // Add color stops only at transition points
+    for (let i = 1; i < samples.length; i++) {
+      if (samples[i].difficulty !== currentDifficulty) {
+        // Add a small transition for smoother gradient appearance
+        gradient.addColorStop(
+          samples[i].distanceRatio - 0.001,
+          hsla(
+            getRunColor(
+              feature.properties.difficultyConvention,
+              currentDifficulty
+            ),
+            0.7
+          )
+        );
+
+        // Update current difficulty
+        currentDifficulty = samples[i].difficulty;
+
+        // Add color stop at new difficulty
+        gradient.addColorStop(
+          samples[i].distanceRatio,
+          hsla(
+            getRunColor(
+              feature.properties.difficultyConvention,
+              currentDifficulty
+            ),
+            0.7
+          )
+        );
+      }
+    }
+
+    // Ensure last color stop is at the end
+    gradient.addColorStop(
+      1,
+      hsla(
+        getRunColor(feature.properties.difficultyConvention, currentDifficulty),
+        0.7
+      )
+    );
+  } else {
+    // Fallback if no segments could be calculated
+    const color = hsla(
+      getRunColor(feature.properties.difficultyConvention, defaultDifficulty),
+      0.7
+    );
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, color);
+  }
+
   return gradient;
 }
 
@@ -583,4 +765,55 @@ function getInterpolatedElevation(
 
   // Interpolate the elevation
   return before.y + ratio * (after.y - before.y);
+}
+
+// Get smoothed elevation using moving average window
+function getSmoothedElevation(
+  rawData: { x: number; y: number }[],
+  distance: number,
+  windowSize: number = 3
+): number {
+  if (rawData.length === 0) return 0;
+  if (rawData.length === 1) return rawData[0].y;
+
+  // First get the interpolated value at the exact distance
+  const interpolatedValue = getInterpolatedElevation(rawData, distance);
+
+  // If we're at the edges, just return the interpolated value
+  if (
+    distance <= rawData[0].x + windowSize ||
+    distance >= rawData[rawData.length - 1].x - windowSize
+  ) {
+    return interpolatedValue;
+  }
+
+  // Find nearby points within our window to compute moving average
+  const windowWidth = windowSize * 2; // Window in meters
+  const lowerBound = distance - windowWidth / 2;
+  const upperBound = distance + windowWidth / 2;
+
+  // Calculate weighted moving average based on distance
+  let weightedSum = 0;
+  let weightSum = 0;
+
+  // Find all raw data points within our window
+  for (let i = 0; i < rawData.length; i++) {
+    const point = rawData[i];
+    if (point.x >= lowerBound && point.x <= upperBound) {
+      // Calculate weight based on distance (closer points have higher weight)
+      const distanceToPoint = Math.abs(point.x - distance);
+      const weight = 1 / (1 + distanceToPoint);
+
+      weightedSum += point.y * weight;
+      weightSum += weight;
+    }
+  }
+
+  // If we found points in our window, return the weighted average
+  if (weightSum > 0) {
+    return weightedSum / weightSum;
+  }
+
+  // Fallback to just the interpolated value
+  return interpolatedValue;
 }

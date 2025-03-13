@@ -4,6 +4,7 @@ import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import WarningIcon from "@mui/icons-material/Warning";
 import { Avatar, CardActions, Chip, Typography } from "@mui/material";
 import { LineString } from "geojson";
+import * as mapboxgl from "mapbox-gl";
 import {
   getRunColor,
   getRunElevationData,
@@ -23,7 +24,6 @@ import { SourceSummary } from "./SourceSummary";
 import { formattedSlope } from "./utils/formattedSlope";
 import { getRunTitleAndSubtitle } from "./utils/PageMetadata";
 import * as UnitHelpers from "./utils/UnitHelpers";
-import * as mapboxgl from "mapbox-gl";
 
 interface Props {
   feature: RunFeature;
@@ -145,14 +145,18 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
           </span>
         ) : null}
       </Typography>
-      {elevationData && (
+      {elevationData && (elevationData.averagePitchInPercent !== null || elevationData.maxPitchInPercent !== null) && (
         <Typography className={"distance-and-elevation-info"}>
-          <span>
-            Average Slope: {formattedSlope(elevationData.averagePitchInPercent)}
-          </span>
-          <span>
-            Max Slope: {formattedSlope(elevationData.maxPitchInPercent)}
-          </span>
+          {elevationData.averagePitchInPercent !== null && (
+            <span>
+              Average Slope: {formattedSlope(elevationData.averagePitchInPercent)}
+            </span>
+          )}
+          {elevationData.maxPitchInPercent !== null && (
+            <span>
+              Max Slope: {formattedSlope(elevationData.maxPitchInPercent)}
+            </span>
+          )}
         </Typography>
       )}
       {properties.description && (
