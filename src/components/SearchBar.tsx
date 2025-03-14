@@ -259,29 +259,36 @@ export const SearchResults: React.FunctionComponent<{
 }> = (props) => {
   let dividerIndex = 0;
   return (
-    <List disablePadding={true}>
-      {props.results
-        .map((result, index) => {
-          return (
-            <SearchResult
-              onSelect={() => {
-                props.onSelect(result);
-              }}
-              selected={props.selectedIndex === index}
-              key={resultID(result)}
-              result={result}
-            />
-          );
-        })
-        .reduce(
-          (previous, current) =>
-            [
-              previous,
-              <Divider key={"divider-" + dividerIndex++} />,
-              current,
-            ] as any
-        )}
-    </List>
+    <div
+      style={{
+        maxHeight: "calc(100dvh - 70px)",
+        overflowY: "auto",
+      }}
+    >
+      <List disablePadding={true}>
+        {props.results
+          .map((result, index) => {
+            return (
+              <SearchResult
+                onSelect={() => {
+                  props.onSelect(result);
+                }}
+                selected={props.selectedIndex === index}
+                key={resultID(result)}
+                result={result}
+              />
+            );
+          })
+          .reduce(
+            (previous, current) =>
+              [
+                previous,
+                <Divider key={"divider-" + dividerIndex++} />,
+                current,
+              ] as any
+          )}
+      </List>
+    </div>
   );
 };
 
