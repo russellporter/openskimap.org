@@ -79,7 +79,18 @@ export const SkiLiftInfo: React.FunctionComponent<{
             {UnitHelpers.heightText(
               elevationData.verticalInMeters,
               props.unitSystem
+            )}{" "}
+            (
+            {UnitHelpers.heightText(
+              elevationData.minElevationInMeters,
+              props.unitSystem
+            )}{" "}
+            -{" "}
+            {UnitHelpers.heightText(
+              elevationData.maxElevationInMeters,
+              props.unitSystem
             )}
+            )
           </span>
         )}
       </Typography>
