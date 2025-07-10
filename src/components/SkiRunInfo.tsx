@@ -4,7 +4,7 @@ import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import WarningIcon from "@mui/icons-material/Warning";
 import { Avatar, CardActions, Chip, Typography } from "@mui/material";
 import { LineString } from "geojson";
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import {
   getRunColor,
   getRunElevationData,
@@ -30,7 +30,7 @@ interface Props {
   eventBus: EventBus;
   unitSystem: UnitHelpers.UnitSystem;
   width?: number;
-  map: mapboxgl.Map;
+  map: maplibregl.Map;
 }
 
 export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {

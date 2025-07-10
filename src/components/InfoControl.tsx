@@ -1,4 +1,4 @@
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import controlWidth from "./controlWidth";
@@ -10,9 +10,9 @@ import { Themed } from "./Themed";
 import { UnitSystemManager } from "./UnitSystemManager";
 import { getFirstPoint } from "./utils/GeoJSON";
 
-export class InfoControl implements mapboxgl.IControl {
+export class InfoControl implements maplibregl.IControl {
   _container: HTMLDivElement;
-  _map: mapboxgl.Map | null = null;
+  _map: maplibregl.Map | null = null;
   _eventBus: EventBus;
   _id: string;
   _panToPositionAfterLoad: boolean = false;
@@ -23,10 +23,10 @@ export class InfoControl implements mapboxgl.IControl {
     this._panToPositionAfterLoad = info.panToPosition === "afterLoad";
     this._eventBus = eventBus;
     this._container = document.createElement("div");
-    this._container.className = "mapboxgl-ctrl";
+    this._container.className = "maplibregl-ctrl";
   }
 
-  onAdd = (map: mapboxgl.Map) => {
+  onAdd = (map: maplibregl.Map) => {
     this._root = ReactDOM.createRoot(this._container);
     this._map = map;
 
@@ -45,7 +45,7 @@ export class InfoControl implements mapboxgl.IControl {
     this._map = null;
   };
 
-  getDefaultPosition = (): string => {
+  getDefaultPosition = (): maplibregl.ControlPosition => {
     return "top-left";
   };
 

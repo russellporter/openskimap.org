@@ -78,7 +78,7 @@ body {
   max-width: 250px !important;
 }
 
-.mapboxgl-popup-content {
+.maplibregl-popup-content {
   padding: 10px;
 }
 
@@ -91,7 +91,7 @@ body {
   content: " ";
 }
 
-.mapboxgl-ctrl-top-left {
+.maplibregl-ctrl-top-left {
   /** Allow the info control to cover other controls if needed */
   z-index: 3;
 }

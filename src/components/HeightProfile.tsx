@@ -12,7 +12,7 @@ import {
   Plugin,
   PointElement,
 } from "chart.js";
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import memoize from "memoize-one";
 import {
   ElevationData,
@@ -37,23 +37,23 @@ export interface HeightProfileProps {
   feature: GeoJSON.Feature<GeoJSON.LineString, RunProperties>;
   elevationData: ElevationData;
   unitSystem: UnitHelpers.UnitSystem;
-  map?: mapboxgl.Map; // Map is optional to allow the component to be used without highlight functionality
+  map?: maplibregl.Map; // Map is optional to allow the component to be used without highlight functionality
 }
 
 interface HeightProfileState {
   LineChart: typeof Line | null;
-  chartHighlightPosition: mapboxgl.LngLat | null;
+  chartHighlightPosition: maplibregl.LngLat | null;
 }
 
 export class HeightProfile extends React.Component<
   HeightProfileProps,
   HeightProfileState
 > {
-  private marker: mapboxgl.Marker | null = null;
+  private marker: maplibregl.Marker | null = null;
 
   convertedChartHighlightPosition = memoize(
     (
-      chartHighlightPosition: mapboxgl.LngLat | null,
+      chartHighlightPosition: maplibregl.LngLat | null,
       elevationProfileGeometry: GeoJSON.LineString
     ) => {
       return this.convertChartHighlightPosition(
@@ -164,7 +164,7 @@ export class HeightProfile extends React.Component<
   }
 
   // Map event handlers
-  _onMapMouseMove = (e: mapboxgl.MapMouseEvent) => {
+  _onMapMouseMove = (e: maplibregl.MapMouseEvent) => {
     this.setChartHighlightPosition(e.lngLat);
   };
 
@@ -172,7 +172,7 @@ export class HeightProfile extends React.Component<
     this.setChartHighlightPosition(null);
   };
 
-  setChartHighlightPosition = (position: mapboxgl.LngLat | null) => {
+  setChartHighlightPosition = (position: maplibregl.LngLat | null) => {
     this.setState({ chartHighlightPosition: position });
   };
 
@@ -214,7 +214,7 @@ export class HeightProfile extends React.Component<
     }
 
     const firstPoint = geometry.coordinates[0];
-    this.markPositionOnMap(new mapboxgl.LngLat(firstPoint[0], firstPoint[1]));
+    this.markPositionOnMap(new maplibregl.LngLat(firstPoint[0], firstPoint[1]));
   }
 
   // Marker management
@@ -225,7 +225,7 @@ export class HeightProfile extends React.Component<
     }
   };
 
-  markPositionOnMap = (position: mapboxgl.LngLat | null) => {
+  markPositionOnMap = (position: maplibregl.LngLat | null) => {
     if (!this.props.map || position === null) {
       this.clearMarker();
       return;
@@ -241,7 +241,7 @@ export class HeightProfile extends React.Component<
       el.style.border = "2px solid #000";
       el.style.backgroundColor = "transparent";
 
-      this.marker = new mapboxgl.Marker({
+      this.marker = new maplibregl.Marker({
         element: el,
         anchor: "center",
       })
@@ -508,7 +508,7 @@ export class HeightProfile extends React.Component<
   }
 
   convertChartHighlightPosition = (
-    chartHighlightPosition: mapboxgl.LngLat | null,
+    chartHighlightPosition: maplibregl.LngLat | null,
     elevationProfileGeometry: GeoJSON.LineString
   ) => {
     if (chartHighlightPosition === null) {
@@ -532,7 +532,7 @@ export class HeightProfile extends React.Component<
 
     // Show the point on the map as well
     const coords = point.geometry.coordinates;
-    this.markPositionOnMap(new mapboxgl.LngLat(coords[0], coords[1]));
+    this.markPositionOnMap(new maplibregl.LngLat(coords[0], coords[1]));
 
     // Return the distance along the line in meters
     return point.properties.location;

@@ -4,6 +4,7 @@ import {
   RunFeature,
   SkiAreaFeature,
 } from "openskidata-format";
+import * as maplibregl from "maplibre-gl";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import EventBus from "./EventBus";
@@ -22,7 +23,7 @@ export const Info: React.FunctionComponent<{
   eventBus: EventBus;
   unitSystem: UnitHelpers.UnitSystem;
   onLoadFeature: (feature: MapFeature) => void;
-  map: mapboxgl.Map;
+  map: maplibregl.Map;
 }> = (props) => {
   const [feature, setFeature] = useState<MapFeature | null>(null);
   useEffect(() => {

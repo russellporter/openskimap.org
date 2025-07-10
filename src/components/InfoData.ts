@@ -1,4 +1,6 @@
+import * as maplibregl from "maplibre-gl";
+
 export interface InfoData {
   id: string;
-  panToPosition: mapboxgl.LngLatLike | null | "afterLoad";
+  panToPosition: maplibregl.LngLatLike | null | "afterLoad";
 }

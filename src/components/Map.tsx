@@ -1,4 +1,4 @@
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
 import { MapMarker } from "../MapMarker";
@@ -18,28 +18,28 @@ import {
 import { UnitSystem } from "./utils/UnitHelpers";
 
 export class Map {
-  private map: mapboxgl.Map;
+  private map: maplibregl.Map;
 
   private eventBus: EventBus;
   private infoControl: InfoControl | null = null;
   private filterControl: FilterControl;
   private searchBarControl: SearchBarControl;
-  private markers: mapboxgl.Marker[];
+  private markers: maplibregl.Marker[];
   private loaded = false;
   private filtersVisible = false;
-  private mapScaleControl: mapboxgl.ScaleControl;
+  private mapScaleControl: maplibregl.ScaleControl;
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
 
   constructor(
-    center: mapboxgl.LngLatLike,
+    center: maplibregl.LngLatLike,
     zoom: number,
     containerID: string | HTMLElement,
     eventBus: EventBus
   ) {
     this.eventBus = eventBus;
-    this.map = new mapboxgl.Map({
+    this.map = new maplibregl.Map({
       container: containerID, // container id
       center: center, // starting position [lng, lat]
       zoom: zoom, // starting zoom,
@@ -53,16 +53,16 @@ export class Map {
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
     this.filterManager = new MapFilterManager(this.map);
 
-    this.mapScaleControl = new mapboxgl.ScaleControl({
+    this.mapScaleControl = new maplibregl.ScaleControl({
       maxWidth: 80,
     });
 
     this.map.addControl(this.searchBarControl);
     this.map.addControl(this.mapScaleControl, "bottom-left");
 
-    this.map.addControl(new mapboxgl.AttributionControl(), "bottom-right");
+    this.map.addControl(new maplibregl.AttributionControl(), "bottom-right");
     this.map.addControl(
-      new mapboxgl.GeolocateControl({
+      new maplibregl.GeolocateControl({
         positionOptions: {
           enableHighAccuracy: true,
         },
@@ -72,7 +72,7 @@ export class Map {
     );
 
     this.map.addControl(
-      new mapboxgl.NavigationControl({
+      new maplibregl.NavigationControl({
         showCompass: true,
         showZoom: false,
       }),
@@ -143,7 +143,7 @@ export class Map {
     }
   };
 
-  flyTo = (center: mapboxgl.LngLatLike) => {
+  flyTo = (center: maplibregl.LngLatLike) => {
     this.map.flyTo({ center: center, zoom: panToZoomLevel });
   };
 
@@ -195,10 +195,10 @@ export class Map {
     }
     this.markers = [];
     for (const marker of markers) {
-      const mapboxMarker = new mapboxgl.Marker()
+      const maplibreMarker = new maplibregl.Marker()
         .setLngLat([marker.coordinates[0], marker.coordinates[1]])
         .addTo(this.map);
-      this.markers.push(mapboxMarker);
+      this.markers.push(maplibreMarker);
     }
   };
 

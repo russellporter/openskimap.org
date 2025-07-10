@@ -1,10 +1,11 @@
 import { debounce } from "throttle-debounce";
+import * as maplibregl from "maplibre-gl";
 import EventBus from "./EventBus";
 export class MapInteractionManager {
-  private map: mapboxgl.Map;
+  private map: maplibregl.Map;
   private eventBus: EventBus;
 
-  constructor(map: mapboxgl.Map, eventBus: EventBus) {
+  constructor(map: maplibregl.Map, eventBus: EventBus) {
     this.map = map;
     this.eventBus = eventBus;
 

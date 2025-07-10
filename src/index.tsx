@@ -1,4 +1,4 @@
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import "../taginfo.json";
@@ -39,14 +39,12 @@ function initialize() {
     false
   );
 
-  (mapboxgl as any).accessToken =
-    "pk.eyJ1IjoicnVzc2VsbCIsImEiOiJja215dmpmMWYwN3ZnMnRwazRuOHF1azZ4In0.JjYNDuMzMZ5plb_YbF_Q5A";
-  mapboxgl.setRTLTextPlugin(
-    "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js",
-    () => {}
+  maplibregl.setRTLTextPlugin(
+    "https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js",
+    false
   );
 
-  let center: mapboxgl.LngLatLike;
+  let center: maplibregl.LngLatLike;
   let zoom: number;
   if (localStorage["slippy.lat"] != null) {
     center = [localStorage["slippy.lng"], localStorage["slippy.lat"]];

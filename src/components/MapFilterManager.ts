@@ -1,46 +1,43 @@
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import { SkiAreaActivity, SkiAreaFeature } from "openskidata-format";
 import MapFilters from "../MapFilters";
-import assert from "./utils/assert";
 export default class MapFiltersManager {
-  private map: mapboxgl.Map;
-  private originalFilters: Map<string, any[] | undefined> = new Map();
+  private map: maplibregl.Map;
+  private originalFilters: Map<
+    string,
+    maplibregl.FilterSpecification | undefined
+  > = new Map();
   private activeRules: MapFilterRules = noRules();
 
-  constructor(map: mapboxgl.Map) {
+  constructor(map: maplibregl.Map) {
     this.map = map;
   }
 
   setFilters = (filters: MapFilters) => {
     const rules = getFilterRules(filters);
-
     const layersAndRules: [string[], ObjectFilterRules][] = [
       [this.skiAreaLayers(), rules.skiAreas],
       [this.runLayers(), rules.runs],
       [this.liftLayers(), rules.lifts],
       [this.selectedLayers(), rules.selected],
     ];
-
     const rulesByLayer = layersAndRules.reduce(
       (combinedRulesByLayer, layersAndRules) => {
         const layers = layersAndRules[0];
         const rules = layersAndRules[1];
-
         layers.forEach((layer) => {
           combinedRulesByLayer.set(
             layer,
-            combine(rules, combinedRulesByLayer.get(layer) || [])
+            combine(rules, combinedRulesByLayer.get(layer) || ["boolean", true])
           );
         });
         return combinedRulesByLayer;
       },
       new Map<string, ObjectFilterRules>()
     );
-
     rulesByLayer.forEach((rules, layer) =>
       this.setFilterOverride(layer, rules)
     );
-
     this.activeRules = rules;
   };
 
@@ -50,9 +47,14 @@ export default class MapFiltersManager {
       return 0;
     }
 
+    let filter: maplibregl.FilterSpecification | null = null;
+    if (rules && typeof rules !== "string") {
+      filter = rules;
+    }
+
     const loadedSkiAreas = this.map.querySourceFeatures("openskimap", {
       sourceLayer: "skiareas",
-      filter: ["all"].concat(rules),
+      filter: filter || undefined,
     });
 
     const bounds = this.map.getBounds();
@@ -75,26 +77,19 @@ export default class MapFiltersManager {
 
   private runLayers = () => {
     return this.layers()
-      .filter(
-        (layer) => layer.type !== "custom" && layer["source-layer"] === "runs"
-      )
+      .filter((layer) => (layer as any)["source-layer"] === "runs")
       .map((layer) => layer.id);
   };
 
   private liftLayers = () => {
     return this.layers()
-      .filter(
-        (layer) => layer.type !== "custom" && layer["source-layer"] === "lifts"
-      )
+      .filter((layer) => (layer as any)["source-layer"] === "lifts")
       .map((layer) => layer.id);
   };
 
   private skiAreaLayers = () => {
     return this.layers()
-      .filter(
-        (layer) =>
-          layer.type !== "custom" && layer["source-layer"] === "skiareas"
-      )
+      .filter((layer) => (layer as any)["source-layer"] === "skiareas")
       .map((layer) => layer.id);
   };
 
@@ -106,13 +101,13 @@ export default class MapFiltersManager {
     return this.map.getStyle().layers || [];
   };
 
-  private setFilterOverride = (layerName: string, rules: any[] | "hidden") => {
+  private setFilterOverride = (layerName: string, rules: ObjectFilterRules) => {
     const layer = this.map.getLayer(layerName);
     if (!layer) {
       return;
     }
 
-    assert(layer.type !== "custom", "Custom layers are not supported");
+    console.assert(layer.type !== "custom", "Custom layers are not supported");
 
     if (rules === "hidden") {
       this.map.setLayoutProperty(layer.id, "visibility", "none");
@@ -122,10 +117,10 @@ export default class MapFiltersManager {
     }
 
     if (!this.originalFilters.has(layerName)) {
-      this.originalFilters.set(layerName, layer.filter);
+      this.originalFilters.set(layerName, layer.filter || undefined);
     }
 
-    const originalRules = this.originalFilters.get(layerName) || [];
+    const originalRules = this.originalFilters.get(layerName) || null;
 
     this.map.setFilter(
       layerName,
@@ -135,22 +130,27 @@ export default class MapFiltersManager {
 
   private finalRulesForLayer = (
     layerName: string,
-    originalRules: any[],
-    overrideRules: any[]
-  ) => {
-    if (overrideRules.length == 0) {
-      return originalRules;
+    originalRules: maplibregl.FilterSpecification | undefined | null,
+    overrideRules: maplibregl.FilterSpecification
+  ): maplibregl.FilterSpecification | null => {
+    if (Array.isArray(overrideRules) && overrideRules.length == 0) {
+      return originalRules || null;
     }
 
     if (this.selectedLayers().includes(layerName)) {
-      return ["all"].concat(overrideRules);
+      return overrideRules;
     }
 
-    return ["all", originalRules].concat(overrideRules);
+    if (!originalRules) {
+      return overrideRules;
+    }
+
+    // Combine original and override rules with "all"
+    return ["all", originalRules, overrideRules] as any;
   };
 }
 
-type ObjectFilterRules = any[] | "hidden";
+type ObjectFilterRules = maplibregl.ExpressionFilterSpecification | "hidden";
 
 interface MapFilterRules {
   runs: ObjectFilterRules;
@@ -160,7 +160,12 @@ interface MapFilterRules {
 }
 
 function noRules(): MapFilterRules {
-  return { runs: [], skiAreas: [], lifts: [], selected: [] };
+  return {
+    runs: ["boolean", true],
+    skiAreas: ["boolean", true],
+    lifts: ["boolean", true],
+    selected: ["boolean", true],
+  };
 }
 
 function getFilterRules(filters: MapFilters): MapFilterRules {
@@ -180,12 +185,20 @@ function getFilterRules(filters: MapFilters): MapFilterRules {
   }, noRules());
 }
 
-function combine(left: ObjectFilterRules, right: ObjectFilterRules) {
+function combine(
+  left: ObjectFilterRules,
+  right: ObjectFilterRules
+): ObjectFilterRules {
   if (left === "hidden" || right === "hidden") {
     return "hidden";
   }
 
-  return left.concat(right);
+  if (!left && !right) return ["boolean", true];
+  if (!left) return right;
+  if (!right) return left;
+
+  // Combine filters using "all"
+  return ["all", left, right] as any;
 }
 
 function getActivityFilterRules(filters: MapFilters): MapFilterRules {
@@ -197,22 +210,22 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
     return {
       skiAreas: "hidden",
       lifts: "hidden",
-      runs: [["has", "other"]],
-      selected: [],
+      runs: ["has", "other"],
+      selected: ["boolean", true],
     };
   } else if (hasDownhill && !hasNordic) {
     return {
-      skiAreas: [["has", "has_downhill"]],
-      lifts: [],
-      runs: [["any", ["has", "downhill"], ["has", "skitour"]]],
-      selected: [],
+      skiAreas: ["has", "has_downhill"],
+      lifts: ["boolean", true],
+      runs: ["any", ["has", "downhill"], ["has", "skitour"]],
+      selected: ["boolean", true],
     };
   } else if (hasNordic && !hasDownhill) {
     return {
-      skiAreas: [["has", "has_nordic"]],
+      skiAreas: ["has", "has_nordic"],
       lifts: "hidden",
-      runs: [["has", "nordic"]],
-      selected: [],
+      runs: ["has", "nordic"],
+      selected: ["boolean", true],
     };
   } else {
     return noRules();
@@ -222,10 +235,10 @@ function getActivityFilterRules(filters: MapFilters): MapFilterRules {
 function getElevationFilterRules(filters: MapFilters): MapFilterRules {
   if (filters.minElevation) {
     return {
-      skiAreas: [[">", ["get", "maxElevation"], filters.minElevation]],
-      lifts: [],
-      runs: [],
-      selected: [],
+      skiAreas: [">", ["get", "maxElevation"], filters.minElevation],
+      lifts: ["boolean", true],
+      runs: ["boolean", true],
+      selected: ["boolean", true],
     };
   } else {
     return noRules();
@@ -235,10 +248,10 @@ function getElevationFilterRules(filters: MapFilters): MapFilterRules {
 function getVerticalFilterRules(filters: MapFilters): MapFilterRules {
   if (filters.minVertical) {
     return {
-      skiAreas: [[">", ["get", "vertical"], filters.minVertical]],
-      lifts: [],
-      runs: [],
-      selected: [],
+      skiAreas: [">", ["get", "vertical"], filters.minVertical],
+      lifts: ["boolean", true],
+      runs: ["boolean", true],
+      selected: ["boolean", true],
     };
   } else {
     return noRules();
@@ -255,7 +268,7 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
   );
   const hasNordic = !filters.hiddenActivities.includes(SkiAreaActivity.Nordic);
 
-  const rules: any[] = [];
+  const rules: maplibregl.ExpressionSpecification[] = [];
   if (hasDownhill) {
     rules.push([">", ["get", "downhillDistance"], filters.minRunLength]);
   }
@@ -263,11 +276,18 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
     rules.push([">", ["get", "nordicDistance"], filters.minRunLength]);
   }
 
+  let skiAreasFilter: maplibregl.FilterSpecification = ["boolean", true];
+  if (rules.length > 1) {
+    skiAreasFilter = ["any", ...rules];
+  } else if (rules.length === 1) {
+    skiAreasFilter = rules[0];
+  }
+
   return {
-    skiAreas: rules.length > 1 ? [["any"].concat(rules)] : rules,
-    lifts: [],
-    runs: [],
-    selected: [],
+    skiAreas: skiAreasFilter,
+    lifts: ["boolean", true],
+    runs: ["boolean", true],
+    selected: ["boolean", true],
   };
 }
 
@@ -275,11 +295,9 @@ function getSelectedObjectFilterRules(filters: MapFilters): MapFilterRules {
   const rules = noRules();
   if (filters.selectedObjectID) {
     rules.selected = [
-      [
-        "any",
-        ["==", ["get", "id"], filters.selectedObjectID],
-        ["in", filters.selectedObjectID, ["get", "skiAreas"]],
-      ],
+      "any",
+      ["==", ["get", "id"], filters.selectedObjectID],
+      ["in", filters.selectedObjectID, ["get", "skiAreas"]],
     ];
   } else {
     rules.selected = "hidden";

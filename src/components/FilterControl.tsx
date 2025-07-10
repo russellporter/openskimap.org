@@ -1,4 +1,4 @@
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import MapFilters, { defaultMapFilters } from "../MapFilters";
@@ -8,9 +8,9 @@ import { FilterForm } from "./FilterForm";
 import { Themed } from "./Themed";
 import { UnitSystemManager } from "./UnitSystemManager";
 
-export class FilterControl implements mapboxgl.IControl {
+export class FilterControl implements maplibregl.IControl {
   _container: HTMLDivElement;
-  _map: mapboxgl.Map | null = null;
+  _map: maplibregl.Map | null = null;
   _eventBus: EventBus;
   _filters: MapFilters = defaultMapFilters;
   _visibleSkiAreasCount: number = 0;
@@ -19,10 +19,10 @@ export class FilterControl implements mapboxgl.IControl {
   constructor(eventBus: EventBus) {
     this._eventBus = eventBus;
     this._container = document.createElement("div");
-    this._container.className = "mapboxgl-ctrl";
+    this._container.className = "maplibregl-ctrl";
   }
 
-  onAdd = (map: mapboxgl.Map) => {
+  onAdd = (map: maplibregl.Map) => {
     this._root = ReactDOM.createRoot(this._container);
     this._map = map;
     this.render();
@@ -66,7 +66,7 @@ export class FilterControl implements mapboxgl.IControl {
     );
   };
 
-  getDefaultPosition = (): string => {
+  getDefaultPosition = (): maplibregl.ControlPosition => {
     return "top-left";
   };
 }

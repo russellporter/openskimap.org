@@ -1,15 +1,16 @@
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
+import { MapStyle } from "../MapStyle";
 
-export class MapStyleControl implements mapboxgl.IControl {
+export class MapStyleControl implements maplibregl.IControl {
   _enabled: boolean = false;
   _satelliteButton: HTMLButtonElement;
   _container: HTMLDivElement;
-  _map: mapboxgl.Map | undefined;
+  _map: maplibregl.Map | undefined;
 
   constructor() {
     this._container = document.createElement("div");
     this._container.className =
-      "mapboxgl-ctrl mapboxgl-ctrl-group openskimap-style-control";
+      "maplibregl-ctrl maplibregl-ctrl-group openskimap-style-control";
 
     this._container.addEventListener("contextmenu", function (e) {
       e.preventDefault();
@@ -25,7 +26,7 @@ export class MapStyleControl implements mapboxgl.IControl {
     );
   }
 
-  onAdd = (map: mapboxgl.Map) => {
+  onAdd = (map: maplibregl.Map) => {
     this._map = map;
     this._setEnabled(false);
 
@@ -38,7 +39,7 @@ export class MapStyleControl implements mapboxgl.IControl {
     this._map = undefined;
   };
 
-  getDefaultPosition = (): string => {
+  getDefaultPosition = (): maplibregl.ControlPosition => {
     return "top-right";
   };
 
@@ -51,10 +52,10 @@ export class MapStyleControl implements mapboxgl.IControl {
     );
     if (enabled) {
       this._satelliteButton.classList.add("openskimap-style-enabled");
-      map && map.setStyle("https://tiles.openskimap.org/styles/satellite.json");
+      map && map.setStyle(MapStyle.Satellite);
     } else {
       this._satelliteButton.classList.remove("openskimap-style-enabled");
-      map && map.setStyle("https://tiles.openskimap.org/styles/terrain.json");
+      map && map.setStyle(MapStyle.Terrain);
     }
   };
 
