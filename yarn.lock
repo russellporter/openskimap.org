@@ -2237,15 +2237,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/maplibre-gl@npm:^1.14.0":
-  version: 1.14.0
-  resolution: "@types/maplibre-gl@npm:1.14.0"
-  dependencies:
-    maplibre-gl: "*"
-  checksum: 9eb47f2e1c5d14feac59033b3711f2678ceb05ebccc8c0b96ee07857948e38c03540243357ac41f72c8e6616861e1540964d14cb8cf3aa3adb6cfbdb46a6fc84
-  languageName: node
-  linkType: hard
-
 "@types/mime@npm:^1":
   version: 1.3.5
   resolution: "@types/mime@npm:1.3.5"
@@ -5457,7 +5448,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"maplibre-gl@npm:*, maplibre-gl@npm:^5.6.1":
+"maplibre-contour@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "maplibre-contour@npm:0.1.0"
+  checksum: 525e4067846806335933b06bc57dd303fcc118f091b9ee3362c0424311fa8b2839ec8d497ffc2794ae802893eb1c4e52a261e6adbcb43f5e57f6f0a6163a51c7
+  languageName: node
+  linkType: hard
+
+"maplibre-gl@npm:^5.6.1":
   version: 5.6.1
   resolution: "maplibre-gl@npm:5.6.1"
   dependencies:
@@ -5979,7 +5977,6 @@ __metadata:
     "@turf/nearest-point-on-line": ^7.0.0
     "@types/chart.js": ^2.9.41
     "@types/geojson": ^7946.0.14
-    "@types/maplibre-gl": ^1.14.0
     "@types/node": ^20.14.14
     "@types/react": ^18.3.3
     "@types/react-dom": ^18.3.0
@@ -5991,6 +5988,7 @@ __metadata:
     clsx: ^2.1.1
     css-loader: ^7.1.2
     html-webpack-plugin: ^5.6.0
+    maplibre-contour: ^0.1.0
     maplibre-gl: ^5.6.1
     memoize-one: ^6.0.0
     openskidata-format: 4.0.0
