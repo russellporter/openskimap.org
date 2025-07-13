@@ -56,20 +56,6 @@ export default class About extends React.Component<Props> {
           <Link href="mailto:contact@skimap.org">contact@skimap.org</Link>.
         </Typography>
         <Typography variant="h6" id="modal-title">
-          License
-        </Typography>
-        <Typography paragraph={true}>
-          Map data is{" "}
-          <Link href="https://www.openstreetmap.org/copyright" target="_blank">
-            © OpenStreetMap contributors
-          </Link>{" "}
-          and <Link href="https://openskimap.org/?about">OpenSkiMap.org</Link>.
-        </Typography>
-        <Typography paragraph={true}>
-          Use is subject to the Open Database license. You must attribute
-          OpenSkiMap.org and OpenStreetMap appropriately.
-        </Typography>
-        <Typography variant="h6" id="modal-title">
           Acceptable Use
         </Typography>
         <Typography paragraph={true}>
@@ -98,6 +84,10 @@ export default class About extends React.Component<Props> {
           GeoJSON format is spatial data with all attributes, while CSV is
           tabular data for easier analysis. Note that data formats are not
           stable and may change as the project evolves.
+        </Typography>
+        <Typography paragraph={true}>
+          Use is subject to the Open Database license. You must attribute
+          OpenSkiMap.org and OpenStreetMap appropriately.
         </Typography>
         <TableContainer sx={{ marginBottom: 2 }}>
           <Table size="small">
@@ -154,6 +144,71 @@ export default class About extends React.Component<Props> {
         <Typography paragraph={true}>
           The data is generally updated daily. It's permitted to automatically
           download the above files once per day.
+        </Typography>
+        <Typography variant="h6" id="modal-title">
+          Credits
+        </Typography>
+        <Typography paragraph={true}>
+          Map data is{" "}
+          <Link href="https://www.openstreetmap.org/copyright" target="_blank">
+            © OpenStreetMap contributors
+          </Link>{" "}
+          and <Link href="https://openskimap.org/?about">OpenSkiMap.org</Link>.
+          Base map graciously provided by{" "}
+          <Link href="https://openfreemap.org/">OpenFreeMap</Link>,{" "}
+          <Link href="https://www.openmaptiles.org/">© OpenMapTiles</Link>.
+          Satellite imagery <Link href="https://www.mapbox.com">© Mapbox</Link>{" "}
+          and <Link href="https://www.maxar.com/">© Maxar</Link>. Terrain Data
+          courtesy of{" "}
+          <Link href="https://registry.opendata.aws/terrain-tiles/">
+            Mapzen and AWS Open Data
+          </Link>
+          .
+        </Typography>
+        <Typography paragraph={true}>Terrain data licenses:</Typography>
+        <Typography component="div" paragraph={true}>
+          <ul>
+            <li>
+              ArcticDEM terrain data DEM(s) were created from DigitalGlobe,
+              Inc., imagery and funded under National Science Foundation awards
+              1043681, 1559691, and 1542736
+            </li>
+            <li>
+              Australia terrain data © Commonwealth of Australia (Geoscience
+              Australia) 2017
+            </li>
+            <li>
+              Austria terrain data © offene Daten Österreichs – Digitales
+              Geländemodell (DGM) Österreich
+            </li>
+            <li>
+              Canada terrain data contains information licensed under the Open
+              Government Licence – Canada
+            </li>
+            <li>
+              Europe terrain data produced using Copernicus data and information
+              funded by the European Union - EU-DEM layers
+            </li>
+            <li>
+              Global ETOPO1 terrain data U.S. National Oceanic and Atmospheric
+              Administration
+            </li>
+            <li>Mexico terrain data source: INEGI, Continental relief, 2016</li>
+            <li>
+              New Zealand terrain data Copyright 2011 Crown copyright (c) Land
+              Information New Zealand and the New Zealand Government (All rights
+              reserved)
+            </li>
+            <li>Norway terrain data © Kartverket</li>
+            <li>
+              United Kingdom terrain data © Environment Agency copyright and/or
+              database right 2015. All rights reserved
+            </li>
+            <li>
+              United States 3DEP (formerly NED) and global GMTED2010 and SRTM
+              terrain data courtesy of the U.S. Geological Survey
+            </li>
+          </ul>
         </Typography>
       </>
     );

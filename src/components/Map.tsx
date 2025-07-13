@@ -63,7 +63,10 @@ export class Map {
     this.map.addControl(this.searchBarControl);
     this.map.addControl(this.mapScaleControl, "bottom-left");
 
-    this.map.addControl(new maplibregl.AttributionControl(), "bottom-right");
+    this.map.addControl(
+      new maplibregl.AttributionControl({ customAttribution: [] }),
+      "bottom-right"
+    );
     this.map.addControl(
       new maplibregl.GeolocateControl({
         positionOptions: {
