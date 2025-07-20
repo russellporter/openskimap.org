@@ -63,10 +63,10 @@ export class Map {
     this.map.addControl(this.searchBarControl);
     this.map.addControl(this.mapScaleControl, "bottom-left");
 
-    this.map.addControl(
-      new maplibregl.AttributionControl({ customAttribution: [] }),
-      "bottom-right"
-    );
+    const attributionControl = new maplibregl.AttributionControl({ 
+      customAttribution: ['<a href="?legal" id="legal-attribution-link">Legal</a>'] 
+    });
+    this.map.addControl(attributionControl, "bottom-right");
     this.map.addControl(
       new maplibregl.GeolocateControl({
         positionOptions: {
@@ -87,6 +87,15 @@ export class Map {
 
     this.map.once("load", () => {
       this.loaded = true;
+      
+      // Add click handler for Legal attribution link
+      const legalLink = document.getElementById("legal-attribution-link");
+      if (legalLink) {
+        legalLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          this.eventBus.openLegal();
+        });
+      }
     });
 
     addUnitSystemChangeListener_NonReactive({
