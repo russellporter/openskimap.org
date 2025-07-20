@@ -8,6 +8,7 @@ import * as UnitHelpers from "./utils/UnitHelpers";
 export default interface State {
   sidebarOpen: boolean;
   aboutInfoOpen: boolean;
+  legalOpen: boolean;
   settingsOpen: boolean;
   mapFiltersOpen: boolean;
   mapStyle: MapStyle;
@@ -20,6 +21,7 @@ export default interface State {
 export interface StateChanges {
   sidebarOpen?: boolean;
   aboutInfoOpen?: boolean;
+  legalOpen?: boolean;
   settingsOpen?: boolean;
   mapFiltersOpen?: boolean;
   mapStyle?: MapStyle;
@@ -34,6 +36,7 @@ export function getInitialState(): State {
   return {
     sidebarOpen: false,
     aboutInfoOpen: false,
+    legalOpen: false,
     settingsOpen: false,
     mapFiltersOpen: false,
     mapStyle: MapStyle.Terrain,

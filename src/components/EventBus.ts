@@ -10,6 +10,8 @@ export default interface EventBus {
   closeSidebar(): void;
   openAboutInfo(): void;
   closeAboutInfo(): void;
+  openLegal(): void;
+  closeLegal(): void;
   openSettings(): void;
   closeSettings(): void;
   setMapStyle(style: MapStyle): void;

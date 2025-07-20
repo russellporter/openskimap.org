@@ -40,6 +40,14 @@ export default class StateStore implements EventBus {
     this.update({ aboutInfoOpen: false });
   };
 
+  openLegal = () => {
+    this.update({ legalOpen: true });
+  };
+
+  closeLegal = () => {
+    this.update({ legalOpen: false });
+  };
+
   openSettings = () => {
     this.update({ settingsOpen: true });
   };
@@ -59,6 +67,7 @@ export default class StateStore implements EventBus {
   urlUpdate = (state: URLState) => {
     this.update({
       aboutInfoOpen: state.aboutInfoOpen,
+      legalOpen: state.legalOpen,
       info: state.selectedObjectID
         ? { id: state.selectedObjectID, panToPosition: "afterLoad" }
         : null,

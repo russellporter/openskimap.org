@@ -5,6 +5,7 @@ import "../taginfo.json";
 import "./assets/robots.txt";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
+import { LegalModal } from "./components/LegalModal";
 import { Map } from "./components/Map";
 import { SettingsModal } from "./components/SettingsModal";
 import Sidebar from "./components/Sidebar";
@@ -23,6 +24,9 @@ function initialize() {
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
   const aboutRoot = ReactDOM.createRoot(
     document.getElementById("about-modal")!
+  );
+  const legalRoot = ReactDOM.createRoot(
+    document.getElementById("legal-modal")!
   );
   const settingsRoot = ReactDOM.createRoot(
     document.getElementById("settings-modal")!
@@ -67,6 +71,7 @@ function initialize() {
   function update(state: State, changes: StateChanges) {
     updateURL({
       aboutInfoOpen: state.aboutInfoOpen,
+      legalOpen: state.legalOpen,
       selectedObjectID: state.info?.id ?? null,
       markers: state.markers,
     });
@@ -91,6 +96,14 @@ function initialize() {
       aboutRoot.render(
         <Themed>
           <AboutModal eventBus={store} open={state.aboutInfoOpen} />
+        </Themed>
+      );
+    }
+
+    if (changes.legalOpen !== undefined) {
+      legalRoot.render(
+        <Themed>
+          <LegalModal eventBus={store} open={state.legalOpen} />
         </Themed>
       );
     }
