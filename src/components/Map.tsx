@@ -261,7 +261,9 @@ export class Map {
 
   setStyle = (style: MapStyle) => {
     this.map.once("styledata", () => {
-      this.updateContourLayers(getUnitSystem_NonReactive());
+      if (style != MapStyle.Satellite) {
+        this.updateContourLayers(getUnitSystem_NonReactive());
+      }
     });
 
     this.map.setStyle(style);
