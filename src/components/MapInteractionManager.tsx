@@ -1,5 +1,5 @@
-import { debounce } from "throttle-debounce";
 import * as maplibregl from "maplibre-gl";
+import { debounce } from "throttle-debounce";
 import EventBus from "./EventBus";
 export class MapInteractionManager {
   private map: maplibregl.Map;
@@ -9,7 +9,7 @@ export class MapInteractionManager {
     this.map = map;
     this.eventBus = eventBus;
 
-    map.on("style.load", () => {
+    map.on("styledata", () => {
       this.attachListeners();
     });
   }

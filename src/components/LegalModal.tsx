@@ -38,16 +38,24 @@ export const LegalModal: React.FunctionComponent<{
         </Typography>
         <Typography paragraph sx={{ mb: 2 }}>
           Graciously provided by{" "}
-          <Link href="https://openfreemap.org/">OpenFreeMap</Link> and{" "}
-          <Link href="https://www.openmaptiles.org/">© OpenMapTiles</Link>.
+          <Link href="https://openfreemap.org/" target="_blank">
+            OpenFreeMap
+          </Link>{" "}
+          and{" "}
+          <Link href="https://www.openmaptiles.org/" target="_blank">
+            © OpenMapTiles
+          </Link>
+          .
         </Typography>
 
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
           Satellite Imagery
         </Typography>
         <Typography paragraph sx={{ mb: 2 }}>
-          <Link href="https://www.mapbox.com">© Mapbox</Link> and{" "}
-          <Link href="https://www.maxar.com/">© Maxar</Link>.
+          Powered by{" "}
+          <Link href="https://www.esri.com/" target="_blank">
+            Esri
+          </Link>
         </Typography>
 
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
@@ -55,7 +63,10 @@ export const LegalModal: React.FunctionComponent<{
         </Typography>
         <Typography paragraph sx={{ mb: 3 }}>
           Courtesy of{" "}
-          <Link href="https://registry.opendata.aws/terrain-tiles/">
+          <Link
+            href="https://registry.opendata.aws/terrain-tiles/"
+            target="_blank"
+          >
             Mapzen and AWS Open Data
           </Link>
           .

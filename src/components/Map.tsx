@@ -5,6 +5,7 @@ import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
 import { MapMarker } from "../MapMarker";
 import { MapStyle } from "../MapStyle";
+import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
 import { InfoControl } from "./InfoControl";
@@ -34,6 +35,8 @@ export class Map {
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
   private demSource: DemSource | null = null;
+  private esriAttribution: EsriAttribution | null = null;
+  private attributionControl: maplibregl.AttributionControl;
 
   constructor(
     center: maplibregl.LngLatLike,
@@ -63,10 +66,12 @@ export class Map {
     this.map.addControl(this.searchBarControl);
     this.map.addControl(this.mapScaleControl, "bottom-left");
 
-    const attributionControl = new maplibregl.AttributionControl({ 
-      customAttribution: ['<a href="?legal" id="legal-attribution-link">Legal</a>'] 
+    this.attributionControl = new maplibregl.AttributionControl({
+      customAttribution: [
+        '<a href="?legal" id="legal-attribution-link">Legal</a>',
+      ],
     });
-    this.map.addControl(attributionControl, "bottom-right");
+    this.map.addControl(this.attributionControl, "bottom-right");
     this.map.addControl(
       new maplibregl.GeolocateControl({
         positionOptions: {
@@ -87,7 +92,15 @@ export class Map {
 
     this.map.once("load", () => {
       this.loaded = true;
-      
+
+      // Initialize Esri attribution for satellite imagery
+      this.esriAttribution = new EsriAttribution(
+        this.map,
+        "https://static.arcgis.com/attribution/World_Imagery",
+        this.attributionControl
+      );
+      this.esriAttribution.autoManage();
+
       // Add click handler for Legal attribution link
       const legalLink = document.getElementById("legal-attribution-link");
       if (legalLink) {
@@ -247,7 +260,7 @@ export class Map {
   };
 
   setStyle = (style: MapStyle) => {
-    this.map.once("style.load", () => {
+    this.map.once("styledata", () => {
       this.updateContourLayers(getUnitSystem_NonReactive());
     });
 
