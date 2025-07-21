@@ -7,6 +7,9 @@ module.exports = merge(common, {
   devServer: {
     static: "./dist",
     hot: true,
+    client: {
+      overlay: false,
+    },
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
