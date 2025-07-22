@@ -1,4 +1,5 @@
 import * as maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import { AboutModal } from "./components/AboutModal";
