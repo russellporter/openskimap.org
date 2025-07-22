@@ -1,8 +1,6 @@
 import * as maplibregl from "maplibre-gl";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import "../taginfo.json";
-import "./assets/robots.txt";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
 import { LegalModal } from "./components/LegalModal";

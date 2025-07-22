@@ -1,5 +1,4 @@
 import mlcontour from "maplibre-contour";
-import { DemSource } from "maplibre-contour/dist/dem-source";
 import * as maplibregl from "maplibre-gl";
 import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
@@ -34,7 +33,7 @@ export class Map {
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
-  private demSource: DemSource | null = null;
+  private demSource: InstanceType<typeof mlcontour.DemSource> | null = null;
   private esriAttribution: EsriAttribution | null = null;
   private attributionControl: maplibregl.AttributionControl;
 

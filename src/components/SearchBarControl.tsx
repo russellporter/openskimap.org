@@ -1,5 +1,4 @@
 import * as maplibregl from "maplibre-gl";
-import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import EventBus from "./EventBus";
 import SearchBar from "./SearchBar";
