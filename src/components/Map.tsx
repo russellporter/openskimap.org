@@ -61,6 +61,7 @@ export class Map {
     this.mapScaleControl = new maplibregl.ScaleControl({
       maxWidth: 80,
     });
+    this.map.setMaxPitch(90);
 
     this.map.addControl(this.searchBarControl);
     this.map.addControl(this.mapScaleControl, "bottom-left");
@@ -124,9 +125,9 @@ export class Map {
   private updateContourLayers(unitSystem: UnitSystem) {
     if (!this.demSource) {
       this.demSource = new mlcontour.DemSource({
-        url: "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
-        encoding: "terrarium",
-        maxzoom: 15,
+        url: "https://tiles.openskimap.org/dynamic/data/merged-terrain/{z}/{x}/{y}.webp",
+        encoding: "mapbox",
+        maxzoom: 16,
         worker: true,
         cacheSize: 100,
         timeoutMs: 10000,
@@ -148,8 +149,8 @@ export class Map {
         thresholds: {
           11: [200, 1000],
           12: [100, 500],
-          13: [20, 100],
-          15: [10, 100],
+          // ideally this would be a higher zoom like 14-15 but the terrain tiles are only available globally up to zoom 13
+          13: [10, 100],
         },
         // Reduces the amount of tiles that need to be loaded and rendered.
         overzoom: 1,
@@ -169,7 +170,7 @@ export class Map {
       this.map.addSource("contours", {
         type: "vector",
         tiles: contourTiles,
-        maxzoom: 15,
+        maxzoom: 16,
       });
     }
 
