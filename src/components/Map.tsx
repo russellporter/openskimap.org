@@ -304,6 +304,17 @@ export class Map {
             };
           }
 
+          // Hillshade is defined as a separate source than the 3d terrain (see https://github.com/maplibre/maplibre-gl-js/issues/2035 for details)
+          if (
+            updatedSources.hillshade &&
+            updatedSources.hillshade.type === "raster-dem"
+          ) {
+            updatedSources.hillshade = {
+              ...updatedSources.hillshade,
+              tiles: [this.demSource.sharedDemProtocolUrl],
+            };
+          }
+
           // Add contour layers to the terrain style
           baseStyle = {
             ...baseStyle,
