@@ -3,7 +3,7 @@ import * as maplibregl from "maplibre-gl";
 import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
 import { MapMarker } from "../MapMarker";
-import { MapStyle } from "../MapStyle";
+import { MapStyle, MAP_STYLE_URLS } from "../MapStyle";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
@@ -259,13 +259,14 @@ export class Map {
   };
 
   setStyle = (style: MapStyle) => {
+    // TODO: investigate using transformStyle instead
     this.map.once("styledata", () => {
       if (style != MapStyle.Satellite) {
         this.updateContourLayers(getUnitSystem_NonReactive());
       }
     });
 
-    this.map.setStyle(style);
+    this.map.setStyle(MAP_STYLE_URLS[style]);
   };
 
   private setFiltersUnthrottled = (filters: MapFilters) => {

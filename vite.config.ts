@@ -16,6 +16,10 @@ export default defineConfig({
     }),
   ],
 
+  // Define global constants
+  define: {
+    BUILD_TIMESTAMP: JSON.stringify(Date.now().toString()),
+  },
 
   // Development server configuration
   server: {

@@ -1,5 +1,5 @@
 import * as maplibregl from "maplibre-gl";
-import { MapStyle } from "../MapStyle";
+import { MapStyle, MAP_STYLE_URLS } from "../MapStyle";
 
 export class MapStyleControl implements maplibregl.IControl {
   _enabled: boolean = false;
@@ -52,10 +52,10 @@ export class MapStyleControl implements maplibregl.IControl {
     );
     if (enabled) {
       this._satelliteButton.classList.add("openskimap-style-enabled");
-      map && map.setStyle(MapStyle.Satellite);
+      map && map.setStyle(MAP_STYLE_URLS[MapStyle.Satellite]);
     } else {
       this._satelliteButton.classList.remove("openskimap-style-enabled");
-      map && map.setStyle(MapStyle.Terrain);
+      map && map.setStyle(MAP_STYLE_URLS[MapStyle.Terrain]);
     }
   };
 
