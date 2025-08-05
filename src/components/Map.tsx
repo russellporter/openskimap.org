@@ -125,7 +125,7 @@ export class Map {
 
       if (shouldEnableTerrain !== this.terrainEnabled) {
         this.terrainEnabled = shouldEnableTerrain;
-        
+
         // Update terrain directly without reloading style
         if (shouldEnableTerrain) {
           // Enable 3D terrain
@@ -137,13 +137,21 @@ export class Map {
           // Disable 3D terrain
           this.map.setTerrain(null);
         }
-        
+
         // Update building layer visibility directly
         if (this.map.getLayer("building-3d")) {
-          this.map.setLayoutProperty("building-3d", "visibility", shouldEnableTerrain ? "visible" : "none");
+          this.map.setLayoutProperty(
+            "building-3d",
+            "visibility",
+            shouldEnableTerrain ? "visible" : "none"
+          );
         }
         if (this.map.getLayer("building-top")) {
-          this.map.setLayoutProperty("building-top", "visibility", shouldEnableTerrain ? "none" : "visible");
+          this.map.setLayoutProperty(
+            "building-top",
+            "visibility",
+            shouldEnableTerrain ? "none" : "visible"
+          );
         }
       }
     });
@@ -210,15 +218,21 @@ export class Map {
         const unitSystem = getUnitSystem_NonReactive();
 
         // Define layer visibility rules
-        const getLayerVisibility = (layerId: string): 'visible' | 'none' | null => {
+        const getLayerVisibility = (
+          layerId: string
+        ): "visible" | "none" | null => {
           // Unit-based layers
-          if (layerId.endsWith('-metric')) return unitSystem === 'metric' ? 'visible' : 'none';
-          if (layerId.endsWith('-imperial')) return unitSystem === 'imperial' ? 'visible' : 'none';
-          
+          if (layerId.endsWith("-metric"))
+            return unitSystem === "metric" ? "visible" : "none";
+          if (layerId.endsWith("-imperial"))
+            return unitSystem === "imperial" ? "visible" : "none";
+
           // Building layers based on terrain mode
-          if (layerId === 'building-3d') return this.terrainEnabled ? 'visible' : 'none';
-          if (layerId === 'building-top') return this.terrainEnabled ? 'none' : 'visible';
-          
+          if (layerId === "building-3d")
+            return this.terrainEnabled ? "visible" : "none";
+          if (layerId === "building-top")
+            return this.terrainEnabled ? "none" : "visible";
+
           // No visibility change needed
           return null;
         };
@@ -227,7 +241,7 @@ export class Map {
         const updatedLayers = newStyle.layers.map((layer) => {
           const visibility = getLayerVisibility(layer.id);
           if (visibility === null) return layer;
-          
+
           return {
             ...layer,
             layout: {
