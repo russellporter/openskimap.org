@@ -37,6 +37,7 @@ export class Map {
   private esriAttribution: EsriAttribution | null = null;
   private attributionControl: maplibregl.AttributionControl;
   private currentStyle: MapStyle | null = null;
+  private terrainEnabled = false;
 
   constructor(
     center: maplibregl.LngLatLike,
@@ -90,6 +91,12 @@ export class Map {
       "bottom-right"
     );
 
+    // Check if map starts with tilt and enable terrain if so
+    const initialPitch = this.map.getPitch();
+    if (initialPitch > 0) {
+      this.terrainEnabled = true;
+    }
+
     this.map.once("load", () => {
       this.loaded = true;
 
@@ -108,6 +115,20 @@ export class Map {
           e.preventDefault();
           this.eventBus.openLegal();
         });
+      }
+    });
+
+    // Enable/disable terrain based on pitch
+    this.map.on("pitchend", () => {
+      const pitch = this.map.getPitch();
+      const shouldEnableTerrain = pitch > 0;
+
+      if (shouldEnableTerrain !== this.terrainEnabled) {
+        this.terrainEnabled = shouldEnableTerrain;
+        // Re-apply current style to update terrain state
+        if (this.currentStyle) {
+          this.setStyle(this.currentStyle);
+        }
       }
     });
 
@@ -171,28 +192,41 @@ export class Map {
     this.map.setStyle(MAP_STYLE_URLS[style], {
       transformStyle: (_, newStyle) => {
         const unitSystem = getUnitSystem_NonReactive();
-        
-        // Show/hide layers based on unit system
+
+        // Define layer visibility rules
+        const getLayerVisibility = (layerId: string): 'visible' | 'none' | null => {
+          // Unit-based layers
+          if (layerId.endsWith('-metric')) return unitSystem === 'metric' ? 'visible' : 'none';
+          if (layerId.endsWith('-imperial')) return unitSystem === 'imperial' ? 'visible' : 'none';
+          
+          // Building layers based on terrain mode
+          if (layerId === 'building-3d') return this.terrainEnabled ? 'visible' : 'none';
+          if (layerId === 'building-top') return this.terrainEnabled ? 'none' : 'visible';
+          
+          // No visibility change needed
+          return null;
+        };
+
+        // Apply visibility rules to layers
         const updatedLayers = newStyle.layers.map((layer) => {
-          if (layer.id.endsWith('-metric')) {
-            return {
-              ...layer,
-              layout: {
-                ...layer.layout,
-                visibility: (unitSystem === 'metric' ? 'visible' : 'none') as 'visible' | 'none',
-              },
-            };
-          } else if (layer.id.endsWith('-imperial')) {
-            return {
-              ...layer,
-              layout: {
-                ...layer.layout,
-                visibility: (unitSystem === 'imperial' ? 'visible' : 'none') as 'visible' | 'none',
-              },
-            };
-          }
-          return layer;
+          const visibility = getLayerVisibility(layer.id);
+          if (visibility === null) return layer;
+          
+          return {
+            ...layer,
+            layout: {
+              ...layer.layout,
+              visibility,
+            },
+          };
         });
+
+        // Handle 3D terrain for all styles
+        let baseStyle = {
+          ...newStyle,
+          layers: updatedLayers,
+          terrain: this.terrainEnabled ? newStyle.terrain : undefined,
+        };
 
         if (style == MapStyle.Terrain) {
           // Apply contour layers to new style
@@ -229,7 +263,7 @@ export class Map {
           ];
 
           // Modify terrain source if it exists to use the same demSource to avoid double loading
-          const updatedSources = { ...newStyle.sources };
+          const updatedSources = { ...baseStyle.sources };
           if (
             updatedSources.terrain &&
             updatedSources.terrain.type === "raster-dem"
@@ -240,9 +274,9 @@ export class Map {
             };
           }
 
-          // Add contours source to the new style
-          const modifiedStyle = {
-            ...newStyle,
+          // Add contour layers to the terrain style
+          baseStyle = {
+            ...baseStyle,
             sources: {
               ...updatedSources,
               contours: {
@@ -252,7 +286,7 @@ export class Map {
               },
             },
             layers: [
-              ...updatedLayers,
+              ...baseStyle.layers,
               {
                 id: "contour-lines",
                 type: "line" as const,
@@ -293,15 +327,9 @@ export class Map {
               },
             ],
           };
-
-          return modifiedStyle;
         }
-        
-        // For non-terrain styles, still apply unit-based layer visibility
-        return {
-          ...newStyle,
-          layers: updatedLayers,
-        };
+
+        return baseStyle;
       },
     });
   };
