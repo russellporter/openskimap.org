@@ -61,7 +61,6 @@ export class Map {
     this.mapScaleControl = new maplibregl.ScaleControl({
       maxWidth: 80,
     });
-    this.map.setMaxPitch(90);
 
     this.map.addControl(this.searchBarControl);
     this.map.addControl(this.mapScaleControl, "bottom-left");
