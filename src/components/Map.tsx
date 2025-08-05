@@ -125,9 +125,25 @@ export class Map {
 
       if (shouldEnableTerrain !== this.terrainEnabled) {
         this.terrainEnabled = shouldEnableTerrain;
-        // Re-apply current style to update terrain state
-        if (this.currentStyle) {
-          this.setStyle(this.currentStyle);
+        
+        // Update terrain directly without reloading style
+        if (shouldEnableTerrain) {
+          // Enable 3D terrain
+          const terrainSource = this.map.getSource("terrain");
+          if (terrainSource) {
+            this.map.setTerrain({ source: "terrain" });
+          }
+        } else {
+          // Disable 3D terrain
+          this.map.setTerrain(null);
+        }
+        
+        // Update building layer visibility directly
+        if (this.map.getLayer("building-3d")) {
+          this.map.setLayoutProperty("building-3d", "visibility", shouldEnableTerrain ? "visible" : "none");
+        }
+        if (this.map.getLayer("building-top")) {
+          this.map.setLayoutProperty("building-top", "visibility", shouldEnableTerrain ? "none" : "visible");
         }
       }
     });
