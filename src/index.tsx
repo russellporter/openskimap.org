@@ -18,7 +18,6 @@ import * as Config from "./Config";
 import "./index.css";
 
 function initialize() {
-  registerServiceWorker();
 
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
   const aboutRoot = ReactDOM.createRoot(
@@ -160,23 +159,3 @@ function initialize() {
 
 window.addEventListener("load", initialize);
 
-async function registerServiceWorker(): Promise<void> {
-  // Check that service workers are supported
-  if ("serviceWorker" in navigator) {
-    if (Config.ENABLE_SERVICE_WORKER) {
-      navigator.serviceWorker
-        .register("/service-worker.js")
-        .then((registration) => {
-          console.log("SW registered: ", registration);
-        })
-        .catch((registrationError) => {
-          console.log("SW registration failed: ", registrationError);
-        });
-    } else {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      registrations.forEach(
-        async (registration) => await registration.unregister()
-      );
-    }
-  }
-}

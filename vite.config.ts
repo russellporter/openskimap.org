@@ -16,12 +16,6 @@ export default defineConfig({
     }),
   ],
 
-  // Define global constants
-  define: {
-    ENABLE_SERVICE_WORKER: JSON.stringify(
-      process.env.NODE_ENV === "production"
-    ),
-  },
 
   // Development server configuration
   server: {
