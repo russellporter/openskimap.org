@@ -170,9 +170,32 @@ export class Map {
     this.currentStyle = style;
     this.map.setStyle(MAP_STYLE_URLS[style], {
       transformStyle: (_, newStyle) => {
+        const unitSystem = getUnitSystem_NonReactive();
+        
+        // Show/hide layers based on unit system
+        const updatedLayers = newStyle.layers.map((layer) => {
+          if (layer.id.endsWith('-metric')) {
+            return {
+              ...layer,
+              layout: {
+                ...layer.layout,
+                visibility: (unitSystem === 'metric' ? 'visible' : 'none') as 'visible' | 'none',
+              },
+            };
+          } else if (layer.id.endsWith('-imperial')) {
+            return {
+              ...layer,
+              layout: {
+                ...layer.layout,
+                visibility: (unitSystem === 'imperial' ? 'visible' : 'none') as 'visible' | 'none',
+              },
+            };
+          }
+          return layer;
+        });
+
         if (style == MapStyle.Terrain) {
           // Apply contour layers to new style
-          const unitSystem = getUnitSystem_NonReactive();
 
           if (!this.demSource) {
             this.demSource = new mlcontour.DemSource({
@@ -229,7 +252,7 @@ export class Map {
               },
             },
             layers: [
-              ...newStyle.layers,
+              ...updatedLayers,
               {
                 id: "contour-lines",
                 type: "line" as const,
@@ -273,7 +296,12 @@ export class Map {
 
           return modifiedStyle;
         }
-        return newStyle;
+        
+        // For non-terrain styles, still apply unit-based layer visibility
+        return {
+          ...newStyle,
+          layers: updatedLayers,
+        };
       },
     });
   };
