@@ -12,6 +12,21 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) =>
+              url.origin === "https://tiles.openskimap.org" ||
+              url.origin === "https://tiles.openfreemap.org",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "tiles-cache",
+              expiration: {
+                maxEntries: 50000,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
+        ],
       },
     }),
   ],
