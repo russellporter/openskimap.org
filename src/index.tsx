@@ -83,12 +83,14 @@ function initialize() {
 
     if (changes.mapStyle !== undefined) {
       map.setStyle(state.mapStyle);
+      localStorage.setItem("mapStyle", state.mapStyle);
     }
 
     if (changes.mapStyleOverlay !== undefined) {
       map.toggleSlopeTerrainOverlay(
         state.mapStyleOverlay === MapStyleOverlay.Slope
       );
+      localStorage.setItem("mapStyleOverlay", state.mapStyleOverlay ? state.mapStyleOverlay : "null");
     }
 
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {

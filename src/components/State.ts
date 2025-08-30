@@ -37,6 +37,22 @@ export interface StateChanges {
 }
 
 export function getInitialState(): State {
+  // Load saved map style from localStorage, default to Terrain
+  const savedMapStyle = localStorage.getItem("mapStyle") as MapStyle;
+  const mapStyle = savedMapStyle && Object.values(MapStyle).includes(savedMapStyle) 
+    ? savedMapStyle 
+    : MapStyle.Terrain;
+
+  // Load saved overlay from localStorage, default to Slope
+  const savedOverlay = localStorage.getItem("mapStyleOverlay");
+  let mapStyleOverlay: MapStyleOverlay | null = MapStyleOverlay.Slope;
+  
+  if (savedOverlay === "null" || savedOverlay === null) {
+    mapStyleOverlay = null;
+  } else if (savedOverlay && Object.values(MapStyleOverlay).includes(savedOverlay as MapStyleOverlay)) {
+    mapStyleOverlay = savedOverlay as MapStyleOverlay;
+  }
+
   return {
     sidebarOpen: false,
     aboutInfoOpen: false,
@@ -44,8 +60,8 @@ export function getInitialState(): State {
     settingsOpen: false,
     layersOpen: false,
     mapFiltersOpen: false,
-    mapStyle: MapStyle.Terrain,
-    mapStyleOverlay: MapStyleOverlay.Slope,
+    mapStyle,
+    mapStyleOverlay,
     mapFilters: defaultMapFilters,
     info: null,
     markers: [],
