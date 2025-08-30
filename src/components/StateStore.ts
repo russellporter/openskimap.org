@@ -1,6 +1,6 @@
 import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
-import { MapStyle } from "../MapStyle";
+import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import EventBus from "./EventBus";
 import { InfoData } from "./InfoData";
 import State, { StateChanges } from "./State";
@@ -56,8 +56,20 @@ export default class StateStore implements EventBus {
     this.update({ settingsOpen: false });
   };
 
+  openLayers = () => {
+    this.update({ layersOpen: true });
+  };
+
+  closeLayers = () => {
+    this.update({ layersOpen: false });
+  };
+
   setMapStyle = (style: MapStyle) => {
     this.update({ mapStyle: style });
+  };
+
+  setMapStyleOverlay = (overlay: MapStyleOverlay | null) => {
+    this.update({ mapStyleOverlay: overlay });
   };
 
   setUnitSystem = (unitSystem: UnitSystem) => {

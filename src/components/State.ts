@@ -1,6 +1,6 @@
 import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
-import { MapStyle } from "../MapStyle";
+import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { InfoData } from "./InfoData";
 import { getUnitSystem_NonReactive } from "./UnitSystemManager";
 import * as UnitHelpers from "./utils/UnitHelpers";
@@ -10,8 +10,10 @@ export default interface State {
   aboutInfoOpen: boolean;
   legalOpen: boolean;
   settingsOpen: boolean;
+  layersOpen: boolean;
   mapFiltersOpen: boolean;
   mapStyle: MapStyle;
+  mapStyleOverlay: MapStyleOverlay | null;
   mapFilters: MapFilters;
   info: InfoData | null;
   markers: MapMarker[];
@@ -23,8 +25,10 @@ export interface StateChanges {
   aboutInfoOpen?: boolean;
   legalOpen?: boolean;
   settingsOpen?: boolean;
+  layersOpen?: boolean;
   mapFiltersOpen?: boolean;
   mapStyle?: MapStyle;
+  mapStyleOverlay?: MapStyleOverlay | null;
   mapFilters?: MapFilters;
   info?: InfoData | null;
   markers?: MapMarker[];
@@ -38,8 +42,10 @@ export function getInitialState(): State {
     aboutInfoOpen: false,
     legalOpen: false,
     settingsOpen: false,
+    layersOpen: false,
     mapFiltersOpen: false,
     mapStyle: MapStyle.Terrain,
+    mapStyleOverlay: MapStyleOverlay.Slope,
     mapFilters: defaultMapFilters,
     info: null,
     markers: [],

@@ -108,9 +108,6 @@ export class Map {
     this.slopeRenderer = new SlopeTerrainRenderer(this.demSource);
     this.slopeRenderer?.registerSlopeProtocol();
 
-    // Enable slope terrain overlay by default if WebGL 2 is supported
-    this.slopeTerrainEnabled = this.slopeRenderer.checkSupport();
-
     // Check if map starts with tilt and enable terrain if so
     const initialPitch = this.map.getPitch();
     if (initialPitch > 0) {
@@ -499,5 +496,9 @@ export class Map {
 
   getSlopeTerrainEnabled = (): boolean => {
     return this.slopeTerrainEnabled;
+  };
+
+  addControl = (control: maplibregl.IControl, position?: string) => {
+    this.map.addControl(control, position as maplibregl.ControlPosition);
   };
 }

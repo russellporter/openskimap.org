@@ -3,6 +3,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import * as ReactDOM from "react-dom/client";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
+import { LayersControl } from "./components/LayersControl";
+import { LayersModal } from "./components/LayersModal";
 import { LegalModal } from "./components/LegalModal";
 import { Map } from "./components/Map";
 import { SettingsModal } from "./components/SettingsModal";
@@ -14,6 +16,7 @@ import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
 import "./index.css";
+import { MapStyleOverlay } from "./MapStyle";
 
 function initialize() {
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
@@ -25,6 +28,9 @@ function initialize() {
   );
   const settingsRoot = ReactDOM.createRoot(
     document.getElementById("settings-modal")!
+  );
+  const layersRoot = ReactDOM.createRoot(
+    document.getElementById("layers-modal")!
   );
 
   const store = new StateStore(getInitialState(), update);
@@ -55,6 +61,10 @@ function initialize() {
 
   const map = new Map(center, zoom, "map", store);
 
+  // Add layers control to map
+  const layersControl = new LayersControl(store);
+  map.addControl(layersControl);
+
   store.editMapHandler = () => {
     editMap(map);
   };
@@ -73,6 +83,12 @@ function initialize() {
 
     if (changes.mapStyle !== undefined) {
       map.setStyle(state.mapStyle);
+    }
+
+    if (changes.mapStyleOverlay !== undefined) {
+      map.toggleSlopeTerrainOverlay(
+        state.mapStyleOverlay === MapStyleOverlay.Slope
+      );
     }
 
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
@@ -113,6 +129,23 @@ function initialize() {
             eventBus={store}
             open={state.settingsOpen}
             unitSystem={state.unitSystem}
+          />
+        </Themed>
+      );
+    }
+
+    if (
+      changes.layersOpen !== undefined ||
+      changes.mapStyle !== undefined ||
+      changes.mapStyleOverlay !== undefined
+    ) {
+      layersRoot.render(
+        <Themed>
+          <LayersModal
+            eventBus={store}
+            open={state.layersOpen}
+            currentMapStyle={state.mapStyle}
+            currentMapStyleOverlay={state.mapStyleOverlay}
           />
         </Themed>
       );
