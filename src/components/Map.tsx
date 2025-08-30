@@ -362,6 +362,7 @@ export class Map {
                   "text-halo-width": 1,
                 },
                 layout: {
+                  "symbol-spacing": 200,
                   "symbol-placement": "line" as const,
                   "text-anchor": "center" as const,
                   "text-size": 10,
