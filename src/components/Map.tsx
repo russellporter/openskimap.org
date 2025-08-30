@@ -13,6 +13,7 @@ import MapFilterManager from "./MapFilterManager";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
 import { panToZoomLevel } from "./SkiAreaInfo";
+import { SlopeTerrainRenderer } from "./SlopeTerrainRenderer";
 import {
   addUnitSystemChangeListener_NonReactive,
   getUnitSystem_NonReactive,
@@ -33,11 +34,13 @@ export class Map {
 
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
-  private demSource: InstanceType<typeof mlcontour.DemSource> | null = null;
+  private demSource: InstanceType<typeof mlcontour.DemSource>;
   private esriAttribution: EsriAttribution | null = null;
   private attributionControl: maplibregl.AttributionControl;
   private currentStyle: MapStyle | null = null;
   private terrainEnabled = false;
+  private slopeTerrainEnabled = false;
+  private slopeRenderer: SlopeTerrainRenderer | null = null;
 
   constructor(
     center: maplibregl.LngLatLike,
@@ -90,6 +93,23 @@ export class Map {
       }),
       "bottom-right"
     );
+
+    this.demSource = new mlcontour.DemSource({
+      url: "https://tiles.openskimap.org/dynamic/data/merged-terrain/{z}/{x}/{y}.webp",
+      encoding: "mapbox",
+      maxzoom: 16,
+      worker: true,
+      cacheSize: 100,
+      timeoutMs: 10000,
+    });
+
+    this.demSource.setupMaplibre(maplibregl);
+    // Initialize slope terrain renderer early
+    this.slopeRenderer = new SlopeTerrainRenderer(this.demSource);
+    this.slopeRenderer?.registerSlopeProtocol();
+
+    // Enable slope terrain overlay by default if WebGL 2 is supported
+    this.slopeTerrainEnabled = this.slopeRenderer.checkSupport();
 
     // Check if map starts with tilt and enable terrain if so
     const initialPitch = this.map.getPitch();
@@ -258,22 +278,20 @@ export class Map {
           terrain: this.terrainEnabled ? newStyle.terrain : undefined,
         };
 
+        // Modify terrain source if it exists to use the same demSource to avoid double loading
+        const updatedSources = { ...baseStyle.sources };
+        if (
+          updatedSources.terrain &&
+          updatedSources.terrain.type === "raster-dem"
+        ) {
+          updatedSources.terrain = {
+            ...updatedSources.terrain,
+            tiles: [this.demSource.sharedDemProtocolUrl],
+          };
+        }
+
         if (style == MapStyle.Terrain) {
           // Apply contour layers to new style
-
-          if (!this.demSource) {
-            this.demSource = new mlcontour.DemSource({
-              url: "https://tiles.openskimap.org/dynamic/data/merged-terrain/{z}/{x}/{y}.webp",
-              encoding: "mapbox",
-              maxzoom: 16,
-              worker: true,
-              cacheSize: 100,
-              timeoutMs: 10000,
-            });
-
-            this.demSource.setupMaplibre(maplibregl);
-          }
-
           // Create contour tiles with current unit system
           const contourTiles = [
             this.demSource.contourProtocolUrl({
@@ -291,18 +309,6 @@ export class Map {
               levelKey: "level",
             }),
           ];
-
-          // Modify terrain source if it exists to use the same demSource to avoid double loading
-          const updatedSources = { ...baseStyle.sources };
-          if (
-            updatedSources.terrain &&
-            updatedSources.terrain.type === "raster-dem"
-          ) {
-            updatedSources.terrain = {
-              ...updatedSources.terrain,
-              tiles: [this.demSource.sharedDemProtocolUrl],
-            };
-          }
 
           // Hillshade is defined as a separate source than the 3d terrain (see https://github.com/maplibre/maplibre-gl-js/issues/2035 for details)
           if (
@@ -368,6 +374,35 @@ export class Map {
               },
             ],
           };
+        }
+
+        // Add slope terrain overlay if enabled
+        if (this.slopeTerrainEnabled && this.slopeRenderer?.checkSupport()) {
+          // Add slope terrain source if not present
+          if (!baseStyle.sources["slope-terrain"]) {
+            baseStyle.sources["slope-terrain"] = {
+              type: "raster",
+              tiles: [`slope-terrain://${this.demSource.sharedDemProtocolUrl}`],
+              tileSize: 512,
+              minzoom: 5,
+              maxzoom: 16,
+            };
+          }
+
+          // Add slope terrain layer after the park layer
+          const baseIndex = baseStyle.layers.findIndex(
+            (layer) => layer.id === "park" || layer.id === "satellite"
+          );
+          const insertIndex =
+            baseIndex >= 0 ? baseIndex + 1 : baseStyle.layers.length;
+          baseStyle.layers.splice(insertIndex, 0, {
+            id: "slope-terrain-overlay",
+            type: "raster",
+            source: "slope-terrain",
+            paint: {
+              "raster-opacity": 0.7,
+            },
+          });
         }
 
         return baseStyle;
@@ -436,4 +471,33 @@ export class Map {
     1000,
     this.updateVisibleSkiAreasCountUnthrottled
   );
+
+  toggleSlopeTerrainOverlay = (enabled?: boolean) => {
+    this.waitForMapLoaded(() => {
+      // Toggle if no explicit value provided
+      const shouldEnable =
+        enabled !== undefined ? enabled : !this.slopeTerrainEnabled;
+
+      if (shouldEnable === this.slopeTerrainEnabled) {
+        return; // No change needed
+      }
+
+      // Check if WebGL 2 is supported
+      if (shouldEnable && !this.slopeRenderer?.checkSupport()) {
+        console.error("Slope terrain rendering requires WebGL 2 support");
+        return;
+      }
+
+      this.slopeTerrainEnabled = shouldEnable;
+
+      // Refresh the style to add/remove the slope terrain layer
+      if (this.currentStyle !== null) {
+        this.setStyle(this.currentStyle);
+      }
+    });
+  };
+
+  getSlopeTerrainEnabled = (): boolean => {
+    return this.slopeTerrainEnabled;
+  };
 }

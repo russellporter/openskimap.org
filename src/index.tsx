@@ -1,6 +1,5 @@
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
@@ -14,11 +13,9 @@ import { Themed } from "./components/Themed";
 import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
-import * as Config from "./Config";
 import "./index.css";
 
 function initialize() {
-
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
   const aboutRoot = ReactDOM.createRoot(
     document.getElementById("about-modal")!
@@ -158,4 +155,3 @@ function initialize() {
 }
 
 window.addEventListener("load", initialize);
-
