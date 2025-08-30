@@ -1,6 +1,7 @@
 import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
+import { Track } from "../utils/TrackParser";
 import { InfoData } from "./InfoData";
 import { UnitSystem } from "./utils/UnitHelpers";
 
@@ -24,6 +25,8 @@ export default interface EventBus {
   setMinimumVertical(vertical: number): void;
   setMinimumRunLength(runLength: number): void;
   addMarker(marker: MapMarker): void;
+  addTrack(track: Track): void;
+  removeTrack(trackId: string): void;
   showInfo(info: InfoData): void;
   hideInfo(): void;
   showFilters(): void;

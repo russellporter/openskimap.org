@@ -1,7 +1,9 @@
-import { Dialog, FormControlLabel, Radio, RadioGroup, Switch, Typography } from "@mui/material";
+import { Button, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, Switch, Typography } from "@mui/material";
+import { Close as CloseIcon, Upload as UploadIcon } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import * as React from "react";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
+import { Track, readGpxFile } from "../utils/TrackParser";
 import EventBus from "./EventBus";
 import { ModalHeader } from "./ModalHeader";
 
@@ -10,9 +12,13 @@ export interface LayersModalProps {
   eventBus: EventBus;
   currentMapStyle: MapStyle;
   currentMapStyleOverlay: MapStyleOverlay | null;
+  tracks: Track[];
 }
 
 export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) => {
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const handleMapStyleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newStyle = event.target.value as MapStyle;
     props.eventBus.setMapStyle(newStyle);
@@ -21,6 +27,39 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
   const handleSlopeOverlayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const enabled = event.target.checked;
     props.eventBus.setMapStyleOverlay(enabled ? MapStyleOverlay.Slope : null);
+  };
+
+  const handleGpxFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.gpx')) {
+      alert('Please select a GPX file');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const track = await readGpxFile(file);
+      props.eventBus.addTrack(track);
+    } catch (error) {
+      console.error('Error parsing GPX file:', error);
+      alert(error instanceof Error ? error.message : 'Failed to parse GPX file');
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveTrack = (trackId: string) => {
+    props.eventBus.removeTrack(trackId);
+  };
+
+  const handleGpxUploadClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -73,6 +112,77 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
             label="Slope"
             sx={{ pl: 1 }}
           />
+        </Box>
+
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="subtitle1" sx={{ mb: 2 }}>
+            GPX Tracks
+          </Typography>
+          
+          {props.tracks.length > 0 && (
+            <Box sx={{ mb: 2, pl: 1 }}>
+              {props.tracks.map((track) => (
+                <Box
+                  key={track.id}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 1,
+                    p: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    bgcolor: 'background.paper'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        bgcolor: track.color,
+                        flexShrink: 0
+                      }}
+                    />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {track.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      ({track.lengthKm} km)
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveTrack(track.id)}
+                    sx={{ ml: 1 }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          <Box sx={{ pl: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<UploadIcon />}
+              onClick={handleGpxUploadClick}
+              disabled={isUploading}
+              size="small"
+            >
+              {isUploading ? 'Uploading...' : 'Add GPX Track'}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".gpx"
+              onChange={handleGpxFileUpload}
+              style={{ display: 'none' }}
+            />
+          </Box>
         </Box>
       </Box>
     </Dialog>

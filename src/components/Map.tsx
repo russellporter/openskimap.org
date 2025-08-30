@@ -4,6 +4,7 @@ import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
 import { MapMarker } from "../MapMarker";
 import { MAP_STYLE_URLS, MapStyle } from "../MapStyle";
+import { Track } from "../utils/TrackParser";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
@@ -28,6 +29,7 @@ export class Map {
   private filterControl: FilterControl;
   private searchBarControl: SearchBarControl;
   private markers: maplibregl.Marker[];
+  private tracks: Track[] = [];
   private loaded = false;
   private filtersVisible = false;
   private mapScaleControl: maplibregl.ScaleControl;
@@ -403,6 +405,44 @@ export class Map {
           });
         }
 
+        // Add track layers
+        this.tracks.forEach((track) => {
+          const sourceId = `track-${track.id}`;
+          const layerId = `track-line-${track.id}`;
+          
+          // Add track source
+          baseStyle.sources[sourceId] = {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {
+                name: track.name,
+                color: track.color
+              },
+              geometry: {
+                type: 'LineString',
+                coordinates: track.coordinates
+              }
+            }
+          };
+
+          // Add track layer
+          baseStyle.layers.push({
+            id: layerId,
+            type: 'line',
+            source: sourceId,
+            paint: {
+              'line-color': track.color,
+              'line-width': 3,
+              'line-opacity': 0.8
+            },
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round'
+            }
+          });
+        });
+
         return baseStyle;
       },
     });
@@ -497,6 +537,16 @@ export class Map {
 
   getSlopeTerrainEnabled = (): boolean => {
     return this.slopeTerrainEnabled;
+  };
+
+  setTracks = (tracks: Track[]) => {
+    this.tracks = tracks;
+    this.waitForMapLoaded(() => {
+      // Trigger style refresh to update track layers
+      if (this.currentStyle !== null) {
+        this.setStyle(this.currentStyle);
+      }
+    });
   };
 
   addControl = (control: maplibregl.IControl, position?: string) => {

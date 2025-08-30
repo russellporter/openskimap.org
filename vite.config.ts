@@ -16,7 +16,8 @@ export default defineConfig({
           {
             urlPattern: ({ url }) =>
               url.origin === "https://tiles.openskimap.org" ||
-              url.origin === "https://tiles.openfreemap.org",
+              url.origin === "https://tiles.openfreemap.org" ||
+              url.origin === "https://services.arcgisonline.com",
             handler: "CacheFirst",
             options: {
               cacheName: "tiles-cache",

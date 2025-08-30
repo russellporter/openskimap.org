@@ -72,6 +72,9 @@ function initialize() {
   store.urlUpdate(getURLState());
 
   update(store._state, store._state);
+  
+  // Initialize tracks on the map
+  map.setTracks(store._state.tracks);
 
   function update(state: State, changes: StateChanges) {
     updateURL({
@@ -139,7 +142,8 @@ function initialize() {
     if (
       changes.layersOpen !== undefined ||
       changes.mapStyle !== undefined ||
-      changes.mapStyleOverlay !== undefined
+      changes.mapStyleOverlay !== undefined ||
+      changes.tracks !== undefined
     ) {
       layersRoot.render(
         <Themed>
@@ -148,6 +152,7 @@ function initialize() {
             open={state.layersOpen}
             currentMapStyle={state.mapStyle}
             currentMapStyleOverlay={state.mapStyleOverlay}
+            tracks={state.tracks}
           />
         </Themed>
       );
@@ -179,6 +184,11 @@ function initialize() {
 
     if (changes.unitSystem !== undefined) {
       setUnitSystem(changes.unitSystem);
+    }
+
+    if (changes.tracks !== undefined) {
+      localStorage.setItem("tracks", JSON.stringify(state.tracks));
+      map.setTracks(state.tracks);
     }
   }
 

@@ -1,6 +1,7 @@
 import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
+import { Track } from "../utils/TrackParser";
 import EventBus from "./EventBus";
 import { InfoData } from "./InfoData";
 import State, { StateChanges } from "./State";
@@ -152,6 +153,16 @@ export default class StateStore implements EventBus {
       latestMarker: marker,
     });
   }
+
+  addTrack = (track: Track) => {
+    const newTracks = [...this._state.tracks, track];
+    this.update({ tracks: newTracks });
+  };
+
+  removeTrack = (trackId: string) => {
+    const newTracks = this._state.tracks.filter(track => track.id !== trackId);
+    this.update({ tracks: newTracks });
+  };
 
   showFilters = () => {
     this.update({ mapFiltersOpen: true });

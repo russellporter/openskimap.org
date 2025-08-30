@@ -1,6 +1,7 @@
 import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
+import { Track } from "../utils/TrackParser";
 import { InfoData } from "./InfoData";
 import { getUnitSystem_NonReactive } from "./UnitSystemManager";
 import * as UnitHelpers from "./utils/UnitHelpers";
@@ -17,6 +18,7 @@ export default interface State {
   mapFilters: MapFilters;
   info: InfoData | null;
   markers: MapMarker[];
+  tracks: Track[];
   unitSystem: UnitHelpers.UnitSystem;
 }
 
@@ -33,6 +35,7 @@ export interface StateChanges {
   info?: InfoData | null;
   markers?: MapMarker[];
   latestMarker?: MapMarker;
+  tracks?: Track[];
   unitSystem?: UnitHelpers.UnitSystem;
 }
 
@@ -53,6 +56,18 @@ export function getInitialState(): State {
     mapStyleOverlay = savedOverlay as MapStyleOverlay;
   }
 
+  // Load saved tracks from localStorage
+  const savedTracks = localStorage.getItem("tracks");
+  let tracks: Track[] = [];
+  if (savedTracks) {
+    try {
+      tracks = JSON.parse(savedTracks);
+    } catch (e) {
+      // If parsing fails, start with empty array
+      tracks = [];
+    }
+  }
+
   return {
     sidebarOpen: false,
     aboutInfoOpen: false,
@@ -65,6 +80,7 @@ export function getInitialState(): State {
     mapFilters: defaultMapFilters,
     info: null,
     markers: [],
+    tracks,
     unitSystem: getUnitSystem_NonReactive(),
   };
 }
