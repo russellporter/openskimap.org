@@ -20,6 +20,7 @@ export default interface State {
   markers: MapMarker[];
   tracks: Track[];
   unitSystem: UnitHelpers.UnitSystem;
+  sunExposureDate: Date;
 }
 
 export interface StateChanges {
@@ -37,6 +38,7 @@ export interface StateChanges {
   latestMarker?: MapMarker;
   tracks?: Track[];
   unitSystem?: UnitHelpers.UnitSystem;
+  sunExposureDate?: Date;
 }
 
 export function getInitialState(): State {
@@ -68,6 +70,30 @@ export function getInitialState(): State {
     }
   }
 
+  // Load saved sun exposure date from localStorage, default to January 15th for winter skiing
+  const savedSunExposureDate = localStorage.getItem("sunExposureDate");
+  let sunExposureDate: Date;
+  
+  if (savedSunExposureDate) {
+    try {
+      sunExposureDate = new Date(savedSunExposureDate);
+      // Validate the date
+      if (isNaN(sunExposureDate.getTime())) {
+        throw new Error("Invalid date");
+      }
+    } catch (e) {
+      // If parsing fails, use default
+      sunExposureDate = new Date();
+      sunExposureDate.setMonth(0); // January
+      sunExposureDate.setDate(15);
+    }
+  } else {
+    // Default to January 15th for winter skiing
+    sunExposureDate = new Date();
+    sunExposureDate.setMonth(0); // January
+    sunExposureDate.setDate(15);
+  }
+
   return {
     sidebarOpen: false,
     aboutInfoOpen: false,
@@ -82,5 +108,6 @@ export function getInitialState(): State {
     markers: [],
     tracks,
     unitSystem: getUnitSystem_NonReactive(),
+    sunExposureDate,
   };
 }

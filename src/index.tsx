@@ -93,6 +93,11 @@ function initialize() {
       localStorage.setItem("mapStyleOverlay", state.mapStyleOverlay ? state.mapStyleOverlay : "null");
     }
 
+    if (changes.sunExposureDate !== undefined) {
+      map.setSunExposureDate(state.sunExposureDate);
+      localStorage.setItem("sunExposureDate", state.sunExposureDate.toISOString());
+    }
+
     if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
       sidebarRoot.render(
         <Themed>
@@ -140,7 +145,8 @@ function initialize() {
       changes.layersOpen !== undefined ||
       changes.mapStyle !== undefined ||
       changes.mapStyleOverlay !== undefined ||
-      changes.tracks !== undefined
+      changes.tracks !== undefined ||
+      changes.sunExposureDate !== undefined
     ) {
       layersRoot.render(
         <Themed>
@@ -150,6 +156,7 @@ function initialize() {
             currentMapStyle={state.mapStyle}
             currentMapStyleOverlay={state.mapStyleOverlay}
             tracks={state.tracks}
+            sunExposureDate={state.sunExposureDate}
           />
         </Themed>
       );

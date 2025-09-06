@@ -385,9 +385,18 @@ export class Map {
           // Add slope terrain source with style parameter
           const sourceName = `slope-terrain-${this.currentSlopeOverlay}`;
           if (!baseStyle.sources[sourceName]) {
+            // Include date in URL for SunExposure style to enable proper caching
+            let tileUrl = `slope-terrain://${this.currentSlopeOverlay}`;
+            if (this.currentSlopeOverlay === MapStyleOverlay.SunExposure && this.slopeRenderer?.sunExposureDate) {
+              const date = this.slopeRenderer.sunExposureDate;
+              const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 1).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              tileUrl += `/${dayOfYear}`;
+            }
+            tileUrl += `/${this.demSource.sharedDemProtocolUrl}`;
+            
             baseStyle.sources[sourceName] = {
               type: "raster",
-              tiles: [`slope-terrain://${this.currentSlopeOverlay}/${this.demSource.sharedDemProtocolUrl}`],
+              tiles: [tileUrl],
               tileSize: 512,
               minzoom: 5,
               maxzoom: 16,
@@ -542,6 +551,16 @@ export class Map {
 
   getCurrentSlopeOverlay = (): MapStyleOverlay | null => {
     return this.currentSlopeOverlay;
+  };
+
+  setSunExposureDate = (date: Date) => {
+    if (this.slopeRenderer) {
+      this.slopeRenderer.sunExposureDate = date;
+      // If sun exposure overlay is active, refresh the style
+      if (this.currentSlopeOverlay === MapStyleOverlay.SunExposure && this.currentStyle !== null) {
+        this.setStyle(this.currentStyle);
+      }
+    }
   };
 
   setTracks = (tracks: Track[]) => {

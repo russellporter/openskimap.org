@@ -19,6 +19,7 @@ export default interface EventBus {
   closeLayers(): void;
   setMapStyle(style: MapStyle): void;
   setMapStyleOverlay(overlay: MapStyleOverlay | null): void;
+  setSunExposureDate(date: Date): void;
   setUnitSystem(unitSystem: UnitSystem): void;
   toggleActivity(activity: SkiAreaActivity): void;
   setMinimumElevation(elevation: number): void;

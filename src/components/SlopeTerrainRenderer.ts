@@ -93,6 +93,10 @@ export class SlopeTerrainRenderer {
   private isSupported: boolean = false;
   private demSource: InstanceType<typeof mlcontour.DemSource>;
   private texturePool: TexturePool | null = null;
+  public sunExposureDate: Date = new Date(new Date().getFullYear(), 0, 15); // Default Jan 15
+  
+  // Coarse terrain zoom level for extended shadow casting
+  private static readonly COARSE_TERRAIN_ZOOM = 7;
 
   private vertexShaderSource = `#version 300 es
     in vec2 a_position;
@@ -201,11 +205,15 @@ export class SlopeTerrainRenderer {
     out vec4 fragColor;
     
     uniform sampler2D u_texture;
+    uniform sampler2D u_lowResTexture;
     uniform float u_zoomLevel;
     uniform float u_latitude;
     uniform float u_longitude;
     uniform int u_difficultyConvention;
     uniform int u_style;
+    uniform float u_dayOfYear;
+    uniform float u_lowResScale;
+    uniform vec2 u_lowResOffset;
     in vec2 v_texCoord;
     `;
 
@@ -283,6 +291,197 @@ export class SlopeTerrainRenderer {
       }
       
       return sampleCount > 0 ? slopeSum / float(sampleCount) : 0.0;
+    }
+    
+    // Calculate sun exposure hours for a given slope
+    vec3 calculateSunExposure(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters, float latitude, float longitude) {
+      // Calculate gradients for slope normal
+      float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
+      float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
+      float e = texture(u_texture, adjustedTexCoord + vec2(texelSize.x, 0.0)).r;
+      float w = texture(u_texture, adjustedTexCoord + vec2(-texelSize.x, 0.0)).r;
+      
+      // Check if any neighboring pixels are invalid
+      if (n < -9999.0) n = centerHeight;
+      if (s < -9999.0) s = centerHeight;
+      if (e < -9999.0) e = centerHeight;
+      if (w < -9999.0) w = centerHeight;
+      
+      // Calculate gradients in map coordinates
+      // Map/World coordinates: X=east, Y=north, Z=up
+      // Texture coordinates: X=east (same), Y increases south (opposite of north)
+      
+      // Height gradients:
+      float dz_dx = (e - w) / (2.0 * pixelSizeMeters);  // Change in height going east
+      float dz_dy_texture = (s - n) / (2.0 * pixelSizeMeters);  // Change in height going south (texture Y)
+      
+      // Convert to world coordinates where Y=north
+      // Going north means going opposite to texture Y, so flip sign
+      float dz_dy_world = -dz_dy_texture;  // Change in height going north
+      
+      // Surface normal using gradient: normal = normalize(-dz/dx, -dz/dy, 1)
+      // This gives the outward-pointing normal from the surface
+      vec3 slopeNormal = normalize(vec3(-dz_dx, -dz_dy_world, 1.0));
+      
+      // Parameters for sun calculation
+      float declination = -23.45 * cos(radians(360.0 * (u_dayOfYear + 10.0) / 365.0)); // Solar declination
+      float latRad = radians(latitude);
+      float decRad = radians(declination);
+      
+      // Sample sun positions throughout the day and accumulate sun exposure score
+      float totalSunScore = 0.0;
+      int samples = 48; // Check every 30 minutes
+      
+      // Always sample the full day, even in polar regions
+      for (int i = 0; i < samples; i++) {
+        // Hour angle from -π to π (sunrise to sunset)
+        float hourAngle = -radians(180.0) + float(i) * radians(360.0) / float(samples - 1);
+        
+        // Calculate sun position
+        float sunAltitude = asin(sin(latRad) * sin(decRad) + cos(latRad) * cos(decRad) * cos(hourAngle));
+        
+        // Skip if sun is below horizon
+        if (sunAltitude <= 0.0) continue;
+        
+        // Calculate sun azimuth (angle from north, clockwise)
+        // Using standard solar azimuth formula
+        float cosAz = (sin(decRad) - sin(sunAltitude) * sin(latRad)) / (cos(sunAltitude) * cos(latRad));
+        cosAz = clamp(cosAz, -1.0, 1.0); // Ensure valid input for acos
+        float sunAzimuth = acos(cosAz);
+        
+        // Adjust azimuth based on hour angle (morning vs afternoon)
+        if (hourAngle > 0.0) {
+          sunAzimuth = radians(360.0) - sunAzimuth; // Afternoon: west of south
+        }
+        
+        // Convert sun position to cartesian vector
+        // X = east, Y = north, Z = up
+        vec3 sunVector = vec3(
+          cos(sunAltitude) * sin(sunAzimuth),   // East component
+          cos(sunAltitude) * cos(sunAzimuth),   // North component  
+          sin(sunAltitude)                       // Up component
+        );
+        
+        // Calculate sun exposure score based on angle between slope normal and sun direction
+        // dot(slopeNormal, sunVector) gives:
+        //   1.0 when slope is perpendicular to sun (maximum exposure)
+        //   0.0 when slope is parallel to sun (no direct exposure)
+        //   negative when slope faces away from sun (no exposure)
+        float dotProduct = dot(slopeNormal, sunVector);
+        
+        // Only count positive contributions (when slope faces the sun)
+        if (dotProduct > 0.0) {
+          // Aggressive terrain shadowing - check for blocking terrain
+          bool inShadow = false;
+          
+          // Check shadows for any sun above horizon
+          if (sunAltitude > radians(5.0)) {
+            // Aggressive shadow parameters - use absolute distances, not pixel-relative
+            int shadowSteps = 15; // Many steps for thorough checking
+            float baseStepSize = 50.0; // Fixed 50m steps regardless of zoom level
+            
+            // Convert sun direction to texture space
+            vec2 sunDir2D = normalize(vec2(sunVector.x, -sunVector.y)); // Convert north to south
+            
+            for (int i = 1; i <= shadowSteps; i++) {
+              // Progressive step size - smaller steps nearby, larger far away
+              float stepSize = baseStepSize * (1.0 + float(i) * 0.5);
+              float totalDistance = stepSize * float(i);
+              
+              // Position to check
+              vec2 checkPos = adjustedTexCoord + sunDir2D * (totalDistance / pixelSizeMeters) * texelSize.x;
+              
+              float terrainHeight = -10000.0;
+              
+              // Try high-resolution first for nearby terrain, but always fall back to low-res if needed
+              bool foundHeight = false;
+              
+              // For nearby terrain, prefer high-res if available
+              // Note: padded texture only has 1-pixel border, so valid range is slightly beyond [0,1]
+              // Texture coordinates: center tile [0,1] + small border for seamless edges
+              float border = 1.0 / 514.0; // 1 pixel border on 512+2=514 texture
+              
+              if (totalDistance < 2000.0 && 
+                  checkPos.x >= -border && checkPos.x <= (1.0 + border) && 
+                  checkPos.y >= -border && checkPos.y <= (1.0 + border)) {
+                terrainHeight = texture(u_texture, checkPos).r;
+                foundHeight = true;
+              }
+              
+              // Fall back to low-res if high-res not available or for distant terrain
+              if (!foundHeight) {
+                // Transform from high-res tile coordinates to low-res tile coordinates
+                // checkPos is in high-res tile space [0,1]
+                // We need to map it to the correct position within the low-res tile
+                vec2 lowResPos = u_lowResOffset + checkPos / u_lowResScale;
+                if (lowResPos.x >= 0.0 && lowResPos.x <= 1.0 && 
+                    lowResPos.y >= 0.0 && lowResPos.y <= 1.0) {
+                  terrainHeight = texture(u_lowResTexture, lowResPos).r;
+                  foundHeight = true;
+                }
+              }
+              
+              // If we can't sample from either texture, stop ray casting
+              if (!foundHeight) {
+                break;
+              }
+              
+              // Skip invalid data
+              if (terrainHeight < -9999.0) {
+                continue;
+              }
+              
+              // Calculate expected height of sun ray at this distance
+              float expectedHeight = centerHeight + totalDistance * tan(sunAltitude);
+              
+              // Very aggressive shadow check - even small differences count
+              if (terrainHeight > expectedHeight + 1.0) {
+                inShadow = true;
+                break;
+              }
+              
+              // Stop if we've gone very far (low-res allows much longer distances)
+              if (totalDistance > 50000.0) { // Maximum 50km shadow range
+                break;
+              }
+            }
+          }
+          
+          // Only add sun contribution if not in shadow
+          if (!inShadow) {
+            // Weight by time interval (each sample represents part of the day)
+            totalSunScore += dotProduct * (24.0 / float(samples));
+          }
+        }
+      }
+      
+      // Color based on total sun exposure score
+      // A perfect south-facing slope in winter might get a score of ~6-8 hours worth of good exposure
+      // Normalize to 0-1 range, with 6 being a more realistic maximum for excellent exposure
+      float normalizedScore = clamp(totalSunScore / 6.0, 0.0, 1.0);
+      
+      vec3 noSunColor = vec3(0.1, 0.2, 0.8);     // Deep blue
+      vec3 littleSunColor = vec3(0.2, 0.5, 0.9); // Light blue
+      vec3 moderateSunColor = vec3(0.5, 0.8, 0.5); // Green
+      vec3 goodSunColor = vec3(0.9, 0.9, 0.2);   // Yellow
+      vec3 excellentSunColor = vec3(1.0, 0.5, 0.0); // Orange
+      vec3 maxSunColor = vec3(1.0, 0.1, 0.0);    // Red
+      
+      vec3 color;
+      // Adjust thresholds to make the map appear warmer
+      if (normalizedScore < 0.15) {
+        color = mix(noSunColor, littleSunColor, normalizedScore * 6.67);
+      } else if (normalizedScore < 0.35) {
+        color = mix(littleSunColor, moderateSunColor, (normalizedScore - 0.15) * 5.0);
+      } else if (normalizedScore < 0.55) {
+        color = mix(moderateSunColor, goodSunColor, (normalizedScore - 0.35) * 5.0);
+      } else if (normalizedScore < 0.75) {
+        color = mix(goodSunColor, excellentSunColor, (normalizedScore - 0.55) * 5.0);
+      } else {
+        color = mix(excellentSunColor, maxSunColor, (normalizedScore - 0.75) * 4.0);
+      }
+      
+      return color;
     }
     
     // Calculate aspect angle from gradients
@@ -453,6 +652,8 @@ export class SlopeTerrainRenderer {
         if (slopeColor.x < 0.0) {
           discard; // Too flat to have meaningful aspect
         }
+      } else if (u_style == 3) { // Sun exposure style - calculate sun hours
+        slopeColor = calculateSunExposure(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters, u_latitude, u_longitude);
       }
       
       // Add some basic hillshading for depth perception (using standard gradient for consistency)
@@ -519,6 +720,13 @@ export class SlopeTerrainRenderer {
         // Placeholder for aspect style - actual calculation is in main shader
         vec3 getSlopeColor(float slope) {
           // Not used for aspect style - calculation happens in calculateAspectColor
+          return vec3(1.0, 0.0, 1.0);
+        }
+      `,
+      [MapStyleOverlay.SunExposure]: `
+        // Placeholder for sun exposure style - actual calculation is in main shader
+        vec3 getSlopeColor(float slope) {
+          // Not used for sun exposure style - calculation happens in calculateSunExposure
           return vec3(1.0, 0.0, 1.0);
         }
       `
@@ -646,7 +854,9 @@ export class SlopeTerrainRenderer {
     zoomLevel: number,
     latitude: number,
     longitude: number,
-    style: MapStyleOverlay
+    style: MapStyleOverlay,
+    date?: Date,
+    lowResDemTile?: { width: number; height: number; data: Float32Array } | null
   ): ImageData | null {
     if (!this.isSupported) {
       return null;
@@ -704,6 +914,33 @@ export class SlopeTerrainRenderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
+    // Set up low-resolution texture (if available)
+    let lowResTexture: WebGLTexture | null = null;
+    if (lowResDemTile) {
+      lowResTexture = this.texturePool!.getTexture();
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, lowResTexture);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.R32F,
+        lowResDemTile.width,
+        lowResDemTile.height,
+        0,
+        gl.RED,
+        gl.FLOAT,
+        lowResDemTile.data
+      );
+      
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, hasFloatLinear ? gl.LINEAR : gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, hasFloatLinear ? gl.LINEAR : gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      
+      // Reset to texture 0
+      gl.activeTexture(gl.TEXTURE0);
+    }
+
     // Use program
     gl.useProgram(program);
 
@@ -722,6 +959,51 @@ export class SlopeTerrainRenderer {
     // Set uniforms
     const textureLocation = gl.getUniformLocation(program, "u_texture");
     gl.uniform1i(textureLocation, 0);
+
+    // Set low-resolution texture uniform (if available)
+    if (lowResDemTile && zoomLevel >= SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM) {
+      console.log(`Setting up low-res texture uniforms for zoom ${zoomLevel}`);
+      const lowResTextureLocation = gl.getUniformLocation(program, "u_lowResTexture");
+      gl.uniform1i(lowResTextureLocation, 1);
+      
+      // Calculate coordinate transformation parameters
+      const lowResZoom = SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM;
+      const lowResScale = Math.pow(2, zoomLevel - lowResZoom);
+      
+      // Calculate coordinate transformation more directly
+      // We know: lowResX = floor(x / lowResScale), lowResY = floor(y / lowResScale)
+      // So the current high-res tile (x,y) maps to position within the low-res tile
+      const highResX = (longitude + 180) / 360 * Math.pow(2, zoomLevel);
+      const highResY = (1 - Math.log(Math.tan(latitude * Math.PI / 180) + 1 / Math.cos(latitude * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoomLevel);
+      
+      // The low-res tile that contains our high-res tile
+      const lowResX = Math.floor(highResX / lowResScale);
+      const lowResY = Math.floor(highResY / lowResScale);
+      
+      // Position of current high-res tile within the low-res tile (0.0 to 1.0)
+      const offsetX = (highResX - lowResX * lowResScale) / lowResScale;
+      const offsetY = (highResY - lowResY * lowResScale) / lowResScale;
+      
+      const lowResScaleLocation = gl.getUniformLocation(program, "u_lowResScale");
+      gl.uniform1f(lowResScaleLocation, lowResScale);
+      
+      const lowResOffsetLocation = gl.getUniformLocation(program, "u_lowResOffset");
+      gl.uniform2f(lowResOffsetLocation, offsetX, offsetY);
+      
+      console.log(`Low-res uniforms: scale=${lowResScale}, offset=(${offsetX}, ${offsetY})`);
+    } else {
+      // Set default values when low-res texture is not available
+      const lowResTextureLocation = gl.getUniformLocation(program, "u_lowResTexture");
+      gl.uniform1i(lowResTextureLocation, 0); // Use high-res texture as fallback
+      
+      const lowResScaleLocation = gl.getUniformLocation(program, "u_lowResScale");
+      gl.uniform1f(lowResScaleLocation, 1.0);
+      
+      const lowResOffsetLocation = gl.getUniformLocation(program, "u_lowResOffset");
+      gl.uniform2f(lowResOffsetLocation, 0.0, 0.0);
+      
+      console.log(`No low-res texture available for zoom ${zoomLevel}`);
+    }
 
     const zoomLocation = gl.getUniformLocation(program, "u_zoomLevel");
     gl.uniform1f(zoomLocation, zoomLevel);
@@ -751,7 +1033,7 @@ export class SlopeTerrainRenderer {
     const conventionLocation = gl.getUniformLocation(program, "u_difficultyConvention");
     gl.uniform1i(conventionLocation, conventionInt);
 
-    // Set style uniform (0 = Slope, 1 = DownhillDifficulty, 2 = Aspect)
+    // Set style uniform (0 = Slope, 1 = DownhillDifficulty, 2 = Aspect, 3 = SunExposure)
     const styleLocation = gl.getUniformLocation(program, "u_style");
     let styleInt = 0;
     switch (style) {
@@ -764,8 +1046,19 @@ export class SlopeTerrainRenderer {
       case MapStyleOverlay.Aspect:
         styleInt = 2;
         break;
+      case MapStyleOverlay.SunExposure:
+        styleInt = 3;
+        break;
     }
     gl.uniform1i(styleLocation, styleInt);
+
+    // Calculate day of year for sun exposure calculation
+    const selectedDate = date || new Date(new Date().getFullYear(), 0, 15); // Default to Jan 15
+    const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
+    const dayOfYear = Math.floor((selectedDate.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    const dayOfYearLocation = gl.getUniformLocation(program, "u_dayOfYear");
+    gl.uniform1f(dayOfYearLocation, dayOfYear);
 
     // Clear and draw
     gl.clearColor(0, 0, 0, 0);
@@ -786,6 +1079,11 @@ export class SlopeTerrainRenderer {
 
     // Return texture to pool instead of deleting
     this.texturePool!.releaseTexture(texture);
+    
+    // Clean up low-resolution texture if it was used
+    if (lowResTexture) {
+      this.texturePool!.releaseTexture(lowResTexture);
+    }
 
     // Create new ImageData with processed pixels
     return new ImageData(
@@ -918,16 +1216,17 @@ export class SlopeTerrainRenderer {
     }
 
     maplibregl.addProtocol("slope-terrain", async (params) => {
-      // Extract style and DEM URL from the nested protocol format
-      // URL format: slope-terrain://style/dem-protocol://z/x/y
-      const urlMatch = params.url.match(/slope-terrain:\/\/([^\/]+)\/(.*)/);
+      // Extract style, optional date, and DEM URL from the nested protocol format
+      // URL format: slope-terrain://style/dem-protocol://z/x/y or slope-terrain://style/dayOfYear/dem-protocol://z/x/y
+      const urlMatch = params.url.match(/slope-terrain:\/\/([^\/]+)(?:\/(\d+))?\/(.*)/);
       
       if (!urlMatch) {
-        throw new Error(`Invalid slope-terrain URL format: ${params.url}. Expected: slope-terrain://style/dem-url`);
+        throw new Error(`Invalid slope-terrain URL format: ${params.url}. Expected: slope-terrain://style/dem-url or slope-terrain://style/dayOfYear/dem-url`);
       }
 
       const styleParam = urlMatch[1];
-      const demUrl = urlMatch[2];
+      const dayOfYearParam = urlMatch[2] ? parseInt(urlMatch[2], 10) : null;
+      const demUrl = urlMatch[3];
       
       // Extract z/x/y from the DEM URL
       const demMatch = demUrl.match(/(\d+)\/(\d+)\/(\d+)/);
@@ -960,6 +1259,25 @@ export class SlopeTerrainRenderer {
 
       // Get the padded DEM tile data to avoid seams
       const demTile = await this.getPaddedDemTile(z, x, y);
+      
+      // Use fixed coarse terrain zoom for extended shadow casting
+      const lowResZoom = SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM;
+      let lowResDemTile: { width: number; height: number; data: Float32Array } | null = null;
+      
+      if (z >= lowResZoom) {
+        // Current zoom is higher than coarse zoom - normal case
+        const lowResScale = Math.pow(2, z - lowResZoom); // Scale factor between resolutions
+        const lowResX = Math.floor(x / lowResScale);
+        const lowResY = Math.floor(y / lowResScale);
+        console.log(`Loading low-res tile: z${lowResZoom}/${lowResX}/${lowResY} (scale: ${lowResScale}) for high-res z${z}/${x}/${y}`);
+        lowResDemTile = await this.getPaddedDemTile(lowResZoom, lowResX, lowResY);
+        console.log(`Low-res tile loaded:`, lowResDemTile ? 'SUCCESS' : 'FAILED');
+      } else {
+        // Current zoom is lower than coarse zoom - use current tile as coarse
+        // This happens at low zoom levels where we don't need extended range anyway
+        console.log(`Skipping low-res tile for zoom ${z} (< ${lowResZoom})`);
+        lowResDemTile = null; // Don't use coarse terrain for low zoom levels
+      }
 
       if (!demTile) {
         // Return transparent tile if no data
@@ -979,13 +1297,25 @@ export class SlopeTerrainRenderer {
         throw new Error("Failed to create empty tile");
       }
 
+      // Convert dayOfYear back to date for sun exposure calculation
+      let dateForCalculation: Date | undefined;
+      if (style === MapStyleOverlay.SunExposure && dayOfYearParam !== null) {
+        const currentYear = new Date().getFullYear();
+        dateForCalculation = new Date(currentYear, 0, dayOfYearParam);
+      } else if (style === MapStyleOverlay.SunExposure) {
+        // Fallback to instance property if no date in URL
+        dateForCalculation = this.sunExposureDate;
+      }
+
       // Process the terrain data with our shader
       const processedData = this.processTerrainTile(
         demTile,
         zoomLevel,
         latitude,
         longitude,
-        style
+        style,
+        dateForCalculation,
+        lowResDemTile
       );
 
       if (!processedData) {

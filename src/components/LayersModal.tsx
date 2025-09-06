@@ -1,4 +1,4 @@
-import { Button, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, Typography } from "@mui/material";
+import { Button, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { Close as CloseIcon, Upload as UploadIcon } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import * as React from "react";
@@ -13,6 +13,7 @@ export interface LayersModalProps {
   currentMapStyle: MapStyle;
   currentMapStyleOverlay: MapStyleOverlay | null;
   tracks: Track[];
+  sunExposureDate: Date;
 }
 
 export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) => {
@@ -104,7 +105,7 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
-            Slope Overlays
+            Slope Overlays <Typography component="span" variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>(Experimental)</Typography>
           </Typography>
           <RadioGroup
             value={props.currentMapStyleOverlay || "none"}
@@ -116,15 +117,42 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
               control={<Radio />}
               label="None"
             />
-            {Object.entries(SLOPE_OVERLAY_NAMES).map(([key, name]) => (
-              <FormControlLabel
-                key={key}
-                value={key}
-                control={<Radio />}
-                label={name}
-              />
-            ))}
+            {Object.entries(SLOPE_OVERLAY_NAMES).map(([key, name]) => {
+              const label = key === MapStyleOverlay.SunExposure 
+                ? `${name} (${props.sunExposureDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
+                : name;
+              return (
+                <FormControlLabel
+                  key={key}
+                  value={key}
+                  control={<Radio />}
+                  label={label}
+                />
+              );
+            })}
           </RadioGroup>
+          
+          {props.currentMapStyleOverlay === MapStyleOverlay.SunExposure && (
+            <Box sx={{ mt: 2, pl: 4 }}>
+              <TextField
+                type="date"
+                label="Date for sun calculation"
+                value={props.sunExposureDate.toISOString().split('T')[0]}
+                onChange={(e) => {
+                  const newDate = new Date(e.target.value);
+                  if (!isNaN(newDate.getTime())) {
+                    props.eventBus.setSunExposureDate(newDate);
+                  }
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                size="small"
+                fullWidth
+                sx={{ maxWidth: 200 }}
+              />
+            </Box>
+          )}
         </Box>
 
         <Box sx={{ mt: 3 }}>

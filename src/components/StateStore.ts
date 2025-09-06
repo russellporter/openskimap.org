@@ -73,6 +73,10 @@ export default class StateStore implements EventBus {
     this.update({ mapStyleOverlay: overlay });
   };
 
+  setSunExposureDate = (date: Date) => {
+    this.update({ sunExposureDate: date });
+  };
+
   setUnitSystem = (unitSystem: UnitSystem) => {
     this.update({ unitSystem });
   };
