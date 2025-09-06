@@ -22,8 +22,6 @@ import {
   RunDifficulty,
   RunFeature,
   RunProperties,
-  RunUse,
-  SlopeGradingScale,
 } from "openskidata-format";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
@@ -578,7 +576,7 @@ function configureChartGradient(
   // Calculate difficulties directly from the smoothed data
   const samples: Array<{
     distanceRatio: number;
-    difficulty: RunDifficulty;
+    difficulty: RunDifficulty | null;
   }> = [];
 
   // Since data is already smoothed, we can calculate slope between adjacent points
@@ -597,14 +595,10 @@ function configureChartGradient(
     const steepness = elevationChange / horizontalDistance;
 
     // Get difficulty based on steepness
-    let difficulty = defaultDifficulty;
-    const calculatedDifficulty = getEstimatedRunDifficulty(
+    const difficulty = getEstimatedRunDifficulty(
       steepness,
       difficultyScheme
     );
-    if (calculatedDifficulty !== null) {
-      difficulty = calculatedDifficulty;
-    }
 
     // Add sample at the current point
     samples.push({
@@ -678,7 +672,7 @@ function configureChartGradient(
   } else {
     // Fallback if no segments could be calculated
     const color = hsla(
-      getRunColor(feature.properties.difficultyConvention, defaultDifficulty),
+      getRunColor(feature.properties.difficultyConvention, null),
       0.7
     );
     gradient.addColorStop(0, color);
