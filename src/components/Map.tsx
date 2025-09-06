@@ -3,7 +3,7 @@ import * as maplibregl from "maplibre-gl";
 import { throttle } from "throttle-debounce";
 import MapFilters from "../MapFilters";
 import { MapMarker } from "../MapMarker";
-import { MAP_STYLE_URLS, MapStyle } from "../MapStyle";
+import { MAP_STYLE_URLS, MapStyle, MapStyleOverlay, isSlopeOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
@@ -41,7 +41,7 @@ export class Map {
   private attributionControl: maplibregl.AttributionControl;
   private currentStyle: MapStyle | null = null;
   private terrainEnabled = false;
-  private slopeTerrainEnabled = false;
+  private currentSlopeOverlay: MapStyleOverlay | null = null;
   private slopeRenderer: SlopeTerrainRenderer | null = null;
 
   constructor(
@@ -254,7 +254,7 @@ export class Map {
 
           // Hide hillshade layer when slope terrain overlay is enabled
           if (layerId === "hillshade")
-            return this.slopeTerrainEnabled ? "none" : "visible";
+            return isSlopeOverlay(this.currentSlopeOverlay) ? "none" : "visible";
 
           // No visibility change needed
           return null;
@@ -381,7 +381,7 @@ export class Map {
         }
 
         // Add slope terrain overlay if enabled
-        if (this.slopeTerrainEnabled && this.slopeRenderer?.checkSupport()) {
+        if (isSlopeOverlay(this.currentSlopeOverlay) && this.slopeRenderer?.checkSupport()) {
           // Add slope terrain source if not present
           if (!baseStyle.sources["slope-terrain"]) {
             baseStyle.sources["slope-terrain"] = {
@@ -413,37 +413,37 @@ export class Map {
         this.tracks.forEach((track) => {
           const sourceId = `track-${track.id}`;
           const layerId = `track-line-${track.id}`;
-          
+
           // Add track source
           baseStyle.sources[sourceId] = {
-            type: 'geojson',
+            type: "geojson",
             data: {
-              type: 'Feature',
+              type: "Feature",
               properties: {
                 name: track.name,
-                color: track.color
+                color: track.color,
               },
               geometry: {
-                type: 'LineString',
-                coordinates: track.coordinates
-              }
-            }
+                type: "LineString",
+                coordinates: track.coordinates,
+              },
+            },
           };
 
           // Add track layer
           baseStyle.layers.push({
             id: layerId,
-            type: 'line',
+            type: "line",
             source: sourceId,
             paint: {
-              'line-color': track.color,
-              'line-width': 3,
-              'line-opacity': 0.8
+              "line-color": track.color,
+              "line-width": 3,
+              "line-opacity": 0.8,
             },
             layout: {
-              'line-join': 'round',
-              'line-cap': 'round'
-            }
+              "line-join": "round",
+              "line-cap": "round",
+            },
           });
         });
 
@@ -514,23 +514,24 @@ export class Map {
     this.updateVisibleSkiAreasCountUnthrottled
   );
 
-  toggleSlopeTerrainOverlay = (enabled?: boolean) => {
+  setSlopeOverlay = (overlay: MapStyleOverlay | null) => {
     this.waitForMapLoaded(() => {
-      // Toggle if no explicit value provided
-      const shouldEnable =
-        enabled !== undefined ? enabled : !this.slopeTerrainEnabled;
-
-      if (shouldEnable === this.slopeTerrainEnabled) {
+      if (overlay === this.currentSlopeOverlay) {
         return; // No change needed
       }
 
-      // Check if WebGL 2 is supported
-      if (shouldEnable && !this.slopeRenderer?.checkSupport()) {
+      // Check if WebGL 2 is supported when enabling slope overlay
+      if (isSlopeOverlay(overlay) && !this.slopeRenderer?.checkSupport()) {
         console.error("Slope terrain rendering requires WebGL 2 support");
         return;
       }
 
-      this.slopeTerrainEnabled = shouldEnable;
+      this.currentSlopeOverlay = overlay;
+
+      // Update renderer style if overlay is enabled
+      if (isSlopeOverlay(overlay) && this.slopeRenderer) {
+        this.slopeRenderer.setStyle(overlay!);
+      }
 
       // Refresh the style to add/remove the slope terrain layer
       if (this.currentStyle !== null) {
@@ -539,8 +540,12 @@ export class Map {
     });
   };
 
-  getSlopeTerrainEnabled = (): boolean => {
-    return this.slopeTerrainEnabled;
+  getSlopeOverlayEnabled = (): boolean => {
+    return isSlopeOverlay(this.currentSlopeOverlay);
+  };
+
+  getCurrentSlopeOverlay = (): MapStyleOverlay | null => {
+    return this.currentSlopeOverlay;
   };
 
   setTracks = (tracks: Track[]) => {

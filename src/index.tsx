@@ -16,7 +16,6 @@ import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
 import "./index.css";
-import { MapStyleOverlay } from "./MapStyle";
 
 function initialize() {
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
@@ -90,9 +89,7 @@ function initialize() {
     }
 
     if (changes.mapStyleOverlay !== undefined) {
-      map.toggleSlopeTerrainOverlay(
-        state.mapStyleOverlay === MapStyleOverlay.Slope
-      );
+      map.setSlopeOverlay(state.mapStyleOverlay);
       localStorage.setItem("mapStyleOverlay", state.mapStyleOverlay ? state.mapStyleOverlay : "null");
     }
 

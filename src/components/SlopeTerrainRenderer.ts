@@ -1,5 +1,6 @@
 import mlcontour from "maplibre-contour";
 import * as maplibregl from "maplibre-gl";
+import { MapStyleOverlay } from "../MapStyle";
 
 class TexturePool {
   private pool: WebGLTexture[] = [];
@@ -42,7 +43,8 @@ class TexturePool {
 export class SlopeTerrainRenderer {
   private canvas: OffscreenCanvas | null = null;
   private gl: WebGL2RenderingContext | null = null;
-  private program: WebGLProgram | null = null;
+  private programs: Map<MapStyleOverlay, WebGLProgram> = new Map();
+  private currentStyle: MapStyleOverlay = MapStyleOverlay.Slope;
   private positionBuffer: WebGLBuffer | null = null;
   private texCoordBuffer: WebGLBuffer | null = null;
   private isSupported: boolean = false;
@@ -60,7 +62,8 @@ export class SlopeTerrainRenderer {
     }
   `;
 
-  private fragmentShaderSource = `#version 300 es
+  private getFragmentShaderSource(style: MapStyleOverlay): string {
+    const baseFragmentShader = `#version 300 es
     precision highp float;
     
     out vec4 fragColor;
@@ -69,36 +72,9 @@ export class SlopeTerrainRenderer {
     uniform float u_zoomLevel;
     uniform float u_latitude;
     in vec2 v_texCoord;
-    
-    // Color gradient for slopes (green to red based on steepness)
-    vec3 getSlopeColor(float slope) {
-      // Slope is in degrees (0-90)
-      float normalizedSlope = clamp(slope / 45.0, 0.0, 1.0); // Normalize to 0-45 degrees for more sensitivity
-      
-      // More vibrant colors for better visibility
-      vec3 green = vec3(0.0, 1.0, 0.0);   // Bright green for flat
-      vec3 yellow = vec3(1.0, 1.0, 0.0);  // Bright yellow for moderate
-      vec3 orange = vec3(1.0, 0.5, 0.0);  // Orange for steep
-      vec3 red = vec3(1.0, 0.0, 0.0);     // Red for very steep
-      
-      vec3 color;
-      if (normalizedSlope < 0.25) {
-        // Green to Yellow (0-11.25 degrees)
-        color = mix(green, yellow, normalizedSlope * 4.0);
-      } else if (normalizedSlope < 0.5) {
-        // Yellow to Orange (11.25-22.5 degrees)
-        color = mix(yellow, orange, (normalizedSlope - 0.25) * 4.0);
-      } else if (normalizedSlope < 0.75) {
-        // Orange to Red (22.5-33.75 degrees)
-        color = mix(orange, red, (normalizedSlope - 0.5) * 4.0);
-      } else {
-        // Deep red for extreme slopes (33.75+ degrees)
-        color = red;
-      }
-      
-      return color;
-    }
-    
+    `;
+
+    const slopeCalculationCode = `
     void main() {
       vec2 textureSize = vec2(textureSize(u_texture, 0));
       vec2 texelSize = 1.0 / textureSize;
@@ -170,7 +146,44 @@ export class SlopeTerrainRenderer {
       // Full opacity to ensure visibility
       fragColor = vec4(finalColor, 1.0);
     }
-  `;
+    `;
+
+    // Style-specific color functions
+    const colorFunctions: Record<MapStyleOverlay, string> = {
+      [MapStyleOverlay.Slope]: `
+        // Color gradient for slopes (green to red based on steepness)
+        vec3 getSlopeColor(float slope) {
+          // Slope is in degrees (0-90)
+          float normalizedSlope = clamp(slope / 45.0, 0.0, 1.0); // Normalize to 0-45 degrees for more sensitivity
+          
+          // More vibrant colors for better visibility
+          vec3 green = vec3(0.0, 1.0, 0.0);   // Bright green for flat
+          vec3 yellow = vec3(1.0, 1.0, 0.0);  // Bright yellow for moderate
+          vec3 orange = vec3(1.0, 0.5, 0.0);  // Orange for steep
+          vec3 red = vec3(1.0, 0.0, 0.0);     // Red for very steep
+          
+          vec3 color;
+          if (normalizedSlope < 0.25) {
+            // Green to Yellow (0-11.25 degrees)
+            color = mix(green, yellow, normalizedSlope * 4.0);
+          } else if (normalizedSlope < 0.5) {
+            // Yellow to Orange (11.25-22.5 degrees)
+            color = mix(yellow, orange, (normalizedSlope - 0.25) * 4.0);
+          } else if (normalizedSlope < 0.75) {
+            // Orange to Red (22.5-33.75 degrees)
+            color = mix(orange, red, (normalizedSlope - 0.5) * 4.0);
+          } else {
+            // Deep red for extreme slopes (33.75+ degrees)
+            color = red;
+          }
+          
+          return color;
+        }
+      `
+    };
+
+    return baseFragmentShader + colorFunctions[style] + slopeCalculationCode;
+  }
 
   public constructor(demSource: InstanceType<typeof mlcontour.DemSource>) {
     this.demSource = demSource;
@@ -188,6 +201,14 @@ export class SlopeTerrainRenderer {
 
   public checkSupport(): boolean {
     return this.isSupported;
+  }
+
+  public setStyle(style: MapStyleOverlay): void {
+    this.currentStyle = style;
+  }
+
+  public getCurrentStyle(): MapStyleOverlay {
+    return this.currentStyle;
   }
 
   private createShader(
@@ -210,6 +231,38 @@ export class SlopeTerrainRenderer {
     return shader;
   }
 
+  private createProgram(gl: WebGL2RenderingContext, style: MapStyleOverlay): WebGLProgram | null {
+    // Create shaders
+    const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, this.vertexShaderSource);
+    const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, this.getFragmentShaderSource(style));
+
+    if (!vertexShader || !fragmentShader) {
+      return null;
+    }
+
+    // Create program
+    const program = gl.createProgram();
+    if (!program) return null;
+
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error(`Program linking error for style ${style}:`, gl.getProgramInfoLog(program));
+      return null;
+    }
+
+    // Validate the program
+    gl.validateProgram(program);
+    if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
+      console.error(`Program validation error for style ${style}:`, gl.getProgramInfoLog(program));
+      return null;
+    }
+
+    return program;
+  }
+
   private initWebGL(canvas: OffscreenCanvas): boolean {
     this.canvas = canvas;
     // Only support WebGL 2
@@ -226,46 +279,14 @@ export class SlopeTerrainRenderer {
 
     this.gl = gl;
 
-    // Create shaders
-    const vertexShader = this.createShader(
-      gl,
-      gl.VERTEX_SHADER,
-      this.vertexShaderSource
-    );
-    const fragmentShader = this.createShader(
-      gl,
-      gl.FRAGMENT_SHADER,
-      this.fragmentShaderSource
-    );
-
-    if (!vertexShader || !fragmentShader) {
-      return false;
-    }
-
-    // Create program
-    this.program = gl.createProgram();
-    if (!this.program) return false;
-
-    gl.attachShader(this.program, vertexShader);
-    gl.attachShader(this.program, fragmentShader);
-    gl.linkProgram(this.program);
-
-    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-      console.error(
-        "Program linking error:",
-        gl.getProgramInfoLog(this.program)
-      );
-      return false;
-    }
-
-    // Validate the program
-    gl.validateProgram(this.program);
-    if (!gl.getProgramParameter(this.program, gl.VALIDATE_STATUS)) {
-      console.error(
-        "Program validation error:",
-        gl.getProgramInfoLog(this.program)
-      );
-      return false;
+    // Create programs for each style
+    for (const style of Object.values(MapStyleOverlay)) {
+      const program = this.createProgram(gl, style);
+      if (!program) {
+        console.error(`Failed to create program for style: ${style}`);
+        return false;
+      }
+      this.programs.set(style, program);
     }
 
     // Setup buffers
@@ -288,14 +309,15 @@ export class SlopeTerrainRenderer {
   public processTerrainTile(
     paddedDemTile: { width: number; height: number; data: Float32Array },
     zoomLevel: number,
-    latitude: number = 50.0
+    latitude: number = 50.0,
+    style: MapStyleOverlay = this.currentStyle
   ): ImageData | null {
     if (!this.isSupported) {
       return null;
     }
 
     const gl = this.gl;
-    const program = this.program;
+    const program = this.programs.get(style);
     const canvas = this.canvas;
 
     if (!gl || !program || !canvas) {
@@ -567,7 +589,8 @@ export class SlopeTerrainRenderer {
       const processedData = this.processTerrainTile(
         demTile,
         zoomLevel,
-        latitude
+        latitude,
+        this.currentStyle
       );
 
       if (!processedData) {
