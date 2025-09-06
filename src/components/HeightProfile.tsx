@@ -548,14 +548,12 @@ function configureChartGradient(
   gradient: CanvasGradient
 ): CanvasGradient {
   const difficultyScheme = getSlopeGradingScale(feature);
-  // Ensure we have a valid non-null difficulty
-  const defaultDifficulty = feature.properties.difficulty as RunDifficulty;
 
   // Verify we have enough elevation data
   if (!elevationsAndDistance || elevationsAndDistance.length < 2) {
     // Not enough data, use default difficulty color
     const color = hsla(
-      getRunColor(feature.properties.difficultyConvention, defaultDifficulty),
+      getRunColor(feature.properties.difficultyConvention, null),
       0.7
     );
     gradient.addColorStop(0, color);
@@ -569,7 +567,7 @@ function configureChartGradient(
   if (totalDistance === 0) {
     // Zero-length path, use default color
     const color = hsla(
-      getRunColor(feature.properties.difficultyConvention, defaultDifficulty),
+      getRunColor(feature.properties.difficultyConvention, null),
       0.7
     );
     gradient.addColorStop(0, color);
