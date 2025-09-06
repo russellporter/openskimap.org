@@ -1,6 +1,44 @@
 import mlcontour from "maplibre-contour";
 import * as maplibregl from "maplibre-gl";
 
+class TexturePool {
+  private pool: WebGLTexture[] = [];
+  private gl: WebGL2RenderingContext;
+
+  constructor(gl: WebGL2RenderingContext) {
+    this.gl = gl;
+  }
+
+  getTexture(): WebGLTexture {
+    if (this.pool.length > 0) {
+      return this.pool.pop()!;
+    }
+    
+    // Create new texture if pool is empty
+    const texture = this.gl.createTexture();
+    if (!texture) {
+      throw new Error("Failed to create WebGL texture");
+    }
+    return texture;
+  }
+
+  releaseTexture(texture: WebGLTexture): void {
+    // Only keep up to 10 textures in the pool to avoid memory bloat
+    if (this.pool.length < 10) {
+      this.pool.push(texture);
+    } else {
+      this.gl.deleteTexture(texture);
+    }
+  }
+
+  cleanup(): void {
+    for (const texture of this.pool) {
+      this.gl.deleteTexture(texture);
+    }
+    this.pool.length = 0;
+  }
+}
+
 export class SlopeTerrainRenderer {
   private canvas: HTMLCanvasElement | null = null;
   private gl: WebGL2RenderingContext | null = null;
@@ -9,6 +47,7 @@ export class SlopeTerrainRenderer {
   private texCoordBuffer: WebGLBuffer | null = null;
   private isSupported: boolean = false;
   private demSource: InstanceType<typeof mlcontour.DemSource>;
+  private texturePool: TexturePool | null = null;
 
   private vertexShaderSource = `#version 300 es
     in vec2 a_position;
@@ -239,6 +278,9 @@ export class SlopeTerrainRenderer {
     const texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
     gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
 
+    // Initialize texture pool
+    this.texturePool = new TexturePool(gl);
+
     return true;
   }
 
@@ -268,9 +310,9 @@ export class SlopeTerrainRenderer {
     canvas.height = outputHeight;
     gl.viewport(0, 0, outputWidth, outputHeight);
 
-    // Create texture from elevation data
+    // Get texture from pool instead of creating new one
     // Store elevation values directly in the red channel as floats
-    const texture = gl.createTexture();
+    const texture = this.texturePool!.getTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(
       gl.TEXTURE_2D,
@@ -341,8 +383,8 @@ export class SlopeTerrainRenderer {
       pixels
     );
 
-    // Clean up
-    gl.deleteTexture(texture);
+    // Return texture to pool instead of deleting
+    this.texturePool!.releaseTexture(texture);
 
     // Create new ImageData with processed pixels
     return new ImageData(
@@ -357,23 +399,23 @@ export class SlopeTerrainRenderer {
     x: number,
     y: number
   ): Promise<{ width: number; height: number; data: Float32Array } | null> {
-    // Create a padded tile by fetching center tile + 8 neighbors to eliminate seams
+    // Create a padded tile by fetching center tile + 4 cardinal neighbors to eliminate seams
     const tilePromises: Promise<{ width: number; height: number; data: Float32Array } | null>[] = [];
     
-    // Define neighboring tile offsets: [dx, dy]
+    // Define neighboring tile offsets: [dx, dy] - only cardinal directions
     const neighbors = [
-      [-1, -1], [0, -1], [1, -1], // top row
-      [-1,  0], [0,  0], [1,  0], // middle row (center is [0,0])
-      [-1,  1], [0,  1], [1,  1]  // bottom row
+      [0, -1], // north
+      [-1, 0], [0, 0], [1, 0], // west, center, east
+      [0, 1]   // south
     ];
     
-    // Fetch all tiles (center + neighbors)
+    // Fetch all tiles (center + cardinal neighbors)
     for (const [dx, dy] of neighbors) {
       tilePromises.push(this.demSource.getDemTile(z, x + dx, y + dy));
     }
     
     const tiles = await Promise.all(tilePromises);
-    const centerTile = tiles[4]; // Center tile is at index 4 ([0,0])
+    const centerTile = tiles[2]; // Center tile is at index 2 ([0,0])
     
     if (!centerTile) {
       return null; // No center tile data available
@@ -395,65 +437,70 @@ export class SlopeTerrainRenderer {
       }
     }
     
-    // Fill border pixels from neighboring tiles
-    const neighborTileMap = [
-      [0, 1, 2],  // top row of neighbor tiles
-      [3, 4, 5],  // middle row 
-      [6, 7, 8]   // bottom row
-    ];
+    // Fill border pixels from neighboring tiles (cardinal directions only)
+    // Tile indices: [0]=north, [1]=west, [2]=center, [3]=east, [4]=south
     
-    // Process each neighbor tile to fill border pixels
-    for (let ny = 0; ny < 3; ny++) {
-      for (let nx = 0; nx < 3; nx++) {
-        const neighborIndex = neighborTileMap[ny][nx];
-        const neighborTile = tiles[neighborIndex];
-        
-        if (!neighborTile || neighborIndex === 4) continue; // Skip center tile and missing neighbors
-        
-        // Determine which border pixels to fill from this neighbor
-        if (nx === 0 && ny === 1) { // Left neighbor
-          for (let y = 0; y < tileSize; y++) {
-            const srcIndex = y * tileSize + (tileSize - 1); // Right edge of left neighbor
-            const dstIndex = (y + 1) * paddedSize + 0; // Left border of padded tile
-            paddedData[dstIndex] = neighborTile.data[srcIndex];
-          }
-        } else if (nx === 2 && ny === 1) { // Right neighbor
-          for (let y = 0; y < tileSize; y++) {
-            const srcIndex = y * tileSize + 0; // Left edge of right neighbor
-            const dstIndex = (y + 1) * paddedSize + (paddedSize - 1); // Right border of padded tile
-            paddedData[dstIndex] = neighborTile.data[srcIndex];
-          }
-        } else if (nx === 1 && ny === 0) { // Top neighbor
-          for (let x = 0; x < tileSize; x++) {
-            const srcIndex = (tileSize - 1) * tileSize + x; // Bottom edge of top neighbor
-            const dstIndex = 0 * paddedSize + (x + 1); // Top border of padded tile
-            paddedData[dstIndex] = neighborTile.data[srcIndex];
-          }
-        } else if (nx === 1 && ny === 2) { // Bottom neighbor
-          for (let x = 0; x < tileSize; x++) {
-            const srcIndex = 0 * tileSize + x; // Top edge of bottom neighbor
-            const dstIndex = (paddedSize - 1) * paddedSize + (x + 1); // Bottom border of padded tile
-            paddedData[dstIndex] = neighborTile.data[srcIndex];
-          }
-        } else if (nx === 0 && ny === 0) { // Top-left corner
-          const srcIndex = (tileSize - 1) * tileSize + (tileSize - 1); // Bottom-right of top-left neighbor
-          const dstIndex = 0 * paddedSize + 0; // Top-left corner of padded tile
-          paddedData[dstIndex] = neighborTile.data[srcIndex];
-        } else if (nx === 2 && ny === 0) { // Top-right corner
-          const srcIndex = (tileSize - 1) * tileSize + 0; // Bottom-left of top-right neighbor
-          const dstIndex = 0 * paddedSize + (paddedSize - 1); // Top-right corner of padded tile
-          paddedData[dstIndex] = neighborTile.data[srcIndex];
-        } else if (nx === 0 && ny === 2) { // Bottom-left corner
-          const srcIndex = 0 * tileSize + (tileSize - 1); // Top-right of bottom-left neighbor
-          const dstIndex = (paddedSize - 1) * paddedSize + 0; // Bottom-left corner of padded tile
-          paddedData[dstIndex] = neighborTile.data[srcIndex];
-        } else if (nx === 2 && ny === 2) { // Bottom-right corner
-          const srcIndex = 0 * tileSize + 0; // Top-left of bottom-right neighbor
-          const dstIndex = (paddedSize - 1) * paddedSize + (paddedSize - 1); // Bottom-right corner of padded tile
-          paddedData[dstIndex] = neighborTile.data[srcIndex];
-        }
+    const northTile = tiles[0];
+    const westTile = tiles[1];
+    const eastTile = tiles[3];
+    const southTile = tiles[4];
+    
+    // Fill top border from north neighbor
+    if (northTile) {
+      for (let x = 0; x < tileSize; x++) {
+        const srcIndex = (tileSize - 1) * tileSize + x; // Bottom edge of north neighbor
+        const dstIndex = 0 * paddedSize + (x + 1); // Top border of padded tile
+        paddedData[dstIndex] = northTile.data[srcIndex];
       }
     }
+    
+    // Fill left border from west neighbor
+    if (westTile) {
+      for (let y = 0; y < tileSize; y++) {
+        const srcIndex = y * tileSize + (tileSize - 1); // Right edge of west neighbor
+        const dstIndex = (y + 1) * paddedSize + 0; // Left border of padded tile
+        paddedData[dstIndex] = westTile.data[srcIndex];
+      }
+    }
+    
+    // Fill right border from east neighbor
+    if (eastTile) {
+      for (let y = 0; y < tileSize; y++) {
+        const srcIndex = y * tileSize + 0; // Left edge of east neighbor
+        const dstIndex = (y + 1) * paddedSize + (paddedSize - 1); // Right border of padded tile
+        paddedData[dstIndex] = eastTile.data[srcIndex];
+      }
+    }
+    
+    // Fill bottom border from south neighbor
+    if (southTile) {
+      for (let x = 0; x < tileSize; x++) {
+        const srcIndex = 0 * tileSize + x; // Top edge of south neighbor
+        const dstIndex = (paddedSize - 1) * paddedSize + (x + 1); // Bottom border of padded tile
+        paddedData[dstIndex] = southTile.data[srcIndex];
+      }
+    }
+    
+    // Fill corner pixels by interpolating from adjacent border pixels
+    // Top-left corner
+    const topLeft = paddedData[0 * paddedSize + 1]; // Top border, first pixel
+    const leftTop = paddedData[1 * paddedSize + 0]; // Left border, first pixel
+    paddedData[0 * paddedSize + 0] = (topLeft + leftTop) / 2;
+    
+    // Top-right corner
+    const topRight = paddedData[0 * paddedSize + (paddedSize - 2)]; // Top border, last pixel
+    const rightTop = paddedData[1 * paddedSize + (paddedSize - 1)]; // Right border, first pixel
+    paddedData[0 * paddedSize + (paddedSize - 1)] = (topRight + rightTop) / 2;
+    
+    // Bottom-left corner
+    const bottomLeft = paddedData[(paddedSize - 1) * paddedSize + 1]; // Bottom border, first pixel
+    const leftBottom = paddedData[(paddedSize - 2) * paddedSize + 0]; // Left border, last pixel
+    paddedData[(paddedSize - 1) * paddedSize + 0] = (bottomLeft + leftBottom) / 2;
+    
+    // Bottom-right corner
+    const bottomRight = paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 2)]; // Bottom border, last pixel
+    const rightBottom = paddedData[(paddedSize - 2) * paddedSize + (paddedSize - 1)]; // Right border, last pixel
+    paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 1)] = (bottomRight + rightBottom) / 2;
     
     return {
       width: paddedSize,
@@ -542,5 +589,12 @@ export class SlopeTerrainRenderer {
 
       return { data: await blob.arrayBuffer() };
     });
+  }
+
+  public cleanup(): void {
+    if (this.texturePool) {
+      this.texturePool.cleanup();
+      this.texturePool = null;
+    }
   }
 }
