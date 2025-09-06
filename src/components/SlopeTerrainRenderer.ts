@@ -1,5 +1,13 @@
 import mlcontour from "maplibre-contour";
 import * as maplibregl from "maplibre-gl";
+import * as turf from "@turf/helpers";
+import { 
+  getRunDifficultyConvention,
+  RunDifficultyConvention,
+  getSlopeGradingScaleForUse,
+  RunUse,
+  getRunColor
+} from "openskidata-format";
 import { MapStyleOverlay } from "../MapStyle";
 
 class TexturePool {
@@ -40,11 +48,46 @@ class TexturePool {
   }
 }
 
+// Helper function to convert HSL color string to RGB vec3 for shader
+function hslToRgb(hslString: string): { r: number; g: number; b: number } {
+  // Parse HSL string like "hsl(125, 100%, 33%)"
+  const match = hslString.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  if (!match) {
+    return { r: 0, g: 0, b: 0 };
+  }
+  
+  const h = parseInt(match[1]) / 360;
+  const s = parseInt(match[2]) / 100;
+  const l = parseInt(match[3]) / 100;
+  
+  let r, g, b;
+  
+  if (s === 0) {
+    r = g = b = l; // achromatic
+  } else {
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  
+  return { r, g, b };
+}
+
 export class SlopeTerrainRenderer {
   private canvas: OffscreenCanvas | null = null;
   private gl: WebGL2RenderingContext | null = null;
   private programs: Map<MapStyleOverlay, WebGLProgram> = new Map();
-  private currentStyle: MapStyleOverlay = MapStyleOverlay.Slope;
   private positionBuffer: WebGLBuffer | null = null;
   private texCoordBuffer: WebGLBuffer | null = null;
   private isSupported: boolean = false;
@@ -62,6 +105,95 @@ export class SlopeTerrainRenderer {
     }
   `;
 
+  private generateDownhillDifficultyShaderCode(): string {
+    // Get slope grading scales for all conventions
+    const conventions = [
+      RunDifficultyConvention.EUROPE,
+      RunDifficultyConvention.JAPAN,
+      RunDifficultyConvention.NORTH_AMERICA
+    ];
+    
+    // Generate the color function
+    let shaderCode = `
+      // Map slope to downhill difficulty colors based on regional convention
+      vec3 getSlopeColor(float slope) {
+        // Convert slope from degrees to gradient percentage (as decimal)
+        // gradient = tan(slope_in_radians)
+        // 45 degrees = 1.0 gradient (100% slope)
+        float gradient = tan(radians(slope));
+        
+        vec3 color = vec3(0.0, 0.0, 0.0); // Default black
+    `;
+    
+    // Generate if-else chain for each convention
+    conventions.forEach((convention, index) => {
+      const scale = getSlopeGradingScaleForUse(RunUse.Downhill, convention);
+      
+      shaderCode += `
+        ${index === 0 ? 'if' : 'else if'} (u_difficultyConvention == ${index}) { // ${convention.toUpperCase()}
+      `;
+      
+      // Generate conditions for each difficulty threshold
+      let firstCondition = true;
+      scale.stops.forEach((stop, stopIndex) => {
+        if (stop.difficulty === null) {
+          // No difficulty - transparent
+          shaderCode += `
+          ${firstCondition ? 'if' : 'else if'} (gradient < ${stop.maxSteepness.toFixed(3)}f) {
+            discard; // Transparent for no difficulty
+          }`;
+          firstCondition = false;
+        } else {
+          // Get the color for this difficulty and convention
+          const colorString = getRunColor(convention, stop.difficulty);
+          const rgb = hslToRgb(colorString);
+          
+          // Check if this is the last stop or has Infinity threshold
+          const isLastStop = stopIndex === scale.stops.length - 1;
+          const hasInfiniteThreshold = stop.maxSteepness === Infinity;
+          
+          if (!isLastStop && !hasInfiniteThreshold) {
+            shaderCode += `
+          ${firstCondition ? 'if' : 'else if'} (gradient < ${stop.maxSteepness.toFixed(3)}f) {
+            color = vec3(${rgb.r.toFixed(3)}f, ${rgb.g.toFixed(3)}f, ${rgb.b.toFixed(3)}f);
+          }`;
+          } else if (hasInfiniteThreshold) {
+            // Handle Infinity threshold - this covers everything above the previous threshold
+            shaderCode += `
+          else {
+            // ${stop.difficulty} - above previous threshold
+            color = vec3(${rgb.r.toFixed(3)}f, ${rgb.g.toFixed(3)}f, ${rgb.b.toFixed(3)}f);
+          }`;
+          } else {
+            // Last stop with finite threshold - check if we should show this difficulty or make it transparent
+            shaderCode += `
+          else if (gradient <= ${stop.maxSteepness.toFixed(3)}f) {
+            // ${stop.difficulty}
+            color = vec3(${rgb.r.toFixed(3)}f, ${rgb.g.toFixed(3)}f, ${rgb.b.toFixed(3)}f);
+          }
+          else {
+            // Above ${stop.maxSteepness.toFixed(3)} - beyond all defined levels, make transparent
+            discard;
+          }`;
+          }
+          firstCondition = false;
+        }
+      });
+      
+      shaderCode += `
+        }`;
+    });
+    
+    // Close the convention if-else chain
+    shaderCode += `
+        
+        return color;
+      }
+    `;
+    
+    return shaderCode;
+  }
+
   private getFragmentShaderSource(style: MapStyleOverlay): string {
     const baseFragmentShader = `#version 300 es
     precision highp float;
@@ -71,6 +203,8 @@ export class SlopeTerrainRenderer {
     uniform sampler2D u_texture;
     uniform float u_zoomLevel;
     uniform float u_latitude;
+    uniform float u_longitude;
+    uniform int u_difficultyConvention;
     in vec2 v_texCoord;
     `;
 
@@ -119,9 +253,10 @@ export class SlopeTerrainRenderer {
       float dzdy = ((ne + 2.0 * n + nw) - (se + 2.0 * s + sw)) / 8.0;
       
       // Calculate pixel size in meters based on zoom level and latitude
-      // Formula: pixelSizeMeters = 156543.03392 * cos(latitude) / 2^zoom
+      // Formula for 256x256 tiles: 156543.03392 * cos(latitude) / 2^zoom
+      // But DEM tiles are 512x512, so pixels are half the size
       float latRad = radians(u_latitude);
-      float pixelSizeMeters = 156543.03392 * cos(latRad) / pow(2.0, u_zoomLevel);
+      float pixelSizeMeters = 156543.03392 * cos(latRad) / pow(2.0, u_zoomLevel) / 2.0;
       
       // Calculate the magnitude of the gradient vector
       float gradientMagnitude = sqrt(dzdx * dzdx + dzdy * dzdy);
@@ -179,7 +314,8 @@ export class SlopeTerrainRenderer {
           
           return color;
         }
-      `
+      `,
+      [MapStyleOverlay.DownhillDifficulty]: this.generateDownhillDifficultyShaderCode()
     };
 
     return baseFragmentShader + colorFunctions[style] + slopeCalculationCode;
@@ -203,13 +339,6 @@ export class SlopeTerrainRenderer {
     return this.isSupported;
   }
 
-  public setStyle(style: MapStyleOverlay): void {
-    this.currentStyle = style;
-  }
-
-  public getCurrentStyle(): MapStyleOverlay {
-    return this.currentStyle;
-  }
 
   private createShader(
     gl: WebGLRenderingContext,
@@ -309,8 +438,9 @@ export class SlopeTerrainRenderer {
   public processTerrainTile(
     paddedDemTile: { width: number; height: number; data: Float32Array },
     zoomLevel: number,
-    latitude: number = 50.0,
-    style: MapStyleOverlay = this.currentStyle
+    latitude: number,
+    longitude: number,
+    style: MapStyleOverlay
   ): ImageData | null {
     if (!this.isSupported) {
       return null;
@@ -392,6 +522,28 @@ export class SlopeTerrainRenderer {
 
     const latitudeLocation = gl.getUniformLocation(program, "u_latitude");
     gl.uniform1f(latitudeLocation, latitude);
+
+    const longitudeLocation = gl.getUniformLocation(program, "u_longitude");
+    gl.uniform1f(longitudeLocation, longitude);
+
+    // Determine difficulty convention based on tile location
+    const point = turf.point([longitude, latitude]);
+    const convention = getRunDifficultyConvention(point);
+    let conventionInt = 0; // Default to EUROPE
+    switch (convention) {
+      case RunDifficultyConvention.EUROPE:
+        conventionInt = 0;
+        break;
+      case RunDifficultyConvention.JAPAN:
+        conventionInt = 1;
+        break;
+      case RunDifficultyConvention.NORTH_AMERICA:
+        conventionInt = 2;
+        break;
+    }
+    
+    const conventionLocation = gl.getUniformLocation(program, "u_difficultyConvention");
+    gl.uniform1i(conventionLocation, conventionInt);
 
     // Clear and draw
     gl.clearColor(0, 0, 0, 0);
@@ -544,25 +696,45 @@ export class SlopeTerrainRenderer {
     }
 
     maplibregl.addProtocol("slope-terrain", async (params) => {
-      // Extract zoom level and coordinates from URL
-      // URL format: slope-terrain://mlcontour://...
-      const urlMatch = params.url.match(/\/(\d+)\/(\d+)\/(\d+)/);
-      let zoomLevel = 10; // Default zoom
-      let latitude = 50.0; // Default latitude (Whistler area)
-      let x = 0,
-        y = 0,
-        z = 0;
-
-      if (urlMatch) {
-        z = parseInt(urlMatch[1], 10);
-        x = parseInt(urlMatch[2], 10);
-        y = parseInt(urlMatch[3], 10);
-        zoomLevel = z;
-        // Convert tile Y coordinate to latitude using Web Mercator formula
-        const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, zoomLevel);
-        latitude =
-          (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+      // Extract style and DEM URL from the nested protocol format
+      // URL format: slope-terrain://style/dem-protocol://z/x/y
+      const urlMatch = params.url.match(/slope-terrain:\/\/([^\/]+)\/(.*)/);
+      
+      if (!urlMatch) {
+        throw new Error(`Invalid slope-terrain URL format: ${params.url}. Expected: slope-terrain://style/dem-url`);
       }
+
+      const styleParam = urlMatch[1];
+      const demUrl = urlMatch[2];
+      
+      // Extract z/x/y from the DEM URL
+      const demMatch = demUrl.match(/(\d+)\/(\d+)\/(\d+)/);
+      if (!demMatch) {
+        throw new Error(`Invalid DEM URL format in: ${demUrl}`);
+      }
+
+      const z = parseInt(demMatch[1], 10);
+      const x = parseInt(demMatch[2], 10);
+      const y = parseInt(demMatch[3], 10);
+      
+      if (isNaN(z) || isNaN(x) || isNaN(y)) {
+        throw new Error(`Invalid tile coordinates in URL: ${params.url}`);
+      }
+
+      // Validate and convert style parameter
+      const style = styleParam as MapStyleOverlay;
+      if (!Object.values(MapStyleOverlay).includes(style)) {
+        throw new Error(`Invalid style parameter: ${styleParam}. Valid styles: ${Object.values(MapStyleOverlay).join(', ')}`);
+      }
+
+      const zoomLevel = z;
+      
+      // Convert tile Y coordinate to latitude using Web Mercator formula
+      const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, zoomLevel);
+      const latitude = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+      
+      // Convert tile X coordinate to longitude
+      const longitude = (x / Math.pow(2, zoomLevel)) * 360 - 180;
 
       // Get the padded DEM tile data to avoid seams
       const demTile = await this.getPaddedDemTile(z, x, y);
@@ -590,7 +762,8 @@ export class SlopeTerrainRenderer {
         demTile,
         zoomLevel,
         latitude,
-        this.currentStyle
+        longitude,
+        style
       );
 
       if (!processedData) {

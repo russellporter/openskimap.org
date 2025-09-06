@@ -1,8 +1,8 @@
-import { Button, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, Switch, Typography } from "@mui/material";
+import { Button, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, Typography } from "@mui/material";
 import { Close as CloseIcon, Upload as UploadIcon } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import * as React from "react";
-import { MapStyle, MapStyleOverlay } from "../MapStyle";
+import { MapStyle, MapStyleOverlay, SLOPE_OVERLAY_NAMES } from "../MapStyle";
 import { Track, readGpxFile } from "../utils/TrackParser";
 import EventBus from "./EventBus";
 import { ModalHeader } from "./ModalHeader";
@@ -25,8 +25,12 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
   };
 
   const handleSlopeOverlayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const enabled = event.target.checked;
-    props.eventBus.setMapStyleOverlay(enabled ? MapStyleOverlay.Slope : null);
+    const value = event.target.value;
+    if (value === "none") {
+      props.eventBus.setMapStyleOverlay(null);
+    } else {
+      props.eventBus.setMapStyleOverlay(value as MapStyleOverlay);
+    }
   };
 
   const handleGpxFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,18 +104,27 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
-            Overlays
+            Slope Overlays
           </Typography>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={props.currentMapStyleOverlay === MapStyleOverlay.Slope}
-                onChange={handleSlopeOverlayChange}
-              />
-            }
-            label="Slope"
+          <RadioGroup
+            value={props.currentMapStyleOverlay || "none"}
+            onChange={handleSlopeOverlayChange}
             sx={{ pl: 1 }}
-          />
+          >
+            <FormControlLabel
+              value="none"
+              control={<Radio />}
+              label="None"
+            />
+            {Object.entries(SLOPE_OVERLAY_NAMES).map(([key, name]) => (
+              <FormControlLabel
+                key={key}
+                value={key}
+                control={<Radio />}
+                label={name}
+              />
+            ))}
+          </RadioGroup>
         </Box>
 
         <Box sx={{ mt: 3 }}>

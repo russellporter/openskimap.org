@@ -382,11 +382,12 @@ export class Map {
 
         // Add slope terrain overlay if enabled
         if (isSlopeOverlay(this.currentSlopeOverlay) && this.slopeRenderer?.checkSupport()) {
-          // Add slope terrain source if not present
-          if (!baseStyle.sources["slope-terrain"]) {
-            baseStyle.sources["slope-terrain"] = {
+          // Add slope terrain source with style parameter
+          const sourceName = `slope-terrain-${this.currentSlopeOverlay}`;
+          if (!baseStyle.sources[sourceName]) {
+            baseStyle.sources[sourceName] = {
               type: "raster",
-              tiles: [`slope-terrain://${this.demSource.sharedDemProtocolUrl}`],
+              tiles: [`slope-terrain://${this.currentSlopeOverlay}/${this.demSource.sharedDemProtocolUrl}`],
               tileSize: 512,
               minzoom: 5,
               maxzoom: 16,
@@ -402,7 +403,7 @@ export class Map {
           baseStyle.layers.splice(insertIndex, 0, {
             id: "slope-terrain-overlay",
             type: "raster",
-            source: "slope-terrain",
+            source: sourceName,
             paint: {
               "raster-opacity": 0.7,
             },
@@ -527,11 +528,6 @@ export class Map {
       }
 
       this.currentSlopeOverlay = overlay;
-
-      // Update renderer style if overlay is enabled
-      if (isSlopeOverlay(overlay) && this.slopeRenderer) {
-        this.slopeRenderer.setStyle(overlay!);
-      }
 
       // Refresh the style to add/remove the slope terrain layer
       if (this.currentStyle !== null) {

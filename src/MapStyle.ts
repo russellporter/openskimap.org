@@ -7,6 +7,7 @@ export enum MapStyle {
 
 export enum MapStyleOverlay {
   Slope = "slope",
+  DownhillDifficulty = "downhillDifficulty",
 }
 
 export const MAP_STYLE_URLS: Record<MapStyle, string> = {
@@ -16,6 +17,7 @@ export const MAP_STYLE_URLS: Record<MapStyle, string> = {
 
 export const SLOPE_OVERLAY_NAMES: Record<MapStyleOverlay, string> = {
   [MapStyleOverlay.Slope]: "Classic",
+  [MapStyleOverlay.DownhillDifficulty]: "Downhill Difficulty",
 };
 
 export function isSlopeOverlay(overlay: MapStyleOverlay | null): boolean {
