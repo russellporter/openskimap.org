@@ -4771,9 +4771,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openskidata-format@npm:5.3.0":
-  version: 5.3.0
-  resolution: "openskidata-format@npm:5.3.0"
+"openskidata-format@npm:5.4.0":
+  version: 5.4.0
+  resolution: "openskidata-format@npm:5.4.0"
   dependencies:
     "@turf/boolean-point-in-polygon": ^7.2.0
     "@turf/center": ^7.2.0
@@ -4781,9 +4781,8 @@ __metadata:
     "@turf/helpers": ^7.2.0
     "@turf/length": ^7.2.0
     "@turf/line-chunk": ^7.2.0
-    "@turf/meta": ^7.2.0
     tslib: ^2
-  checksum: de14ff47d47d5fcea9658061ae2e083f537eecaf0880a7c0c2db6bfb9c54d4a9f7529050f4624b58cce19a4560828344be8aa7561b3228bc39b93edc1b85f7c8
+  checksum: 922012788533cadea31a6ed1f5efdecc78faf835cc3dbead80685df9c035d37dbcfc12c8b9d30fc45c0d6c35cafa2add7615d353ee8df1b388c868abe7efd1d7
   languageName: node
   linkType: hard
 
@@ -4813,7 +4812,7 @@ __metadata:
     maplibre-contour: ^0.1.0
     maplibre-gl: ^5.6.1
     memoize-one: ^6.0.0
-    openskidata-format: 5.3.0
+    openskidata-format: 5.4.0
     prettier: ^3.3.3
     query-string: ^9.1.0
     react: ^18.3.1
