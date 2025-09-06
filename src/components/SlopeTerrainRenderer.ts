@@ -205,29 +205,13 @@ export class SlopeTerrainRenderer {
     uniform float u_latitude;
     uniform float u_longitude;
     uniform int u_difficultyConvention;
+    uniform int u_style;
     in vec2 v_texCoord;
     `;
 
     const slopeCalculationCode = `
-    void main() {
-      vec2 textureSize = vec2(textureSize(u_texture, 0));
-      vec2 texelSize = 1.0 / textureSize;
-      
-      // Map output coordinates to padded texture coordinates
-      // Scale and offset to map to the center portion of the padded texture
-      vec2 adjustedTexCoord = v_texCoord * (textureSize - 2.0) / textureSize + 1.0 / textureSize;
-      
-      // Sample the center pixel - elevation is stored directly in red channel
-      vec4 centerSample = texture(u_texture, adjustedTexCoord);
-      
-      // Check if we have valid data (DEM tiles use -10000 for no data)
-      if (centerSample.r < -9999.0) {
-        discard;
-      }
-      
-      float centerHeight = centerSample.r;
-      
-      
+    // Calculate slope using standard Sobel operator (full resolution)
+    float calculateStandardSlope(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters) {
       // Sample neighboring pixels for slope calculation (Sobel operator)
       float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
       float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
@@ -252,24 +236,108 @@ export class SlopeTerrainRenderer {
       float dzdx = ((ne + 2.0 * e + se) - (nw + 2.0 * w + sw)) / 8.0;
       float dzdy = ((ne + 2.0 * n + nw) - (se + 2.0 * s + sw)) / 8.0;
       
+      // Calculate the magnitude of the gradient vector
+      float gradientMagnitude = sqrt(dzdx * dzdx + dzdy * dzdy);
+      
+      // Calculate slope in radians, then convert to degrees
+      float slope = atan(gradientMagnitude / pixelSizeMeters);
+      return degrees(slope);
+    }
+    
+    // Calculate smoothed slope using larger sampling area
+    float calculateSmoothedSlope(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters) {
+      // Sample in a 5x5 grid for smoothing
+      float slopeSum = 0.0;
+      int sampleCount = 0;
+      
+      for (int dy = -2; dy <= 2; dy++) {
+        for (int dx = -2; dx <= 2; dx++) {
+          vec2 offset = vec2(float(dx), float(dy)) * texelSize;
+          vec2 sampleCoord = adjustedTexCoord + offset;
+          
+          // Sample center and neighbors for this position
+          float center = texture(u_texture, sampleCoord).r;
+          if (center < -9999.0) continue; // Skip invalid pixels
+          
+          float n = texture(u_texture, sampleCoord + vec2(0.0, -texelSize.y)).r;
+          float s = texture(u_texture, sampleCoord + vec2(0.0, texelSize.y)).r;
+          float e = texture(u_texture, sampleCoord + vec2(texelSize.x, 0.0)).r;
+          float w = texture(u_texture, sampleCoord + vec2(-texelSize.x, 0.0)).r;
+          
+          // Use center value for invalid neighbors
+          if (n < -9999.0) n = center;
+          if (s < -9999.0) s = center;
+          if (e < -9999.0) e = center;
+          if (w < -9999.0) w = center;
+          
+          // Simple gradient calculation
+          float dzdx = (e - w) / 2.0;
+          float dzdy = (n - s) / 2.0;
+          
+          float gradientMagnitude = sqrt(dzdx * dzdx + dzdy * dzdy);
+          float slope = atan(gradientMagnitude / pixelSizeMeters);
+          
+          slopeSum += degrees(slope);
+          sampleCount++;
+        }
+      }
+      
+      return sampleCount > 0 ? slopeSum / float(sampleCount) : 0.0;
+    }
+    
+    void main() {
+      vec2 textureSize = vec2(textureSize(u_texture, 0));
+      vec2 texelSize = 1.0 / textureSize;
+      
+      // Map output coordinates to padded texture coordinates
+      // Scale and offset to map to the center portion of the padded texture
+      vec2 adjustedTexCoord = v_texCoord * (textureSize - 2.0) / textureSize + 1.0 / textureSize;
+      
+      // Sample the center pixel - elevation is stored directly in red channel
+      vec4 centerSample = texture(u_texture, adjustedTexCoord);
+      
+      // Check if we have valid data (DEM tiles use -10000 for no data)
+      if (centerSample.r < -9999.0) {
+        discard;
+      }
+      
+      float centerHeight = centerSample.r;
+      
       // Calculate pixel size in meters based on zoom level and latitude
       // Formula for 256x256 tiles: 156543.03392 * cos(latitude) / 2^zoom
       // But DEM tiles are 512x512, so pixels are half the size
       float latRad = radians(u_latitude);
       float pixelSizeMeters = 156543.03392 * cos(latRad) / pow(2.0, u_zoomLevel) / 2.0;
       
-      // Calculate the magnitude of the gradient vector
-      float gradientMagnitude = sqrt(dzdx * dzdx + dzdy * dzdy);
-      
-      // Calculate slope in radians, then convert to degrees
-      // The slope is the arctangent of the elevation change over horizontal distance
-      float slope = atan(gradientMagnitude / pixelSizeMeters);
-      float slopeDegrees = degrees(slope);
+      // Choose slope calculation method based on style and zoom level
+      float slopeDegrees;
+      if (u_style == 0) { // Slope style - always use full resolution
+        slopeDegrees = calculateStandardSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+      } else { // DownhillDifficulty style - use smoothing only above zoom 13
+        if (u_zoomLevel > 13.0) {
+          slopeDegrees = calculateSmoothedSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+        } else {
+          slopeDegrees = calculateStandardSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+        }
+      }
       
       // Get color based on slope
       vec3 slopeColor = getSlopeColor(slopeDegrees);
       
-      // Add some basic hillshading for depth perception
+      // Add some basic hillshading for depth perception (using standard gradient for consistency)
+      float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
+      float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
+      float e = texture(u_texture, adjustedTexCoord + vec2(texelSize.x, 0.0)).r;
+      float w = texture(u_texture, adjustedTexCoord + vec2(-texelSize.x, 0.0)).r;
+      
+      if (n < -9999.0) n = centerHeight;
+      if (s < -9999.0) s = centerHeight;
+      if (e < -9999.0) e = centerHeight;
+      if (w < -9999.0) w = centerHeight;
+      
+      float dzdx = (e - w) / 2.0;
+      float dzdy = (n - s) / 2.0;
+      
       vec3 normal = normalize(vec3(-dzdx, -dzdy, pixelSizeMeters));
       vec3 lightDir = normalize(vec3(0.5, 0.5, 0.8));
       float hillshade = dot(normal, lightDir);
@@ -544,6 +612,11 @@ export class SlopeTerrainRenderer {
     
     const conventionLocation = gl.getUniformLocation(program, "u_difficultyConvention");
     gl.uniform1i(conventionLocation, conventionInt);
+
+    // Set style uniform (0 = Slope, 1 = DownhillDifficulty)
+    const styleLocation = gl.getUniformLocation(program, "u_style");
+    const styleInt = style === MapStyleOverlay.Slope ? 0 : 1;
+    gl.uniform1i(styleLocation, styleInt);
 
     // Clear and draw
     gl.clearColor(0, 0, 0, 0);
