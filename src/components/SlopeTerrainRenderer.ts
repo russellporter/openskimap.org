@@ -285,6 +285,131 @@ export class SlopeTerrainRenderer {
       return sampleCount > 0 ? slopeSum / float(sampleCount) : 0.0;
     }
     
+    // Calculate aspect angle from gradients
+    vec3 calculateAspectColor(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters, float latitude) {
+      // Calculate gradients for aspect
+      float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
+      float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
+      float e = texture(u_texture, adjustedTexCoord + vec2(texelSize.x, 0.0)).r;
+      float w = texture(u_texture, adjustedTexCoord + vec2(-texelSize.x, 0.0)).r;
+      
+      // Check if any neighboring pixels are invalid
+      if (n < -9999.0) n = centerHeight;
+      if (s < -9999.0) s = centerHeight;
+      if (e < -9999.0) e = centerHeight;
+      if (w < -9999.0) w = centerHeight;
+      
+      // Calculate gradients (pointing uphill)
+      float dzdx = (e - w) / (2.0 * pixelSizeMeters);  // Positive if east is higher
+      float dzdy = (s - n) / (2.0 * pixelSizeMeters);  // Positive if south is higher (Y increases downward)
+      
+      // Calculate aspect (direction of slope face)
+      // The gradient vector (dzdx, dzdy) points uphill
+      // The aspect is the direction the slope faces (downhill)
+      // So we negate the gradient to get the downhill direction
+      // atan(y, x) in GLSL gives angle from positive X axis (east)
+      // We want angle from north, so we rotate by 90 degrees
+      float aspectRadians = atan(-dzdy, -dzdx) + radians(90.0);
+      
+      // Convert to degrees and normalize to 0-360 range
+      float aspectDegrees = degrees(aspectRadians);
+      if (aspectDegrees < 0.0) {
+        aspectDegrees += 360.0;
+      }
+      if (aspectDegrees >= 360.0) {
+        aspectDegrees -= 360.0;
+      }
+      
+      // Only show aspect for slopes steeper than ~5 degrees
+      float gradientMagnitude = sqrt(dzdx * dzdx + dzdy * dzdy);
+      float slope = atan(gradientMagnitude);
+      if (degrees(slope) < 5.0) {
+        return vec3(-1.0); // Signal to discard in main
+      }
+      
+      // Aspect coloring based on winter sun exposure
+      // 0/360 = North, 90 = East, 180 = South, 270 = West
+      
+      // Define base colors for sun exposure
+      vec3 maxSunColor = vec3(1.0, 0.2, 0.0);           // Red-orange (maximum heat)
+      vec3 excellentAfternoonColor = vec3(1.0, 0.5, 0.0); // Orange (excellent afternoon sun)
+      vec3 goodAfternoonColor = vec3(1.0, 0.8, 0.0);    // Yellow-orange (good afternoon sun)
+      vec3 someAfternoonColor = vec3(0.5, 0.8, 0.3);    // Yellow-green (some afternoon sun)
+      vec3 minSunColor = vec3(0.2, 0.4, 1.0);           // Blue (minimal sun)
+      vec3 limitedSunColor = vec3(0.3, 0.6, 0.9);       // Light blue (limited sun)
+      vec3 morningSunColor = vec3(0.6, 0.9, 0.5);       // Light green (morning sun only)
+      vec3 goodMorningSunColor = vec3(0.9, 0.9, 0.2);   // Yellow (good morning sun)
+      
+      // Check hemisphere and assign colors accordingly
+      // In northern hemisphere: south-facing gets most sun
+      // In southern hemisphere: north-facing gets most sun
+      bool isNorthernHemisphere = latitude >= 0.0;
+      
+      vec3 southColor, southwestColor, westColor, northwestColor;
+      vec3 northColor, northeastColor, eastColor, southeastColor;
+      
+      if (isNorthernHemisphere) {
+        // Northern hemisphere - south faces get most winter sun
+        southColor = maxSunColor;
+        southwestColor = excellentAfternoonColor;
+        westColor = goodAfternoonColor;
+        northwestColor = someAfternoonColor;
+        northColor = minSunColor;
+        northeastColor = limitedSunColor;
+        eastColor = morningSunColor;
+        southeastColor = goodMorningSunColor;
+      } else {
+        // Southern hemisphere - north faces get most winter sun
+        northColor = maxSunColor;
+        northwestColor = excellentAfternoonColor;
+        westColor = goodAfternoonColor;
+        southwestColor = someAfternoonColor;
+        southColor = minSunColor;
+        southeastColor = limitedSunColor;
+        eastColor = morningSunColor;
+        northeastColor = goodMorningSunColor;
+      }
+      
+      vec3 color;
+      
+      // Create smooth transitions between cardinal directions
+      if (aspectDegrees >= 337.5 || aspectDegrees < 22.5) {
+        // North (337.5° to 22.5°)
+        color = northColor;
+      } else if (aspectDegrees >= 22.5 && aspectDegrees < 67.5) {
+        // Northeast (22.5° to 67.5°)
+        float t = (aspectDegrees - 22.5) / 45.0;
+        color = mix(northColor, northeastColor, smoothstep(0.0, 0.5, t)) * (1.0 - smoothstep(0.5, 1.0, t)) 
+               + mix(northeastColor, eastColor, smoothstep(0.0, 1.0, t)) * smoothstep(0.5, 1.0, t);
+      } else if (aspectDegrees >= 67.5 && aspectDegrees < 112.5) {
+        // East (67.5° to 112.5°)
+        float t = (aspectDegrees - 67.5) / 45.0;
+        color = mix(eastColor, southeastColor, t);
+      } else if (aspectDegrees >= 112.5 && aspectDegrees < 157.5) {
+        // Southeast (112.5° to 157.5°)
+        float t = (aspectDegrees - 112.5) / 45.0;
+        color = mix(southeastColor, southColor, t);
+      } else if (aspectDegrees >= 157.5 && aspectDegrees < 202.5) {
+        // South (157.5° to 202.5°)
+        color = southColor;
+      } else if (aspectDegrees >= 202.5 && aspectDegrees < 247.5) {
+        // Southwest (202.5° to 247.5°)
+        float t = (aspectDegrees - 202.5) / 45.0;
+        color = mix(southColor, southwestColor, smoothstep(0.0, 0.5, t)) * (1.0 - smoothstep(0.5, 1.0, t))
+               + mix(southwestColor, westColor, smoothstep(0.0, 1.0, t)) * smoothstep(0.5, 1.0, t);
+      } else if (aspectDegrees >= 247.5 && aspectDegrees < 292.5) {
+        // West (247.5° to 292.5°)
+        float t = (aspectDegrees - 247.5) / 45.0;
+        color = mix(westColor, northwestColor, t);
+      } else if (aspectDegrees >= 292.5 && aspectDegrees < 337.5) {
+        // Northwest (292.5° to 337.5°)
+        float t = (aspectDegrees - 292.5) / 45.0;
+        color = mix(northwestColor, northColor, t);
+      }
+      
+      return color;
+    }
+    
     void main() {
       vec2 textureSize = vec2(textureSize(u_texture, 0));
       vec2 texelSize = 1.0 / textureSize;
@@ -311,18 +436,24 @@ export class SlopeTerrainRenderer {
       
       // Choose slope calculation method based on style and zoom level
       float slopeDegrees;
+      vec3 slopeColor;
+      
       if (u_style == 0) { // Slope style - always use full resolution
         slopeDegrees = calculateStandardSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
-      } else { // DownhillDifficulty style - use smoothing only above zoom 13
+        slopeColor = getSlopeColor(slopeDegrees);
+      } else if (u_style == 1) { // DownhillDifficulty style - use smoothing only above zoom 13
         if (u_zoomLevel > 13.0) {
           slopeDegrees = calculateSmoothedSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
         } else {
           slopeDegrees = calculateStandardSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
         }
+        slopeColor = getSlopeColor(slopeDegrees);
+      } else if (u_style == 2) { // Aspect style - calculate aspect angle
+        slopeColor = calculateAspectColor(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters, u_latitude);
+        if (slopeColor.x < 0.0) {
+          discard; // Too flat to have meaningful aspect
+        }
       }
-      
-      // Get color based on slope
-      vec3 slopeColor = getSlopeColor(slopeDegrees);
       
       // Add some basic hillshading for depth perception (using standard gradient for consistency)
       float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
@@ -383,7 +514,14 @@ export class SlopeTerrainRenderer {
           return color;
         }
       `,
-      [MapStyleOverlay.DownhillDifficulty]: this.generateDownhillDifficultyShaderCode()
+      [MapStyleOverlay.DownhillDifficulty]: this.generateDownhillDifficultyShaderCode(),
+      [MapStyleOverlay.Aspect]: `
+        // Placeholder for aspect style - actual calculation is in main shader
+        vec3 getSlopeColor(float slope) {
+          // Not used for aspect style - calculation happens in calculateAspectColor
+          return vec3(1.0, 0.0, 1.0);
+        }
+      `
     };
 
     return baseFragmentShader + colorFunctions[style] + slopeCalculationCode;
@@ -613,9 +751,20 @@ export class SlopeTerrainRenderer {
     const conventionLocation = gl.getUniformLocation(program, "u_difficultyConvention");
     gl.uniform1i(conventionLocation, conventionInt);
 
-    // Set style uniform (0 = Slope, 1 = DownhillDifficulty)
+    // Set style uniform (0 = Slope, 1 = DownhillDifficulty, 2 = Aspect)
     const styleLocation = gl.getUniformLocation(program, "u_style");
-    const styleInt = style === MapStyleOverlay.Slope ? 0 : 1;
+    let styleInt = 0;
+    switch (style) {
+      case MapStyleOverlay.Slope:
+        styleInt = 0;
+        break;
+      case MapStyleOverlay.DownhillDifficulty:
+        styleInt = 1;
+        break;
+      case MapStyleOverlay.Aspect:
+        styleInt = 2;
+        break;
+    }
     gl.uniform1i(styleLocation, styleInt);
 
     // Clear and draw
