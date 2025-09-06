@@ -16,11 +16,14 @@ import * as maplibregl from "maplibre-gl";
 import memoize from "memoize-one";
 import {
   ElevationData,
+  getEstimatedRunDifficulty,
+  getRunColor,
+  getSlopeGradingScale,
   RunDifficulty,
   RunFeature,
   RunProperties,
   RunUse,
-  getRunColor,
+  SlopeGradingScale,
 } from "openskidata-format";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
@@ -544,7 +547,7 @@ function configureChartGradient(
   elevationsAndDistance: { x: number; y: number }[],
   gradient: CanvasGradient
 ): CanvasGradient {
-  const difficultyScheme = getRunDifficultyScheme(feature);
+  const difficultyScheme = getSlopeGradingScale(feature);
   // Ensure we have a valid non-null difficulty
   const defaultDifficulty = feature.properties.difficulty as RunDifficulty;
 
@@ -696,46 +699,6 @@ function hsla(hsl: string, amount: number) {
   return `hsl(${result[1]}, ${result[2]}%, ${result[3]}%, ${amount})`;
 }
 
-type RunDifficultyScheme = {
-  // Stops must be ordered ascending by steepness
-  stops: { maxSteepness: number; difficulty: RunDifficulty }[];
-};
-
-function getRunDifficultyScheme(feature: RunFeature) {
-  if (
-    feature.properties.uses.includes(RunUse.Downhill) ||
-    feature.properties.uses.includes(RunUse.Skitour)
-  ) {
-    return {
-      stops: [
-        { maxSteepness: 0.25, difficulty: RunDifficulty.EASY },
-        { maxSteepness: 0.4, difficulty: RunDifficulty.INTERMEDIATE },
-        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED },
-      ],
-    };
-  } else if (feature.properties.uses.includes(RunUse.Nordic)) {
-    return {
-      stops: [
-        { maxSteepness: 0.1, difficulty: RunDifficulty.EASY },
-        { maxSteepness: 0.15, difficulty: RunDifficulty.INTERMEDIATE },
-        { maxSteepness: Number.MAX_VALUE, difficulty: RunDifficulty.ADVANCED },
-      ],
-    };
-  } else {
-    return { stops: [] };
-  }
-}
-
-function getEstimatedRunDifficulty(
-  steepness: number,
-  scheme: RunDifficultyScheme
-): RunDifficulty | null {
-  const absoluteSteepness = Math.abs(steepness);
-  return (
-    scheme.stops.find((stop) => stop.maxSteepness > absoluteSteepness)
-      ?.difficulty || null
-  );
-}
 
 // Get the interpolated elevation value for a given distance along the line
 function getInterpolatedElevation(

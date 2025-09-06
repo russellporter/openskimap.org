@@ -2283,6 +2283,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/bbox@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/bbox@npm:7.2.0"
+  dependencies:
+    "@turf/helpers": ^7.2.0
+    "@turf/meta": ^7.2.0
+    "@types/geojson": ^7946.0.10
+    tslib: ^2.8.1
+  checksum: 34dfb634d04bc20be292a211e0fdef610556bead4bb5a38174fe040c59f041b4a0e2f586148c2c8b88677b1c5af08a07de5745235233dbaa0197fd67bf21e0da
+  languageName: node
+  linkType: hard
+
 "@turf/bearing@npm:^7.1.0":
   version: 7.1.0
   resolution: "@turf/bearing@npm:7.1.0"
@@ -2304,6 +2316,31 @@ __metadata:
     "@types/geojson": ^7946.0.10
     tslib: ^2.8.1
   checksum: 4033fbaf40cf12ee47eeb285f7192825d2f0d7671b0bea636dc14b8531e32fb57d58e4d2815357dca2d4c398ce9c1df619882f1842d013176c178fa1e3458429
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-point-in-polygon@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/boolean-point-in-polygon@npm:7.2.0"
+  dependencies:
+    "@turf/helpers": ^7.2.0
+    "@turf/invariant": ^7.2.0
+    "@types/geojson": ^7946.0.10
+    point-in-polygon-hao: ^1.1.0
+    tslib: ^2.8.1
+  checksum: 37624a62d88e7d8c39a37d774399e3a9322f8b544e708c5f6eb4ad34ed86f57c7ac1ef6fafcc66297eb77b44aa28cccb9c8c583bf317471d142c0fbefc4aeb9c
+  languageName: node
+  linkType: hard
+
+"@turf/center@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/center@npm:7.2.0"
+  dependencies:
+    "@turf/bbox": ^7.2.0
+    "@turf/helpers": ^7.2.0
+    "@types/geojson": ^7946.0.10
+    tslib: ^2.8.1
+  checksum: d8c88e972eabec094993d875607d0467b98826517bbeb24bd6b289e62cbbfbdbdd649e7e03f1b7967d0f258a3adfac0955d4d09aaabb59bebf5db99bcca485e3
   languageName: node
   linkType: hard
 
@@ -4734,16 +4771,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openskidata-format@npm:4.0.0":
-  version: 4.0.0
-  resolution: "openskidata-format@npm:4.0.0"
+"openskidata-format@npm:5.3.0":
+  version: 5.3.0
+  resolution: "openskidata-format@npm:5.3.0"
   dependencies:
+    "@turf/boolean-point-in-polygon": ^7.2.0
+    "@turf/center": ^7.2.0
     "@turf/distance": ^7.2.0
+    "@turf/helpers": ^7.2.0
     "@turf/length": ^7.2.0
     "@turf/line-chunk": ^7.2.0
     "@turf/meta": ^7.2.0
     tslib: ^2
-  checksum: 79efd061a6e241531a8d1865bd046c7a1adbfe482c91d25a0a7fc57419c590f1fa11380416629ac311b2b361ef8b4139e65febe8ead142e082e17353d16dcd80
+  checksum: de14ff47d47d5fcea9658061ae2e083f537eecaf0880a7c0c2db6bfb9c54d4a9f7529050f4624b58cce19a4560828344be8aa7561b3228bc39b93edc1b85f7c8
   languageName: node
   linkType: hard
 
@@ -4773,7 +4813,7 @@ __metadata:
     maplibre-contour: ^0.1.0
     maplibre-gl: ^5.6.1
     memoize-one: ^6.0.0
-    openskidata-format: 4.0.0
+    openskidata-format: 5.3.0
     prettier: ^3.3.3
     query-string: ^9.1.0
     react: ^18.3.1
@@ -4895,6 +4935,15 @@ __metadata:
   version: 4.0.2
   resolution: "picomatch@npm:4.0.2"
   checksum: a7a5188c954f82c6585720e9143297ccd0e35ad8072231608086ca950bee672d51b0ef676254af0788205e59bd4e4deb4e7708769226bed725bf13370a7d1464
+  languageName: node
+  linkType: hard
+
+"point-in-polygon-hao@npm:^1.1.0":
+  version: 1.2.4
+  resolution: "point-in-polygon-hao@npm:1.2.4"
+  dependencies:
+    robust-predicates: ^3.0.2
+  checksum: c010727ca2fb1b98b80f10ab597ad39a2a80f78a6b4ba80c7f5bb34962a5ec0c39098b16c71d0fe99530a196335e12bb92ec36d2c74ccc8a9d24e9fcb2a97847
   languageName: node
   linkType: hard
 
@@ -5221,6 +5270,13 @@ __metadata:
   version: 0.12.0
   resolution: "retry@npm:0.12.0"
   checksum: 623bd7d2e5119467ba66202d733ec3c2e2e26568074923bc0585b6b99db14f357e79bdedb63cab56cec47491c4a0da7e6021a7465ca6dc4f481d3898fdd3158c
+  languageName: node
+  linkType: hard
+
+"robust-predicates@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "robust-predicates@npm:3.0.2"
+  checksum: 36854c1321548ceca96d36ad9d6e0a5a512986029ec6929ad6ed3ec1612c22cc8b46cc72d2c5674af42e8074a119d793f6f0ea3a5b51373e3ab926c64b172d7a
   languageName: node
   linkType: hard
 
