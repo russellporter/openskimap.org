@@ -252,6 +252,10 @@ export class Map {
           if (layerId === "building-top")
             return this.terrainEnabled ? "none" : "visible";
 
+          // Hide hillshade layer when slope terrain overlay is enabled
+          if (layerId === "hillshade")
+            return this.slopeTerrainEnabled ? "none" : "visible";
+
           // No visibility change needed
           return null;
         };
