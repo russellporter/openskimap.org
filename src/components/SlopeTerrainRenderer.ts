@@ -298,17 +298,17 @@ export class SlopeTerrainRenderer {
           vec3 red = vec3(1.0, 0.0, 0.0);     // Red for very steep
           
           vec3 color;
-          if (normalizedSlope < 0.25) {
-            // Green to Yellow (0-11.25 degrees)
-            color = mix(green, yellow, normalizedSlope * 4.0);
-          } else if (normalizedSlope < 0.5) {
-            // Yellow to Orange (11.25-22.5 degrees)
-            color = mix(yellow, orange, (normalizedSlope - 0.25) * 4.0);
-          } else if (normalizedSlope < 0.75) {
-            // Orange to Red (22.5-33.75 degrees)
-            color = mix(orange, red, (normalizedSlope - 0.5) * 4.0);
+          if (normalizedSlope < 0.33) {
+            // Green to Yellow (0-15 degrees)
+            color = mix(green, yellow, normalizedSlope * 3.0);
+          } else if (normalizedSlope < 0.67) {
+            // Yellow to Orange (15-30 degrees)
+            color = mix(yellow, orange, (normalizedSlope - 0.33) * 3.0);
+          } else if (normalizedSlope < 1.0) {
+            // Orange to Red (30-45 degrees)
+            color = mix(orange, red, (normalizedSlope - 0.67) * 3.0);
           } else {
-            // Deep red for extreme slopes (33.75+ degrees)
+            // Deep red for extreme slopes (45+ degrees)
             color = red;
           }
           
