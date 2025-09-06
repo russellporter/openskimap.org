@@ -40,7 +40,7 @@ class TexturePool {
 }
 
 export class SlopeTerrainRenderer {
-  private canvas: HTMLCanvasElement | null = null;
+  private canvas: OffscreenCanvas | null = null;
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
   private positionBuffer: WebGLBuffer | null = null;
@@ -173,10 +173,11 @@ export class SlopeTerrainRenderer {
   `;
 
   public constructor(demSource: InstanceType<typeof mlcontour.DemSource>) {
-    // Try to initialize WebGL on construction
-    this.canvas = document.createElement("canvas");
-    this.isSupported = this.initWebGL(this.canvas);
     this.demSource = demSource;
+    
+    // Always use OffscreenCanvas for optimal performance
+    this.canvas = new OffscreenCanvas(512, 512);
+    this.isSupported = this.initWebGL(this.canvas);
 
     if (!this.isSupported) {
       console.warn(
@@ -209,7 +210,7 @@ export class SlopeTerrainRenderer {
     return shader;
   }
 
-  private initWebGL(canvas: HTMLCanvasElement): boolean {
+  private initWebGL(canvas: OffscreenCanvas): boolean {
     this.canvas = canvas;
     // Only support WebGL 2
     const gl = canvas.getContext("webgl2");
@@ -305,7 +306,11 @@ export class SlopeTerrainRenderer {
     const outputWidth = paddedDemTile.width - 2;
     const outputHeight = paddedDemTile.height - 2;
     
-    // Resize canvas to match output size
+    // Assert tiles are expected size - resize canvas to match output size
+    console.assert(
+      canvas.width === outputWidth && canvas.height === outputHeight,
+      `Unexpected tile size: canvas ${canvas.width}x${canvas.height}, expected ${outputWidth}x${outputHeight}`
+    );
     canvas.width = outputWidth;
     canvas.height = outputHeight;
     gl.viewport(0, 0, outputWidth, outputHeight);
