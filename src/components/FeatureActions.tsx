@@ -1,5 +1,4 @@
 import { Button } from "@mui/material";
-import * as React from "react";
 
 export function getWebsiteActions(websites: string[]): JSX.Element[] {
   if (websites.length === 0) {

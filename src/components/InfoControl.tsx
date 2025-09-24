@@ -1,5 +1,4 @@
 import * as maplibregl from "maplibre-gl";
-import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";

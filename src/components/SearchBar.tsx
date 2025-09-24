@@ -45,11 +45,6 @@ interface State {
   hideResults: boolean;
 }
 
-enum Activity {
-  Downhill = "downhill",
-  Nordic = "nordic",
-  Backcountry = "backcountry",
-}
 
 type CommandResult = { type: "add_marker"; data: MapMarker };
 type LocationResult = {

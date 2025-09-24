@@ -1,6 +1,5 @@
 import { Checkbox, styled } from "@mui/material";
 import { CheckboxProps } from "@mui/material/Checkbox";
-import * as React from "react";
 
 const downhillSkiAreaColor = "#3085FE";
 const nordicSkiAreaColor = "#20B200";

@@ -34,6 +34,7 @@ export class Map {
   private filtersVisible = false;
   private mapScaleControl: maplibregl.ScaleControl;
 
+  // @ts-ignore - interactionManager is stored for explicitness but doesn't need to be accessed
   private interactionManager: MapInteractionManager;
   private filterManager: MapFilterManager;
   private demSource: InstanceType<typeof mlcontour.DemSource>;
