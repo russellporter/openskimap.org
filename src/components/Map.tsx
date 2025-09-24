@@ -440,8 +440,14 @@ export class Map {
             },
           };
 
-          // Add track layer
-          baseStyle.layers.push({
+          // Add track layer before other-ski-area-icons
+          const baseIndex = baseStyle.layers.findIndex(
+            (layer) => layer.id === "other-ski-area-icons"
+          );
+          const insertIndex =
+            baseIndex >= 0 ? baseIndex : baseStyle.layers.length;
+
+          baseStyle.layers.splice(insertIndex, 0, {
             id: layerId,
             type: "line",
             source: sourceId,
