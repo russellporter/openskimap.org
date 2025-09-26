@@ -318,6 +318,16 @@ const SearchResult: React.FunctionComponent<{
       <ListItemText
         primary={getPrimaryText(props.result)}
         secondary={getSecondaryText(props.result)}
+        primaryTypographyProps={{
+          sx: {
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            lineClamp: 3,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }
+        }}
       />
     </ListItemButton>
   );
