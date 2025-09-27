@@ -1,7 +1,7 @@
 import mlcontour from "maplibre-contour";
 import * as maplibregl from "maplibre-gl";
 import { throttle } from "throttle-debounce";
-import MapFilters from "../MapFilters";
+import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
 import { MAP_STYLE_URLS, MapStyle, MapStyleOverlay, isSlopeOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
@@ -10,7 +10,8 @@ import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
 import { InfoControl } from "./InfoControl";
 import { InfoData } from "./InfoData";
-import MapFilterManager from "./MapFilterManager";
+import { getVisibleSkiAreasCount } from "./MapVisibilityUtils";
+import { getFilterRules } from "./MapFilterRules";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { SearchBarControl } from "./SearchBarControl";
 import { panToZoomLevel } from "./SkiAreaInfo";
@@ -36,11 +37,11 @@ export class Map {
 
   // @ts-ignore - interactionManager is stored for explicitness but doesn't need to be accessed
   private interactionManager: MapInteractionManager;
-  private filterManager: MapFilterManager;
   private demSource: InstanceType<typeof mlcontour.DemSource>;
   private esriAttribution: EsriAttribution | null = null;
   private attributionControl: maplibregl.AttributionControl;
   private currentStyle: MapStyle | null = null;
+  private currentFilters: MapFilters = defaultMapFilters;
   private terrainEnabled = false;
   private currentSlopeOverlay: MapStyleOverlay | null = null;
   private slopeRenderer: SlopeTerrainRenderer | null = null;
@@ -64,7 +65,6 @@ export class Map {
     this.searchBarControl = new SearchBarControl(eventBus);
 
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
-    this.filterManager = new MapFilterManager(this.map);
 
     this.mapScaleControl = new maplibregl.ScaleControl({
       maxWidth: 80,
@@ -261,19 +261,69 @@ export class Map {
           return null;
         };
 
-        // Apply visibility rules to layers
-        const updatedLayers = newStyle.layers.map((layer) => {
-          const visibility = getLayerVisibility(layer.id);
-          if (visibility === null) return layer;
+        // Apply filter rules to layers
+        const applyFilters = (layers: any[]) => {
+          const filterRules = getFilterRules(this.currentFilters);
 
-          return {
-            ...layer,
-            layout: {
-              ...layer.layout,
-              visibility,
-            },
-          };
-        });
+          return layers.map((layer) => {
+            // Apply visibility rules first
+            const visibility = getLayerVisibility(layer.id);
+            let updatedLayer = layer;
+
+            if (visibility !== null) {
+              updatedLayer = {
+                ...layer,
+                layout: {
+                  ...layer.layout,
+                  visibility,
+                },
+              };
+            }
+
+            // Apply filter rules based on source-layer
+            const sourceLayer = layer["source-layer"];
+            let filterRule = null;
+            let mergeExistingFilter = true;
+
+            if (layer.id === "selected-run" || layer.id === "selected-lift") {
+              filterRule = filterRules.selected;
+              mergeExistingFilter = false; // Replace existing filter
+            } else if (sourceLayer === "skiareas") {
+              filterRule = filterRules.skiAreas;
+            } else if (sourceLayer === "runs") {
+              filterRule = filterRules.runs;
+            } else if (sourceLayer === "lifts") {
+              filterRule = filterRules.lifts;
+            }
+
+            // Apply filter rule
+            if (filterRule === "hidden") {
+              updatedLayer = {
+                ...updatedLayer,
+                layout: {
+                  ...updatedLayer.layout,
+                  visibility: "none",
+                },
+              };
+            } else if (filterRule && filterRule !== true && Array.isArray(filterRule)) {
+              // Combine with existing filter if present
+              const existingFilter = layer.filter;
+              const newFilter = existingFilter && mergeExistingFilter
+                ? ["all", existingFilter, filterRule]
+                : filterRule;
+
+              updatedLayer = {
+                ...updatedLayer,
+                filter: newFilter,
+              };
+            }
+
+            return updatedLayer;
+          });
+        };
+
+        // Apply visibility and filter rules to layers
+        const updatedLayers = applyFilters(newStyle.layers);
 
         // Handle 3D terrain for all styles
         let baseStyle = {
@@ -470,9 +520,13 @@ export class Map {
   };
 
   private setFiltersUnthrottled = (filters: MapFilters) => {
+    this.currentFilters = filters;
     this.waitForMapLoaded(() => {
       this.filterControl.setFilters(filters);
-      this.filterManager.setFilters(filters);
+      // Refresh the style to apply filters instead of using filterManager for layer updates
+      if (this.currentStyle !== null) {
+        this.setStyle(this.currentStyle);
+      }
       this.updateVisibleSkiAreasCountUnthrottled();
     });
   };
@@ -522,7 +576,7 @@ export class Map {
     }
 
     this.filterControl.setVisibleSkiAreasCount(
-      this.filterManager.getVisibleSkiAreasCount()
+      getVisibleSkiAreasCount(this.map, this.currentFilters)
     );
   };
 
