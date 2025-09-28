@@ -96,7 +96,7 @@ export class SlopeTerrainRenderer {
   public sunExposureDate: Date = new Date(new Date().getFullYear(), 0, 15); // Default Jan 15
   
   // Coarse terrain zoom level for extended shadow casting
-  private static readonly COARSE_TERRAIN_ZOOM = 7;
+  private static readonly COARSE_TERRAIN_ZOOM = 8;
 
   private vertexShaderSource = `#version 300 es
     in vec2 a_position;
@@ -852,6 +852,8 @@ export class SlopeTerrainRenderer {
   public processTerrainTile(
     paddedDemTile: { width: number; height: number; data: Float32Array },
     zoomLevel: number,
+    tileX: number,
+    tileY: number,
     latitude: number,
     longitude: number,
     style: MapStyleOverlay,
@@ -970,19 +972,18 @@ export class SlopeTerrainRenderer {
       const lowResZoom = SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM;
       const lowResScale = Math.pow(2, zoomLevel - lowResZoom);
       
-      // Calculate coordinate transformation more directly
+      // Calculate coordinate transformation using actual tile coordinates
       // We know: lowResX = floor(x / lowResScale), lowResY = floor(y / lowResScale)
       // So the current high-res tile (x,y) maps to position within the low-res tile
-      const highResX = (longitude + 180) / 360 * Math.pow(2, zoomLevel);
-      const highResY = (1 - Math.log(Math.tan(latitude * Math.PI / 180) + 1 / Math.cos(latitude * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoomLevel);
+      // Use exact tile coordinates to avoid floating-point precision errors
       
       // The low-res tile that contains our high-res tile
-      const lowResX = Math.floor(highResX / lowResScale);
-      const lowResY = Math.floor(highResY / lowResScale);
+      const lowResX = Math.floor(tileX / lowResScale);
+      const lowResY = Math.floor(tileY / lowResScale);
       
       // Position of current high-res tile within the low-res tile (0.0 to 1.0)
-      const offsetX = (highResX - lowResX * lowResScale) / lowResScale;
-      const offsetY = (highResY - lowResY * lowResScale) / lowResScale;
+      const offsetX = (tileX - lowResX * lowResScale) / lowResScale;
+      const offsetY = (tileY - lowResY * lowResScale) / lowResScale;
       
       const lowResScaleLocation = gl.getUniformLocation(program, "u_lowResScale");
       gl.uniform1f(lowResScaleLocation, lowResScale);
@@ -1311,6 +1312,8 @@ export class SlopeTerrainRenderer {
       const processedData = this.processTerrainTile(
         demTile,
         zoomLevel,
+        x,
+        y,
         latitude,
         longitude,
         style,
