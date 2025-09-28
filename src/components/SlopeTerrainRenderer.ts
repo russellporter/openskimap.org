@@ -214,10 +214,28 @@ export class SlopeTerrainRenderer {
     uniform float u_dayOfYear;
     uniform float u_lowResScale;
     uniform vec2 u_lowResOffset;
+    uniform float u_tileX;
+    uniform float u_tileY;
     in vec2 v_texCoord;
     `;
 
     const slopeCalculationCode = `
+    // Calculate per-pixel latitude and longitude from tile coordinates
+    vec2 calculatePixelLatLng(vec2 texCoord, float zoom, float tileX, float tileY) {
+      // Calculate pixel position within the tile (0.0 to 1.0)
+      float pixelX = tileX + texCoord.x;
+      float pixelY = tileY + texCoord.y;
+
+      // Convert to longitude (straightforward linear mapping)
+      float longitude = (pixelX / pow(2.0, zoom)) * 360.0 - 180.0;
+
+      // Convert to latitude using Web Mercator inverse projection
+      float n = 3.14159265359 - (2.0 * 3.14159265359 * pixelY) / pow(2.0, zoom);
+      float latitude = (180.0 / 3.14159265359) * atan(0.5 * (exp(n) - exp(-n)));
+
+      return vec2(latitude, longitude);
+    }
+
     // Calculate slope using standard Sobel operator (full resolution)
     float calculateStandardSlope(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters) {
       // Sample neighboring pixels for slope calculation (Sobel operator)
@@ -294,7 +312,16 @@ export class SlopeTerrainRenderer {
     }
     
     // Calculate sun exposure hours for a given slope
-    vec3 calculateSunExposure(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters, float latitude, float longitude) {
+    vec3 calculateSunExposure(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters) {
+      // Calculate per-pixel latitude and longitude
+      // Note: adjustedTexCoord is in padded texture space, but we need original texture coordinates
+      // Convert back to original tile coordinates (0.0 to 1.0 within the tile)
+      vec2 textureSize = vec2(textureSize(u_texture, 0));
+      vec2 originalTexCoord = (adjustedTexCoord * textureSize - 1.0) / (textureSize - 2.0);
+      vec2 pixelLatLng = calculatePixelLatLng(originalTexCoord, u_zoomLevel, u_tileX, u_tileY);
+      float latitude = pixelLatLng.x;
+      float longitude = pixelLatLng.y;
+
       // Calculate gradients for slope normal
       float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
       float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
@@ -485,7 +512,13 @@ export class SlopeTerrainRenderer {
     }
     
     // Calculate aspect angle from gradients
-    vec3 calculateAspectColor(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters, float latitude) {
+    vec3 calculateAspectColor(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters) {
+      // Calculate per-pixel latitude
+      vec2 textureSize = vec2(textureSize(u_texture, 0));
+      vec2 originalTexCoord = (adjustedTexCoord * textureSize - 1.0) / (textureSize - 2.0);
+      vec2 pixelLatLng = calculatePixelLatLng(originalTexCoord, u_zoomLevel, u_tileX, u_tileY);
+      float latitude = pixelLatLng.x;
+
       // Calculate gradients for aspect
       float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
       float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
@@ -648,12 +681,12 @@ export class SlopeTerrainRenderer {
         }
         slopeColor = getSlopeColor(slopeDegrees);
       } else if (u_style == 2) { // Aspect style - calculate aspect angle
-        slopeColor = calculateAspectColor(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters, u_latitude);
+        slopeColor = calculateAspectColor(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
         if (slopeColor.x < 0.0) {
           discard; // Too flat to have meaningful aspect
         }
       } else if (u_style == 3) { // Sun exposure style - calculate sun hours
-        slopeColor = calculateSunExposure(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters, u_latitude, u_longitude);
+        slopeColor = calculateSunExposure(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
       }
       
       // Add some basic hillshading for depth perception (using standard gradient for consistency)
@@ -1014,6 +1047,12 @@ export class SlopeTerrainRenderer {
 
     const longitudeLocation = gl.getUniformLocation(program, "u_longitude");
     gl.uniform1f(longitudeLocation, longitude);
+
+    const tileXLocation = gl.getUniformLocation(program, "u_tileX");
+    gl.uniform1f(tileXLocation, tileX);
+
+    const tileYLocation = gl.getUniformLocation(program, "u_tileY");
+    gl.uniform1f(tileYLocation, tileY);
 
     // Determine difficulty convention based on tile location
     const point = turf.point([longitude, latitude]);
