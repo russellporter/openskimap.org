@@ -1138,23 +1138,23 @@ export class SlopeTerrainRenderer {
     x: number,
     y: number
   ): Promise<{ width: number; height: number; data: Float32Array } | null> {
-    // Create a padded tile by fetching center tile + 4 cardinal neighbors to eliminate seams
+    // Create a padded tile by fetching center tile + 8 neighbors (cardinal + diagonal) to eliminate seams
     const tilePromises: Promise<{ width: number; height: number; data: Float32Array } | null>[] = [];
-    
-    // Define neighboring tile offsets: [dx, dy] - only cardinal directions
+
+    // Define neighboring tile offsets: [dx, dy] - all 8 neighbors + center in 3x3 grid
     const neighbors = [
-      [0, -1], // north
-      [-1, 0], [0, 0], [1, 0], // west, center, east
-      [0, 1]   // south
+      [-1, -1], [0, -1], [1, -1], // northwest, north, northeast
+      [-1,  0], [0,  0], [1,  0], // west, center, east
+      [-1,  1], [0,  1], [1,  1]  // southwest, south, southeast
     ];
     
-    // Fetch all tiles (center + cardinal neighbors)
+    // Fetch all tiles (center + 8 neighbors)
     for (const [dx, dy] of neighbors) {
       tilePromises.push(this.demSource.getDemTile(z, x + dx, y + dy));
     }
-    
+
     const tiles = await Promise.all(tilePromises);
-    const centerTile = tiles[2]; // Center tile is at index 2 ([0,0])
+    const centerTile = tiles[4]; // Center tile is at index 4 ([0,0])
     
     if (!centerTile) {
       return null; // No center tile data available
@@ -1176,13 +1176,20 @@ export class SlopeTerrainRenderer {
       }
     }
     
-    // Fill border pixels from neighboring tiles (cardinal directions only)
-    // Tile indices: [0]=north, [1]=west, [2]=center, [3]=east, [4]=south
-    
-    const northTile = tiles[0];
-    const westTile = tiles[1];
-    const eastTile = tiles[3];
-    const southTile = tiles[4];
+    // Fill border pixels from neighboring tiles
+    // Tile indices in 3x3 grid:
+    // [0]=northwest, [1]=north, [2]=northeast
+    // [3]=west,      [4]=center, [5]=east
+    // [6]=southwest, [7]=south, [8]=southeast
+
+    const northwestTile = tiles[0];
+    const northTile = tiles[1];
+    const northeastTile = tiles[2];
+    const westTile = tiles[3];
+    const eastTile = tiles[5];
+    const southwestTile = tiles[6];
+    const southTile = tiles[7];
+    const southeastTile = tiles[8];
     
     // Fill top border from north neighbor
     if (northTile) {
@@ -1220,26 +1227,50 @@ export class SlopeTerrainRenderer {
       }
     }
     
-    // Fill corner pixels by interpolating from adjacent border pixels
+    // Fill corner pixels from diagonal neighbor tiles (if available) or interpolate
     // Top-left corner
-    const topLeft = paddedData[0 * paddedSize + 1]; // Top border, first pixel
-    const leftTop = paddedData[1 * paddedSize + 0]; // Left border, first pixel
-    paddedData[0 * paddedSize + 0] = (topLeft + leftTop) / 2;
-    
+    if (northwestTile) {
+      const srcIndex = (tileSize - 1) * tileSize + (tileSize - 1); // Bottom-right pixel of northwest tile
+      paddedData[0 * paddedSize + 0] = northwestTile.data[srcIndex];
+    } else {
+      // Fallback to interpolation
+      const topLeft = paddedData[0 * paddedSize + 1]; // Top border, first pixel
+      const leftTop = paddedData[1 * paddedSize + 0]; // Left border, first pixel
+      paddedData[0 * paddedSize + 0] = (topLeft + leftTop) / 2;
+    }
+
     // Top-right corner
-    const topRight = paddedData[0 * paddedSize + (paddedSize - 2)]; // Top border, last pixel
-    const rightTop = paddedData[1 * paddedSize + (paddedSize - 1)]; // Right border, first pixel
-    paddedData[0 * paddedSize + (paddedSize - 1)] = (topRight + rightTop) / 2;
-    
+    if (northeastTile) {
+      const srcIndex = (tileSize - 1) * tileSize + 0; // Bottom-left pixel of northeast tile
+      paddedData[0 * paddedSize + (paddedSize - 1)] = northeastTile.data[srcIndex];
+    } else {
+      // Fallback to interpolation
+      const topRight = paddedData[0 * paddedSize + (paddedSize - 2)]; // Top border, last pixel
+      const rightTop = paddedData[1 * paddedSize + (paddedSize - 1)]; // Right border, first pixel
+      paddedData[0 * paddedSize + (paddedSize - 1)] = (topRight + rightTop) / 2;
+    }
+
     // Bottom-left corner
-    const bottomLeft = paddedData[(paddedSize - 1) * paddedSize + 1]; // Bottom border, first pixel
-    const leftBottom = paddedData[(paddedSize - 2) * paddedSize + 0]; // Left border, last pixel
-    paddedData[(paddedSize - 1) * paddedSize + 0] = (bottomLeft + leftBottom) / 2;
-    
+    if (southwestTile) {
+      const srcIndex = 0 * tileSize + (tileSize - 1); // Top-right pixel of southwest tile
+      paddedData[(paddedSize - 1) * paddedSize + 0] = southwestTile.data[srcIndex];
+    } else {
+      // Fallback to interpolation
+      const bottomLeft = paddedData[(paddedSize - 1) * paddedSize + 1]; // Bottom border, first pixel
+      const leftBottom = paddedData[(paddedSize - 2) * paddedSize + 0]; // Left border, last pixel
+      paddedData[(paddedSize - 1) * paddedSize + 0] = (bottomLeft + leftBottom) / 2;
+    }
+
     // Bottom-right corner
-    const bottomRight = paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 2)]; // Bottom border, last pixel
-    const rightBottom = paddedData[(paddedSize - 2) * paddedSize + (paddedSize - 1)]; // Right border, last pixel
-    paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 1)] = (bottomRight + rightBottom) / 2;
+    if (southeastTile) {
+      const srcIndex = 0 * tileSize + 0; // Top-left pixel of southeast tile
+      paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 1)] = southeastTile.data[srcIndex];
+    } else {
+      // Fallback to interpolation
+      const bottomRight = paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 2)]; // Bottom border, last pixel
+      const rightBottom = paddedData[(paddedSize - 2) * paddedSize + (paddedSize - 1)]; // Right border, last pixel
+      paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 1)] = (bottomRight + rightBottom) / 2;
+    }
     
     return {
       width: paddedSize,
