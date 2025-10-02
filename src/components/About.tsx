@@ -86,8 +86,14 @@ export default class About extends React.Component<Props> {
           stable and may change as the project evolves.
         </Typography>
         <Typography paragraph={true}>
-          Use is subject to the Open Database license. You must attribute
-          OpenSkiMap.org and OpenStreetMap appropriately.
+          Use is subject to several licenses. You must attribute
+          OpenSkiMap.org, OpenStreetMap, and <Link
+            onClick={(e: any) => {
+              e.preventDefault();
+              this.props.eventBus.openLegal();
+            }}
+            href="#"
+          >terrain data providers</Link> appropriately.
         </Typography>
         <TableContainer sx={{ marginBottom: 2 }}>
           <Table size="small">

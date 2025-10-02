@@ -101,6 +101,16 @@ export const LegalModal: React.FunctionComponent<{
             </Link>{" "}
           </Typography>
           <Typography component="li" sx={{ mb: 1 }}>
+            <strong>Spain:</strong>{" "}
+            <Link href="https://centrodedescargas.cnig.es/CentroDescargas/modelo-digital-terreno-mdt05-primera-cobertura" target="_blank">
+              MDT05-cob1 2008-2015
+            </Link>{" "}
+            - CC BY 4.0{" "}
+            <Link href="https://www.scne.es/" target="_blank">
+              scne.es
+            </Link>
+          </Typography>
+          <Typography component="li" sx={{ mb: 1 }}>
             <strong>Switzerland:</strong>{" "}
             <Link href="https://www.swisstopo.admin.ch/fr/geodata/height/alti3d.html" target="_blank">
               SwissAlti3D
