@@ -316,8 +316,15 @@ export class SlopeTerrainRenderer {
       // Calculate per-pixel latitude and longitude
       // Note: adjustedTexCoord is in padded texture space, but we need original texture coordinates
       // Convert back to original tile coordinates (0.0 to 1.0 within the tile)
-      vec2 textureSize = vec2(textureSize(u_texture, 0));
-      vec2 originalTexCoord = (adjustedTexCoord * textureSize - 1.0) / (textureSize - 2.0);
+      vec2 originalTexCoord;
+      if (u_style == 3) {
+        // Extended padding: adjustedTexCoord is in [1/3, 2/3] range for center tile
+        originalTexCoord = (adjustedTexCoord - 1.0/3.0) * 3.0;
+      } else {
+        // Minimal padding: convert from padded coords to tile coords
+        vec2 textureSize = vec2(textureSize(u_texture, 0));
+        originalTexCoord = (adjustedTexCoord * textureSize - 1.0) / (textureSize - 2.0);
+      }
       vec2 pixelLatLng = calculatePixelLatLng(originalTexCoord, u_zoomLevel, u_tileX, u_tileY);
       float latitude = pixelLatLng.x;
       float longitude = pixelLatLng.y;
@@ -414,40 +421,47 @@ export class SlopeTerrainRenderer {
               // Progressive step size - smaller steps nearby, larger far away
               float stepSize = baseStepSize * (1.0 + float(i) * 0.5);
               float totalDistance = stepSize * float(i);
-              
+
               // Position to check
               vec2 checkPos = adjustedTexCoord + sunDir2D * (totalDistance / pixelSizeMeters) * texelSize.x;
-              
+
               float terrainHeight = -10000.0;
-              
-              // Try high-resolution first for nearby terrain, but always fall back to low-res if needed
+
+              // Try high-resolution first, with different valid ranges based on padding type
               bool foundHeight = false;
-              
-              // For nearby terrain, prefer high-res if available
-              // Note: padded texture only has 1-pixel border, so valid range is slightly beyond [0,1]
-              // Texture coordinates: center tile [0,1] + small border for seamless edges
-              float border = 1.0 / 514.0; // 1 pixel border on 512+2=514 texture
-              
-              if (totalDistance < 2000.0 && 
-                  checkPos.x >= -border && checkPos.x <= (1.0 + border) && 
-                  checkPos.y >= -border && checkPos.y <= (1.0 + border)) {
-                terrainHeight = texture(u_texture, checkPos).r;
-                foundHeight = true;
+
+              if (u_style == 3) {
+                // Extended padding: 3x3 grid, valid range is [0, 1] (entire texture)
+                // Center tile is at [1/3, 2/3], neighbors extend the range
+                if (checkPos.x >= 0.0 && checkPos.x <= 1.0 &&
+                    checkPos.y >= 0.0 && checkPos.y <= 1.0) {
+                  terrainHeight = texture(u_texture, checkPos).r;
+                  foundHeight = true;
+                }
+              } else {
+                // Minimal padding: only small border beyond center tile
+                float border = 1.0 / 514.0; // 1 pixel border
+                if (totalDistance < 2000.0 &&
+                    checkPos.x >= -border && checkPos.x <= (1.0 + border) &&
+                    checkPos.y >= -border && checkPos.y <= (1.0 + border)) {
+                  terrainHeight = texture(u_texture, checkPos).r;
+                  foundHeight = true;
+                }
               }
-              
+
               // Fall back to low-res if high-res not available or for distant terrain
               if (!foundHeight) {
                 // Transform from high-res tile coordinates to low-res tile coordinates
-                // checkPos is in high-res tile space [0,1]
-                // We need to map it to the correct position within the low-res tile
-                vec2 lowResPos = u_lowResOffset + checkPos / u_lowResScale;
-                if (lowResPos.x >= 0.0 && lowResPos.x <= 1.0 && 
+                // For extended padding, need to map from 3x3 grid coords to single tile coords
+                vec2 originalTexCoord = u_style == 3 ? (checkPos - 1.0/3.0) * 3.0 : checkPos;
+                vec2 lowResPos = u_lowResOffset + originalTexCoord / u_lowResScale;
+                if (lowResPos.x >= 0.0 && lowResPos.x <= 1.0 &&
                     lowResPos.y >= 0.0 && lowResPos.y <= 1.0) {
                   terrainHeight = texture(u_lowResTexture, lowResPos).r;
                   foundHeight = true;
                 }
               }
-              
+
               // If we can't sample from either texture, stop ray casting
               if (!foundHeight) {
                 break;
@@ -514,8 +528,15 @@ export class SlopeTerrainRenderer {
     // Calculate aspect angle from gradients
     vec3 calculateAspectColor(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters) {
       // Calculate per-pixel latitude
-      vec2 textureSize = vec2(textureSize(u_texture, 0));
-      vec2 originalTexCoord = (adjustedTexCoord * textureSize - 1.0) / (textureSize - 2.0);
+      vec2 originalTexCoord;
+      if (u_style == 2) {
+        // For aspect style, should use minimal padding
+        vec2 textureSize = vec2(textureSize(u_texture, 0));
+        originalTexCoord = (adjustedTexCoord * textureSize - 1.0) / (textureSize - 2.0);
+      } else {
+        // Fallback (shouldn't happen for aspect)
+        originalTexCoord = adjustedTexCoord;
+      }
       vec2 pixelLatLng = calculatePixelLatLng(originalTexCoord, u_zoomLevel, u_tileX, u_tileY);
       float latitude = pixelLatLng.x;
 
@@ -645,10 +666,19 @@ export class SlopeTerrainRenderer {
     void main() {
       vec2 textureSize = vec2(textureSize(u_texture, 0));
       vec2 texelSize = 1.0 / textureSize;
-      
+
       // Map output coordinates to padded texture coordinates
-      // Scale and offset to map to the center portion of the padded texture
-      vec2 adjustedTexCoord = v_texCoord * (textureSize - 2.0) / textureSize + 1.0 / textureSize;
+      // For sun exposure (u_style == 3): 3x3 grid, center tile is middle third
+      // For other styles: minimal padding with 1px border
+      vec2 adjustedTexCoord;
+      if (u_style == 3) {
+        // Extended padding: map to center third of 3x3 grid
+        // v_texCoord [0,1] -> texture coords for center tile [1/3, 2/3]
+        adjustedTexCoord = v_texCoord / 3.0 + 1.0 / 3.0;
+      } else {
+        // Minimal padding: map to center with 1px border
+        adjustedTexCoord = v_texCoord * (textureSize - 2.0) / textureSize + 1.0 / textureSize;
+      }
       
       // Sample the center pixel - elevation is stored directly in red channel
       vec4 centerSample = texture(u_texture, adjustedTexCoord);
@@ -905,15 +935,19 @@ export class SlopeTerrainRenderer {
       return null;
     }
 
-    // Output size excludes the 1-pixel padding border
-    const outputWidth = paddedDemTile.width - 2;
-    const outputHeight = paddedDemTile.height - 2;
-    
-    // Assert tiles are expected size - resize canvas to match output size
-    console.assert(
-      canvas.width === outputWidth && canvas.height === outputHeight,
-      `Unexpected tile size: canvas ${canvas.width}x${canvas.height}, expected ${outputWidth}x${outputHeight}`
-    );
+    // Calculate output size based on padding type
+    let outputWidth: number, outputHeight: number;
+    if (style === MapStyleOverlay.SunExposure) {
+      // Extended padding: 3x3 grid, output is center tile (1/3 of total size)
+      outputWidth = paddedDemTile.width / 3;
+      outputHeight = paddedDemTile.height / 3;
+    } else {
+      // Minimal padding: 1px border, so subtract 2
+      outputWidth = paddedDemTile.width - 2;
+      outputHeight = paddedDemTile.height - 2;
+    }
+
+    // Resize canvas to match output size
     canvas.width = outputWidth;
     canvas.height = outputHeight;
     gl.viewport(0, 0, outputWidth, outputHeight);
@@ -1133,148 +1167,132 @@ export class SlopeTerrainRenderer {
     );
   }
 
-  private async getPaddedDemTile(
+  /**
+   * Creates a minimally padded DEM tile with 1-pixel border from 4 cardinal neighbors.
+   * Used for basic slope/hillshading calculations where seam elimination is needed.
+   */
+  private async getMinimalPaddedDemTile(
     z: number,
     x: number,
     y: number
   ): Promise<{ width: number; height: number; data: Float32Array } | null> {
-    // Create a padded tile by fetching center tile + 8 neighbors (cardinal + diagonal) to eliminate seams
-    const tilePromises: Promise<{ width: number; height: number; data: Float32Array } | null>[] = [];
+    // Fetch center tile + 4 cardinal neighbors only
+    const [centerTile, northTile, southTile, eastTile, westTile] = await Promise.all([
+      this.demSource.getDemTile(z, x, y),
+      this.demSource.getDemTile(z, x, y - 1),
+      this.demSource.getDemTile(z, x, y + 1),
+      this.demSource.getDemTile(z, x + 1, y),
+      this.demSource.getDemTile(z, x - 1, y),
+    ]);
 
-    // Define neighboring tile offsets: [dx, dy] - all 8 neighbors + center in 3x3 grid
+    if (!centerTile) {
+      return null;
+    }
+
+    const tileSize = centerTile.width;
+    const paddedSize = tileSize + 2;
+    const paddedData = new Float32Array(paddedSize * paddedSize);
+    paddedData.fill(-10000);
+
+    // Copy center tile
+    for (let y = 0; y < tileSize; y++) {
+      for (let x = 0; x < tileSize; x++) {
+        paddedData[(y + 1) * paddedSize + (x + 1)] = centerTile.data[y * tileSize + x];
+      }
+    }
+
+    // Fill borders from cardinal neighbors
+    if (northTile) {
+      for (let x = 0; x < tileSize; x++) {
+        paddedData[0 * paddedSize + (x + 1)] = northTile.data[(tileSize - 1) * tileSize + x];
+      }
+    }
+
+    if (southTile) {
+      for (let x = 0; x < tileSize; x++) {
+        paddedData[(paddedSize - 1) * paddedSize + (x + 1)] = southTile.data[0 * tileSize + x];
+      }
+    }
+
+    if (eastTile) {
+      for (let y = 0; y < tileSize; y++) {
+        paddedData[(y + 1) * paddedSize + (paddedSize - 1)] = eastTile.data[y * tileSize + 0];
+      }
+    }
+
+    if (westTile) {
+      for (let y = 0; y < tileSize; y++) {
+        paddedData[(y + 1) * paddedSize + 0] = westTile.data[y * tileSize + (tileSize - 1)];
+      }
+    }
+
+    // Interpolate corners
+    paddedData[0] = (paddedData[1] + paddedData[paddedSize]) / 2; // Top-left
+    paddedData[paddedSize - 1] = (paddedData[paddedSize - 2] + paddedData[2 * paddedSize - 1]) / 2; // Top-right
+    paddedData[(paddedSize - 1) * paddedSize] = (paddedData[(paddedSize - 2) * paddedSize] + paddedData[(paddedSize - 1) * paddedSize + 1]) / 2; // Bottom-left
+    paddedData[paddedSize * paddedSize - 1] = (paddedData[paddedSize * paddedSize - 2] + paddedData[(paddedSize - 1) * paddedSize - 1]) / 2; // Bottom-right
+
+    return {
+      width: paddedSize,
+      height: paddedSize,
+      data: paddedData
+    };
+  }
+
+  /**
+   * Creates an extended padded DEM tile containing full neighboring tiles in a 3x3 grid.
+   * Used for sun exposure calculations where extended shadow casting is needed.
+   */
+  private async getExtendedPaddedDemTile(
+    z: number,
+    x: number,
+    y: number
+  ): Promise<{ width: number; height: number; data: Float32Array } | null> {
+    // Fetch center tile + 8 neighbors for 3x3 grid
     const neighbors = [
       [-1, -1], [0, -1], [1, -1], // northwest, north, northeast
       [-1,  0], [0,  0], [1,  0], // west, center, east
       [-1,  1], [0,  1], [1,  1]  // southwest, south, southeast
     ];
-    
-    // Fetch all tiles (center + 8 neighbors)
-    for (const [dx, dy] of neighbors) {
-      tilePromises.push(this.demSource.getDemTile(z, x + dx, y + dy));
-    }
+
+    const tilePromises = neighbors.map(([dx, dy]) =>
+      this.demSource.getDemTile(z, x + dx, y + dy)
+    );
 
     const tiles = await Promise.all(tilePromises);
-    const centerTile = tiles[4]; // Center tile is at index 4 ([0,0])
-    
+    const centerTile = tiles[4]; // Center at index 4
+
     if (!centerTile) {
-      return null; // No center tile data available
+      return null;
     }
-    
+
     const tileSize = centerTile.width;
-    const paddedSize = tileSize + 2; // Add 1 pixel border on each side
-    const paddedData = new Float32Array(paddedSize * paddedSize);
-    
-    // Fill with no-data value initially
+    const gridSize = tileSize * 3; // 3x3 grid of full tiles
+    const paddedData = new Float32Array(gridSize * gridSize);
     paddedData.fill(-10000);
-    
-    // Copy center tile to padded tile (offset by 1 pixel in each direction)
-    for (let y = 0; y < tileSize; y++) {
-      for (let x = 0; x < tileSize; x++) {
-        const srcIndex = y * tileSize + x;
-        const dstIndex = (y + 1) * paddedSize + (x + 1);
-        paddedData[dstIndex] = centerTile.data[srcIndex];
-      }
-    }
-    
-    // Fill border pixels from neighboring tiles
-    // Tile indices in 3x3 grid:
-    // [0]=northwest, [1]=north, [2]=northeast
-    // [3]=west,      [4]=center, [5]=east
-    // [6]=southwest, [7]=south, [8]=southeast
 
-    const northwestTile = tiles[0];
-    const northTile = tiles[1];
-    const northeastTile = tiles[2];
-    const westTile = tiles[3];
-    const eastTile = tiles[5];
-    const southwestTile = tiles[6];
-    const southTile = tiles[7];
-    const southeastTile = tiles[8];
-    
-    // Fill top border from north neighbor
-    if (northTile) {
-      for (let x = 0; x < tileSize; x++) {
-        const srcIndex = (tileSize - 1) * tileSize + x; // Bottom edge of north neighbor
-        const dstIndex = 0 * paddedSize + (x + 1); // Top border of padded tile
-        paddedData[dstIndex] = northTile.data[srcIndex];
-      }
-    }
-    
-    // Fill left border from west neighbor
-    if (westTile) {
+    // Copy all tiles into 3x3 grid
+    for (let i = 0; i < 9; i++) {
+      const tile = tiles[i];
+      if (!tile) continue;
+
+      const gridX = i % 3;
+      const gridY = Math.floor(i / 3);
+      const offsetX = gridX * tileSize;
+      const offsetY = gridY * tileSize;
+
       for (let y = 0; y < tileSize; y++) {
-        const srcIndex = y * tileSize + (tileSize - 1); // Right edge of west neighbor
-        const dstIndex = (y + 1) * paddedSize + 0; // Left border of padded tile
-        paddedData[dstIndex] = westTile.data[srcIndex];
+        for (let x = 0; x < tileSize; x++) {
+          const srcIndex = y * tileSize + x;
+          const dstIndex = (offsetY + y) * gridSize + (offsetX + x);
+          paddedData[dstIndex] = tile.data[srcIndex];
+        }
       }
     }
-    
-    // Fill right border from east neighbor
-    if (eastTile) {
-      for (let y = 0; y < tileSize; y++) {
-        const srcIndex = y * tileSize + 0; // Left edge of east neighbor
-        const dstIndex = (y + 1) * paddedSize + (paddedSize - 1); // Right border of padded tile
-        paddedData[dstIndex] = eastTile.data[srcIndex];
-      }
-    }
-    
-    // Fill bottom border from south neighbor
-    if (southTile) {
-      for (let x = 0; x < tileSize; x++) {
-        const srcIndex = 0 * tileSize + x; // Top edge of south neighbor
-        const dstIndex = (paddedSize - 1) * paddedSize + (x + 1); // Bottom border of padded tile
-        paddedData[dstIndex] = southTile.data[srcIndex];
-      }
-    }
-    
-    // Fill corner pixels from diagonal neighbor tiles (if available) or interpolate
-    // Top-left corner
-    if (northwestTile) {
-      const srcIndex = (tileSize - 1) * tileSize + (tileSize - 1); // Bottom-right pixel of northwest tile
-      paddedData[0 * paddedSize + 0] = northwestTile.data[srcIndex];
-    } else {
-      // Fallback to interpolation
-      const topLeft = paddedData[0 * paddedSize + 1]; // Top border, first pixel
-      const leftTop = paddedData[1 * paddedSize + 0]; // Left border, first pixel
-      paddedData[0 * paddedSize + 0] = (topLeft + leftTop) / 2;
-    }
 
-    // Top-right corner
-    if (northeastTile) {
-      const srcIndex = (tileSize - 1) * tileSize + 0; // Bottom-left pixel of northeast tile
-      paddedData[0 * paddedSize + (paddedSize - 1)] = northeastTile.data[srcIndex];
-    } else {
-      // Fallback to interpolation
-      const topRight = paddedData[0 * paddedSize + (paddedSize - 2)]; // Top border, last pixel
-      const rightTop = paddedData[1 * paddedSize + (paddedSize - 1)]; // Right border, first pixel
-      paddedData[0 * paddedSize + (paddedSize - 1)] = (topRight + rightTop) / 2;
-    }
-
-    // Bottom-left corner
-    if (southwestTile) {
-      const srcIndex = 0 * tileSize + (tileSize - 1); // Top-right pixel of southwest tile
-      paddedData[(paddedSize - 1) * paddedSize + 0] = southwestTile.data[srcIndex];
-    } else {
-      // Fallback to interpolation
-      const bottomLeft = paddedData[(paddedSize - 1) * paddedSize + 1]; // Bottom border, first pixel
-      const leftBottom = paddedData[(paddedSize - 2) * paddedSize + 0]; // Left border, last pixel
-      paddedData[(paddedSize - 1) * paddedSize + 0] = (bottomLeft + leftBottom) / 2;
-    }
-
-    // Bottom-right corner
-    if (southeastTile) {
-      const srcIndex = 0 * tileSize + 0; // Top-left pixel of southeast tile
-      paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 1)] = southeastTile.data[srcIndex];
-    } else {
-      // Fallback to interpolation
-      const bottomRight = paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 2)]; // Bottom border, last pixel
-      const rightBottom = paddedData[(paddedSize - 2) * paddedSize + (paddedSize - 1)]; // Right border, last pixel
-      paddedData[(paddedSize - 1) * paddedSize + (paddedSize - 1)] = (bottomRight + rightBottom) / 2;
-    }
-    
     return {
-      width: paddedSize,
-      height: paddedSize,
+      width: gridSize,
+      height: gridSize,
       data: paddedData
     };
   }
@@ -1328,26 +1346,26 @@ export class SlopeTerrainRenderer {
       // Convert tile X coordinate to longitude
       const longitude = (x / Math.pow(2, zoomLevel)) * 360 - 180;
 
-      // Get the padded DEM tile data to avoid seams
-      const demTile = await this.getPaddedDemTile(z, x, y);
-      
-      // Use fixed coarse terrain zoom for extended shadow casting
+      // Get the padded DEM tile data - use extended padding for sun exposure, minimal for others
+      const demTile = style === MapStyleOverlay.SunExposure
+        ? await this.getExtendedPaddedDemTile(z, x, y)
+        : await this.getMinimalPaddedDemTile(z, x, y);
+
+      // Use fixed coarse terrain zoom for extended shadow casting (only needed for sun exposure)
       const lowResZoom = SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM;
       let lowResDemTile: { width: number; height: number; data: Float32Array } | null = null;
-      
-      if (z >= lowResZoom) {
-        // Current zoom is higher than coarse zoom - normal case
-        const lowResScale = Math.pow(2, z - lowResZoom); // Scale factor between resolutions
+
+      if (style === MapStyleOverlay.SunExposure && z >= lowResZoom) {
+        // For sun exposure, load coarse terrain for extended shadow casting
+        const lowResScale = Math.pow(2, z - lowResZoom);
         const lowResX = Math.floor(x / lowResScale);
         const lowResY = Math.floor(y / lowResScale);
         console.log(`Loading low-res tile: z${lowResZoom}/${lowResX}/${lowResY} (scale: ${lowResScale}) for high-res z${z}/${x}/${y}`);
-        lowResDemTile = await this.getPaddedDemTile(lowResZoom, lowResX, lowResY);
+        lowResDemTile = await this.getMinimalPaddedDemTile(lowResZoom, lowResX, lowResY);
         console.log(`Low-res tile loaded:`, lowResDemTile ? 'SUCCESS' : 'FAILED');
       } else {
-        // Current zoom is lower than coarse zoom - use current tile as coarse
-        // This happens at low zoom levels where we don't need extended range anyway
-        console.log(`Skipping low-res tile for zoom ${z} (< ${lowResZoom})`);
-        lowResDemTile = null; // Don't use coarse terrain for low zoom levels
+        console.log(`Skipping low-res tile for style ${style} at zoom ${z}`);
+        lowResDemTile = null;
       }
 
       if (!demTile) {
