@@ -450,14 +450,20 @@ export class SlopeTerrainRenderer {
               }
 
               // Fall back to low-res if high-res not available or for distant terrain
-              if (!foundHeight) {
+              if (!foundHeight && u_style == 3) {
                 // Transform from high-res tile coordinates to low-res tile coordinates
-                // For extended padding, need to map from 3x3 grid coords to single tile coords
-                vec2 originalTexCoord = u_style == 3 ? (checkPos - 1.0/3.0) * 3.0 : checkPos;
-                vec2 lowResPos = u_lowResOffset + originalTexCoord / u_lowResScale;
-                if (lowResPos.x >= 0.0 && lowResPos.x <= 1.0 &&
-                    lowResPos.y >= 0.0 && lowResPos.y <= 1.0) {
-                  terrainHeight = texture(u_lowResTexture, lowResPos).r;
+                // Both textures use extended padding (3x3 grid) for sun exposure
+                // Convert from 3x3 grid coords to single tile coords, then to low-res 3x3 coords
+                vec2 originalTexCoord = (checkPos - 1.0/3.0) * 3.0;
+
+                // Map to low-res tile position, then back to low-res 3x3 grid coords
+                vec2 lowResTilePos = u_lowResOffset + originalTexCoord / u_lowResScale;
+                vec2 lowResGridPos = lowResTilePos / 3.0 + 1.0/3.0;
+
+                // Check if within low-res 3x3 grid bounds
+                if (lowResGridPos.x >= 0.0 && lowResGridPos.x <= 1.0 &&
+                    lowResGridPos.y >= 0.0 && lowResGridPos.y <= 1.0) {
+                  terrainHeight = texture(u_lowResTexture, lowResGridPos).r;
                   foundHeight = true;
                 }
               }
@@ -1356,12 +1362,12 @@ export class SlopeTerrainRenderer {
       let lowResDemTile: { width: number; height: number; data: Float32Array } | null = null;
 
       if (style === MapStyleOverlay.SunExposure && z >= lowResZoom) {
-        // For sun exposure, load coarse terrain for extended shadow casting
+        // For sun exposure, load coarse terrain with extended padding for better shadow casting
         const lowResScale = Math.pow(2, z - lowResZoom);
         const lowResX = Math.floor(x / lowResScale);
         const lowResY = Math.floor(y / lowResScale);
         console.log(`Loading low-res tile: z${lowResZoom}/${lowResX}/${lowResY} (scale: ${lowResScale}) for high-res z${z}/${x}/${y}`);
-        lowResDemTile = await this.getMinimalPaddedDemTile(lowResZoom, lowResX, lowResY);
+        lowResDemTile = await this.getExtendedPaddedDemTile(lowResZoom, lowResX, lowResY);
         console.log(`Low-res tile loaded:`, lowResDemTile ? 'SUCCESS' : 'FAILED');
       } else {
         console.log(`Skipping low-res tile for style ${style} at zoom ${z}`);
