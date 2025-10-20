@@ -4798,7 +4798,7 @@ __metadata:
     throttle-debounce: ^5.0.2
     tslib: ^2.6.3
     typescript: ^5.5.4
-    vite: ^7.0.7
+    vite: ^7.1.11
     vite-plugin-pwa: ^1.0.1
     whatwg-fetch: ^3.6.20
   languageName: unknown
@@ -6067,9 +6067,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^7.0.7":
-  version: 7.1.5
-  resolution: "vite@npm:7.1.5"
+"vite@npm:^7.1.11":
+  version: 7.1.11
+  resolution: "vite@npm:7.1.11"
   dependencies:
     esbuild: ^0.25.0
     fdir: ^6.5.0
@@ -6118,7 +6118,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 14922d98024a1d93ebe8f3ce38af586c83d55f037f8c5fe8664103d7aa0785d0747f3edf8cb6550dcfa071b90bfd40bce56581d9cb14a19a53d29abb9f3415f5
+  checksum: 67855b760fc55228ef91b22bc6bf90c0e3500ea5f52174533bc475f33885fb2d1548d9f0d0533e11f351b752ab3c467c2d07076550cf65e96ed1462534609764
   languageName: node
   linkType: hard
 
