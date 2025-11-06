@@ -148,6 +148,13 @@ export default class About extends React.Component<Props> {
           </Table>
         </TableContainer>
         <Typography paragraph={true}>
+          All datasets are also available in a single{" "}
+          <Link href="https://tiles.openskimap.org/openskidata.gpkg">
+            GeoPackage file
+          </Link>
+          .
+        </Typography>
+        <Typography paragraph={true}>
           The data is generally updated daily. It's permitted to automatically
           download the above files once per day.
         </Typography>
