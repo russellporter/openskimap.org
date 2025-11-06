@@ -1825,9 +1825,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@maplibre/maplibre-gl-style-spec@npm:^24.1.1":
-  version: 24.2.0
-  resolution: "@maplibre/maplibre-gl-style-spec@npm:24.2.0"
+"@maplibre/maplibre-gl-style-spec@npm:^24.3.1":
+  version: 24.3.1
+  resolution: "@maplibre/maplibre-gl-style-spec@npm:24.3.1"
   dependencies:
     "@mapbox/jsonlint-lines-primitives": ~2.0.2
     "@mapbox/unitbezier": ^0.0.1
@@ -1840,7 +1840,7 @@ __metadata:
     gl-style-format: dist/gl-style-format.mjs
     gl-style-migrate: dist/gl-style-migrate.mjs
     gl-style-validate: dist/gl-style-validate.mjs
-  checksum: d582618eccf0e9d4361c058fa2770a4bda9d4952845d64e12c541cf74c682155f67143a1df97190e8f6384a784077187c87ee6eaab4dddbdc49d9134f37369cb
+  checksum: 401dea3d38da80883f0bc2b3d0fbf7a08eb879f413bfa7d003849b419256603b957b8906738d06c03193798a3a7e14330fdb101465e9027ef7b0d19b84347735
   languageName: node
   linkType: hard
 
@@ -3048,12 +3048,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:^4.4.3":
-  version: 4.4.6
-  resolution: "chart.js@npm:4.4.6"
+"chart.js@npm:^4.5.1":
+  version: 4.5.1
+  resolution: "chart.js@npm:4.5.1"
   dependencies:
     "@kurkle/color": ^0.3.0
-  checksum: 4dcf6aa20f41115bb9e848d3053960eb4eeaaa94272344cc2b9b8faba33316c43893311897e20cd2bcd5b7963333cb30b7805829b78918d1d8c14a9e772e0c87
+  checksum: 34b35b373642994b2adac197e91363625930530e29fc1baa6dbb411b5e1295f9f6572922003a0224a21a3019aec916567c1ed00c33b1373081f189fc188e5a7b
   languageName: node
   linkType: hard
 
@@ -4402,7 +4402,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -4465,9 +4465,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"maplibre-gl@npm:latest":
-  version: 5.7.3
-  resolution: "maplibre-gl@npm:5.7.3"
+"maplibre-gl@npm:^5.11.0":
+  version: 5.11.0
+  resolution: "maplibre-gl@npm:5.11.0"
   dependencies:
     "@mapbox/geojson-rewind": ^0.5.2
     "@mapbox/jsonlint-lines-primitives": ^2.0.2
@@ -4476,7 +4476,7 @@ __metadata:
     "@mapbox/unitbezier": ^0.0.1
     "@mapbox/vector-tile": ^2.0.4
     "@mapbox/whoots-js": ^3.1.0
-    "@maplibre/maplibre-gl-style-spec": ^24.1.1
+    "@maplibre/maplibre-gl-style-spec": ^24.3.1
     "@maplibre/vt-pbf": ^4.0.3
     "@types/geojson": ^7946.0.16
     "@types/geojson-vt": 3.2.5
@@ -4491,7 +4491,7 @@ __metadata:
     quickselect: ^3.0.0
     supercluster: ^8.0.1
     tinyqueue: ^3.0.0
-  checksum: 3766d27149d8416791b76ee95328def7e62016567c348ebcdd4862ca2fbc3400cca1c845e8cddf9933ca99221040f5653c7eee1ed0fe6121297eaa9d84de3f81
+  checksum: e94988323557acca9a8d9de584c230e3f3f28c20839a6ba7841d3192b29b2953f3e1506473f82d5958ad972cf46558bdfbeec183ec2cdbeacd81fb075b92347e
   languageName: node
   linkType: hard
 
@@ -4746,7 +4746,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openskidata-format@npm:latest":
+"openskidata-format@npm:^5.5.0":
   version: 5.5.0
   resolution: "openskidata-format@npm:5.5.0"
   dependencies:
@@ -4782,24 +4782,24 @@ __metadata:
     "@types/react-outside-click-handler": ^1.3.3
     "@types/throttle-debounce": ^5.0.2
     "@vitejs/plugin-react": ^4.7.0
-    chart.js: ^4.4.3
+    chart.js: ^4.5.1
     clsx: ^2.1.1
     maplibre-contour: ^0.1.0
-    maplibre-gl: latest
+    maplibre-gl: ^5.11.0
     memoize-one: ^6.0.0
-    openskidata-format: latest
-    prettier: ^3.3.3
-    query-string: ^9.1.0
-    react: ^18.3.1
-    react-chartjs-2: ^5.2.0
+    openskidata-format: ^5.5.0
+    prettier: ^3.6.2
+    query-string: ^9.3.1
+    react: ^19.2.0
+    react-chartjs-2: ^5.3.1
     react-detect-click-outside: ^1.1.7
-    react-dom: ^18.3.1
+    react-dom: ^19.2.0
     shallow-equal: ^3.1.0
     throttle-debounce: ^5.0.2
-    tslib: ^2.6.3
-    typescript: ^5.5.4
-    vite: ^7.1.11
-    vite-plugin-pwa: ^1.0.1
+    tslib: ^2.8.1
+    typescript: ^5.9.3
+    vite: ^7.2.1
+    vite-plugin-pwa: ^1.1.0
     whatwg-fetch: ^3.6.20
   languageName: unknown
   linkType: soft
@@ -4952,12 +4952,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "prettier@npm:3.3.3"
+"prettier@npm:^3.6.2":
+  version: 3.6.2
+  resolution: "prettier@npm:3.6.2"
   bin:
     prettier: bin/prettier.cjs
-  checksum: bc8604354805acfdde6106852d14b045bb20827ad76a5ffc2455b71a8257f94de93f17f14e463fe844808d2ccc87248364a5691488a3304f1031326e62d9276e
+  checksum: 0206f5f437892e8858f298af8850bf9d0ef1c22e21107a213ba56bfb9c2387a2020bfda244a20161d8e3dad40c6b04101609a55d370dece53d0a31893b64f861
   languageName: node
   linkType: hard
 
@@ -5017,14 +5017,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"query-string@npm:^9.1.0":
-  version: 9.1.1
-  resolution: "query-string@npm:9.1.1"
+"query-string@npm:^9.3.1":
+  version: 9.3.1
+  resolution: "query-string@npm:9.3.1"
   dependencies:
     decode-uri-component: ^0.4.1
     filter-obj: ^5.1.0
     split-on-first: ^3.0.0
-  checksum: cc9c89c61f41eca2eccc67d85667708a29e517ccc93ae62753c4a1207c64ea04bf9cdb3c4006dc6c9693407aacdefad7a6e54e47158914f4efcf1c4c88371a6c
+  checksum: 4f2b600e0226e680956e08bd5f27ccb6c9b832aedca7eeab844da85aac6624b340e2cc5dd77129bc96a9fadbec0d847decadecd115eb43a6b9cdafa078c98f75
   languageName: node
   linkType: hard
 
@@ -5044,13 +5044,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-chartjs-2@npm:^5.2.0":
-  version: 5.2.0
-  resolution: "react-chartjs-2@npm:5.2.0"
+"react-chartjs-2@npm:^5.3.1":
+  version: 5.3.1
+  resolution: "react-chartjs-2@npm:5.3.1"
   peerDependencies:
     chart.js: ^4.1.1
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: ace702185be1450e5888a8bcd8b5fc1995067e3b11d236764a67f5567a3d7c32ff16923b8d48d3d39bda6e45135da6c044c9b43fbe8e1978f95aca9d2c0ce348
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 14a5698c9b8464cefa60eebb15c946358dc24390712bf775535b290b6304504b8108d3d9b8729b0f0c00fb3cf580b5d18cb29de3d670f6299222ca528b74bf32
   languageName: node
   linkType: hard
 
@@ -5064,15 +5064,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.3.1":
-  version: 18.3.1
-  resolution: "react-dom@npm:18.3.1"
+"react-dom@npm:^19.2.0":
+  version: 19.2.0
+  resolution: "react-dom@npm:19.2.0"
   dependencies:
-    loose-envify: ^1.1.0
-    scheduler: ^0.23.2
+    scheduler: ^0.27.0
   peerDependencies:
-    react: ^18.3.1
-  checksum: 298954ecd8f78288dcaece05e88b570014d8f6dce5db6f66e6ee91448debeb59dcd31561dddb354eee47e6c1bb234669459060deb238ed0213497146e555a0b9
+    react: ^19.2.0
+  checksum: b6ec952f68a29dcc847143ad48974477e1d3b95cb0a6e0039dd93c7fe64d0ef51f2ca09a19c5eb892ba625ba88c4bcc6f8bc3bdd1c33ccc3f6f17acabbb4882f
   languageName: node
   linkType: hard
 
@@ -5112,12 +5111,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.3.1":
-  version: 18.3.1
-  resolution: "react@npm:18.3.1"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: a27bcfa8ff7c15a1e50244ad0d0c1cb2ad4375eeffefd266a64889beea6f6b64c4966c9b37d14ee32d6c9fcd5aa6ba183b6988167ab4d127d13e7cb5b386a376
+"react@npm:^19.2.0":
+  version: 19.2.0
+  resolution: "react@npm:19.2.0"
+  checksum: 33dd01bf699e1c5040eb249e0f552519adf7ee90b98c49d702a50bf23af6852ea46023a5f7f93966ab10acd7a45428fa0f193c686ecdaa7a75a03886e53ec3fe
   languageName: node
   linkType: hard
 
@@ -5396,12 +5393,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:^0.23.2":
-  version: 0.23.2
-  resolution: "scheduler@npm:0.23.2"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: 3e82d1f419e240ef6219d794ff29c7ee415fbdc19e038f680a10c067108e06284f1847450a210b29bbaf97b9d8a97ced5f624c31c681248ac84c80d56ad5a2c4
+"scheduler@npm:^0.27.0":
+  version: 0.27.0
+  resolution: "scheduler@npm:0.27.0"
+  checksum: 92644ead0a9443e20f9d24132fe93675b156209b9eeb35ea245f8a86768d0cc0fcca56f341eeef21d9b6dd8e72d6d5e260eb5a41d34b05cd605dd45a29f572ef
   languageName: node
   linkType: hard
 
@@ -5855,7 +5850,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2, tslib@npm:^2.6.2, tslib@npm:^2.6.3, tslib@npm:^2.8.1":
+"tslib@npm:^2, tslib@npm:^2.6.2, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: e4aba30e632b8c8902b47587fd13345e2827fa639e7c3121074d5ee0880723282411a8838f830b55100cbe4517672f84a2472667d355b81e8af165a55dc6203a
@@ -5921,23 +5916,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.5.4":
-  version: 5.6.3
-  resolution: "typescript@npm:5.6.3"
+"typescript@npm:^5.9.3":
+  version: 5.9.3
+  resolution: "typescript@npm:5.9.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: ba302f8822777ebefb28b554105f3e074466b671e7444ec6b75dadc008a62f46f373d9e57ceced1c433756d06c8b7dc569a7eefdf3a9573122a49205ff99021a
+  checksum: 0d0ffb84f2cd072c3e164c79a2e5a1a1f4f168e84cb2882ff8967b92afe1def6c2a91f6838fb58b168428f9458c57a2ba06a6737711fdd87a256bbe83e9a217f
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^5.5.4#~builtin<compat/typescript>":
-  version: 5.6.3
-  resolution: "typescript@patch:typescript@npm%3A5.6.3#~builtin<compat/typescript>::version=5.6.3&hash=493e53"
+"typescript@patch:typescript@^5.9.3#~builtin<compat/typescript>":
+  version: 5.9.3
+  resolution: "typescript@patch:typescript@npm%3A5.9.3#~builtin<compat/typescript>::version=5.9.3&hash=493e53"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: ade87bce2363ee963eed0e4ca8a312ea02c81873ebd53609bc3f6dc0a57f6e61ad7e3fb8cbb7f7ab8b5081cbee801b023f7c4823ee70b1c447eae050e6c7622b
+  checksum: 8bb8d86819ac86a498eada254cad7fb69c5f74778506c700c2a712daeaff21d3a6f51fd0d534fe16903cb010d1b74f89437a3d02d4d0ff5ca2ba9a4660de8497
   languageName: node
   linkType: hard
 
@@ -6046,9 +6041,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-pwa@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "vite-plugin-pwa@npm:1.0.1"
+"vite-plugin-pwa@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "vite-plugin-pwa@npm:1.1.0"
   dependencies:
     debug: ^4.3.6
     pretty-bytes: ^6.1.1
@@ -6063,13 +6058,13 @@ __metadata:
   peerDependenciesMeta:
     "@vite-pwa/assets-generator":
       optional: true
-  checksum: 8271a7909a454f9197e188ab0b10b0bfb2deda31a4f1b2a2621303ed2c18f915d9531c3d190705652d943d591235d42eaa8b458cd72a15c546234baeee854f98
+  checksum: 75eb965d8df1ab96d52aabe9b4a8888392b098155f5bcea3d143c925c10136c1f3cdde70321aff4aa1377c5bcd8e03a2dacab2933ce3a6bf3139fbce83b18333
   languageName: node
   linkType: hard
 
-"vite@npm:^7.1.11":
-  version: 7.1.11
-  resolution: "vite@npm:7.1.11"
+"vite@npm:^7.2.1":
+  version: 7.2.1
+  resolution: "vite@npm:7.2.1"
   dependencies:
     esbuild: ^0.25.0
     fdir: ^6.5.0
@@ -6118,7 +6113,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 67855b760fc55228ef91b22bc6bf90c0e3500ea5f52174533bc475f33885fb2d1548d9f0d0533e11f351b752ab3c467c2d07076550cf65e96ed1462534609764
+  checksum: 6ccdeb4446d8d1690db516232a7d5dfe4435d069b32ee25cfef3896b4d0bb4326d80af3216a56b0a1e757d85393a21a87b1d5a3b06ca6ad21f885e17e661de7c
   languageName: node
   linkType: hard
 
