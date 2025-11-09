@@ -34,6 +34,21 @@ export const LegalModal: React.FunctionComponent<{
         </Typography>
 
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+          Place Data
+        </Typography>
+        <Typography paragraph sx={{ mb: 2 }}>
+          Data from{" "}
+          <Link href="https://whosonfirst.org/" target="_blank">
+            Who's On First
+          </Link>
+          .{" "}
+          <Link href="https://whosonfirst.org/docs/licenses/" target="_blank">
+            License
+          </Link>
+          .
+        </Typography>
+
+        <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
           Base Map
         </Typography>
         <Typography paragraph sx={{ mb: 2 }}>
