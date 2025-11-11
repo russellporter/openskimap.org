@@ -16,7 +16,7 @@ import {
   getLiftNameAndType,
   LiftFeature,
   LiftProperties,
-  Location,
+  Place,
   RunFeature,
   RunProperties,
   SkiAreaActivity,
@@ -346,7 +346,7 @@ function getPrimaryText(result: Result): string | null {
 
       const locality =
         properties.type === FeatureType.SkiArea
-          ? properties.location?.localized.en.locality
+          ? properties.places.find((place) => place.localized.en.locality)?.localized.en.locality
           : null;
       return locality ?? null;
   }
@@ -396,7 +396,7 @@ function getLocation(
 ): string | null {
   let components: string[] = [];
 
-  let locations: Location[];
+  let places = properties.places;
   if (
     properties.type === FeatureType.Lift ||
     properties.type === FeatureType.Run
@@ -404,23 +404,14 @@ function getLocation(
     components.push(
       properties.skiAreas.map((skiArea) => skiArea.properties.name).join(" / ")
     );
-    locations = properties.skiAreas
-      .map((skiArea) => skiArea.properties.location)
-      .filter(
-        (location): location is NonNullable<typeof location> => location != null
-      );
-  } else if (properties.location) {
-    locations = [properties.location];
-  } else {
-    locations = [];
   }
 
-  const regions = getUniqueLocalizedValues("region", locations);
+  const regions = getUniqueLocalizedValues("region", places);
   if (regions.length > 0) {
     components.push(regions.join(" / "));
   }
 
-  const countries = getUniqueLocalizedValues("country", locations);
+  const countries = getUniqueLocalizedValues("country", places);
   if (countries.length > 0) {
     components.push(countries.join(" / "));
   }
@@ -433,14 +424,14 @@ function isString(e: any): e is string {
   return !!e;
 }
 
-function getUniqueLocalizedValues<T extends keyof Location["localized"]["en"]>(
+function getUniqueLocalizedValues<T extends keyof Place["localized"]["en"]>(
   key: T,
-  locations: Location[]
+  places: Place[]
 ): string[] {
   return [
     ...new Set(
-      locations
-        .map((location) => location.localized.en[key])
+      places
+        .map((place) => place.localized.en[key])
         .filter((value): value is NonNullable<typeof value> => value != null)
     ),
   ];

@@ -33,7 +33,7 @@
     "maplibre-contour": "^0.1.0",
     "maplibre-gl": "^5.11.0",
     "memoize-one": "^6.0.0",
-    "openskidata-format": "^5.5.0",
+    "openskidata-format": "^7.0.0",
     "query-string": "^9.3.1",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",

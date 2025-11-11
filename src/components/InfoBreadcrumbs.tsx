@@ -4,7 +4,7 @@ import {
   FeatureType,
   LiftFeature,
   LiftProperties,
-  Location,
+  Place,
   RunFeature,
   RunProperties,
   SkiAreaFeature,
@@ -107,45 +107,43 @@ function getBreadcrumbs(
     skiAreas = properties.skiAreas;
   }
 
-  let locations: Location[];
-  if (properties.type === FeatureType.SkiArea && properties.location) {
-    locations = [properties.location];
-  } else {
-    locations = skiAreas.flatMap((skiArea) =>
-      skiArea.properties.location ? [skiArea.properties.location] : []
+  let places = properties.places;
+
+  // Group places by country
+  const placesByCountry = new Map<string, Place[]>();
+  places.forEach((place) => {
+    const countryCode = place.iso3166_1Alpha2;
+    if (!placesByCountry.has(countryCode)) {
+      placesByCountry.set(countryCode, []);
+    }
+    placesByCountry.get(countryCode)!.push(place);
+  });
+
+  // Create country breadcrumbs
+  const countryBreadcrumbs: Breadcrumb[] = Array.from(placesByCountry.keys())
+    .sort()
+    .map((countryCode) => {
+      const place = placesByCountry.get(countryCode)![0];
+      return {
+        id: "country-" + countryCode,
+        text: place.localized.en.country,
+      };
+    });
+
+  // Create region breadcrumbs grouped by country
+  const regionBreadcrumbs: Breadcrumb[] = [];
+  Array.from(placesByCountry.values()).forEach((countryPlaces) => {
+    const regions = unique(
+      countryPlaces
+        .filter((place) => place.localized.en.region && place.iso3166_2)
+        .map((place) => ({
+          id: "region-" + place.iso3166_2!,
+          text: place.localized.en.region!,
+        }))
     );
-  }
-
-  const countryBreadcrumbs: Breadcrumb[] = unique(
-    locations.flatMap((location) => {
-      if (!location) {
-        return [];
-      }
-      return [
-        {
-          id: "country-" + location.iso3166_1Alpha2,
-          text: location.localized.en.country,
-        },
-      ];
-    })
-  );
-
-  const regionBreadcrumbs: Breadcrumb[] = unique(
-    locations.flatMap((location) => {
-      const regionName = location?.localized.en.region;
-      const regionCode = location?.iso3166_2;
-      if (!regionName || !regionCode) {
-        return [];
-      }
-
-      return [
-        {
-          id: "region-" + regionCode,
-          text: regionName,
-        },
-      ];
-    })
-  );
+    regionBreadcrumbs.push(...regions);
+  });
+  regionBreadcrumbs.sort((a, b) => a.text.localeCompare(b.text));
 
   const skiAreaBreadcrumbs: Breadcrumb[] = unique(
     skiAreas.flatMap((skiArea) => {

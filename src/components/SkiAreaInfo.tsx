@@ -119,7 +119,7 @@ function getTitle(properties: SkiAreaProperties) {
     summary = "Ski Area";
   }
 
-  const locality = properties.location?.localized.en.locality;
+  const locality = properties.places.find((place) => place.localized.en.locality)?.localized.en.locality;
   if (locality) {
     return summary + " near " + locality;
   } else {
