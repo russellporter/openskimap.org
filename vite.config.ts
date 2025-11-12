@@ -20,10 +20,11 @@ export default defineConfig({
               url.origin === "https://services.arcgisonline.com",
             handler: "CacheFirst",
             options: {
-              cacheName: "tiles-cache",
+              cacheName: `tiles-cache-v2`,
               expiration: {
                 maxEntries: 50000,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+                purgeOnQuotaError: true
               },
             },
           },
