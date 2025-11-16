@@ -401,9 +401,10 @@ function getLocation(
     properties.type === FeatureType.Lift ||
     properties.type === FeatureType.Run
   ) {
-    components.push(
-      properties.skiAreas.map((skiArea) => skiArea.properties.name).join(" / ")
-    );
+    const skiAreaNames = properties.skiAreas.map((skiArea) => skiArea.properties.name).filter(isString)
+    if (skiAreaNames.length > 0) {
+    components.push(skiAreaNames.join(" / "));
+    }
   }
 
   const regions = getUniqueLocalizedValues("region", places);
