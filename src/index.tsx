@@ -3,6 +3,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import * as ReactDOM from "react-dom/client";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
+import { GpxDropZone } from "./components/GpxDropZone";
 import { LayersControl } from "./components/LayersControl";
 import { LayersModal } from "./components/LayersModal";
 import { LegalModal } from "./components/LegalModal";
@@ -17,6 +18,7 @@ import { TrackDrawingManager } from "./components/TrackDrawingManager";
 import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
+import { readGpxFile } from "./utils/TrackParser";
 import "./index.css";
 
 function initialize() {
@@ -36,11 +38,17 @@ function initialize() {
   const trackDrawingRoot = ReactDOM.createRoot(
     document.getElementById("track-drawing-controls")!
   );
+  const gpxDropZoneRoot = ReactDOM.createRoot(
+    document.getElementById("gpx-drop-zone")!
+  );
 
   // Track drawing manager - declared early so it's available in update function closure
   let trackDrawingManager: TrackDrawingManager | null = null;
   // Map reference - will be set after map is created
   let mapInstance: Map | null = null;
+  // Track drag state for GPX drop zone
+  let isDraggingFile = false;
+  let dragCounter = 0;
 
   const store = new StateStore(getInitialState(), update);
 
@@ -52,6 +60,93 @@ function initialize() {
     },
     false
   );
+
+  // GPX drag-and-drop handlers
+  function hasGpxFile(event: DragEvent): boolean {
+    if (!event.dataTransfer) return false;
+    const items = event.dataTransfer.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].kind === "file") {
+        const type = items[i].type;
+        // GPX files may have various MIME types or none at all
+        if (
+          type === "application/gpx+xml" ||
+          type === "application/xml" ||
+          type === "text/xml" ||
+          type === ""
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function renderDropZone() {
+    gpxDropZoneRoot.render(
+      <Themed>
+        <GpxDropZone visible={isDraggingFile} />
+      </Themed>
+    );
+  }
+
+  function handleDragEnter(event: DragEvent) {
+    event.preventDefault();
+    dragCounter++;
+    if (hasGpxFile(event) && dragCounter === 1) {
+      isDraggingFile = true;
+      renderDropZone();
+    }
+  }
+
+  function handleDragLeave(event: DragEvent) {
+    event.preventDefault();
+    dragCounter--;
+    if (dragCounter === 0) {
+      isDraggingFile = false;
+      renderDropZone();
+    }
+  }
+
+  function handleDragOver(event: DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "copy";
+    }
+  }
+
+  async function handleDrop(event: DragEvent) {
+    event.preventDefault();
+    dragCounter = 0;
+    isDraggingFile = false;
+    renderDropZone();
+
+    if (!event.dataTransfer) return;
+
+    const files = event.dataTransfer.files;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.name.toLowerCase().endsWith(".gpx")) {
+        try {
+          const track = await readGpxFile(file);
+          store.addTrack(track);
+        } catch (error) {
+          console.error("Failed to parse GPX file:", error);
+          alert(
+            `Failed to load GPX file "${file.name}": ${error instanceof Error ? error.message : "Unknown error"}`
+          );
+        }
+      }
+    }
+  }
+
+  document.addEventListener("dragenter", handleDragEnter);
+  document.addEventListener("dragleave", handleDragLeave);
+  document.addEventListener("dragover", handleDragOver);
+  document.addEventListener("drop", handleDrop);
+
+  // Initial render of drop zone (hidden)
+  renderDropZone();
 
   maplibregl.setRTLTextPlugin(
     "https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js",
