@@ -128,8 +128,10 @@ function initialize() {
       const file = files[i];
       if (file.name.toLowerCase().endsWith(".gpx")) {
         try {
-          const track = await readGpxFile(file);
-          store.addTrack(track);
+          const tracks = await readGpxFile(file);
+          for (const track of tracks) {
+            store.addTrack(track);
+          }
         } catch (error) {
           console.error("Failed to parse GPX file:", error);
           alert(

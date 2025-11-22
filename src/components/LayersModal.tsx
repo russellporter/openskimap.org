@@ -45,8 +45,10 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
 
     setIsUploading(true);
     try {
-      const track = await readGpxFile(file);
-      props.eventBus.addTrack(track);
+      const tracks = await readGpxFile(file);
+      for (const track of tracks) {
+        props.eventBus.addTrack(track);
+      }
     } catch (error) {
       console.error('Error parsing GPX file:', error);
       alert(error instanceof Error ? error.message : 'Failed to parse GPX file');
