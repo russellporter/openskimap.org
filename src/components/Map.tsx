@@ -253,9 +253,9 @@ export class Map {
           if (layerId === "building-top")
             return this.terrainEnabled ? "none" : "visible";
 
-          // Hide hillshade layer when slope terrain overlay is enabled
+          // Hide hillshade layer when slope terrain overlay is enabled (except avalanche slope classes)
           if (layerId === "hillshade")
-            return isSlopeOverlay(this.currentSlopeOverlay) ? "none" : "visible";
+            return isSlopeOverlay(this.currentSlopeOverlay) && this.currentSlopeOverlay !== MapStyleOverlay.AvalancheSlopeClasses ? "none" : "visible";
 
           // No visibility change needed
           return null;

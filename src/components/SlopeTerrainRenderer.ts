@@ -723,30 +723,39 @@ export class SlopeTerrainRenderer {
         }
       } else if (u_style == 3) { // Sun exposure style - calculate sun hours
         slopeColor = calculateSunExposure(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+      } else if (u_style == 4) { // Avalanche slope classes style - use smoothed slope to reduce noise from boulders etc.
+        slopeDegrees = calculateSmoothedSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+        slopeColor = getSlopeColor(slopeDegrees);
       }
-      
+
       // Add some basic hillshading for depth perception (using standard gradient for consistency)
-      float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
-      float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
-      float e = texture(u_texture, adjustedTexCoord + vec2(texelSize.x, 0.0)).r;
-      float w = texture(u_texture, adjustedTexCoord + vec2(-texelSize.x, 0.0)).r;
-      
-      if (n < -9999.0) n = centerHeight;
-      if (s < -9999.0) s = centerHeight;
-      if (e < -9999.0) e = centerHeight;
-      if (w < -9999.0) w = centerHeight;
-      
-      float dzdx = (e - w) / 2.0;
-      float dzdy = (n - s) / 2.0;
-      
-      vec3 normal = normalize(vec3(-dzdx, -dzdy, pixelSizeMeters));
-      vec3 lightDir = normalize(vec3(0.5, 0.5, 0.8));
-      float hillshade = dot(normal, lightDir);
-      hillshade = clamp(hillshade, 0.3, 1.0); // Keep some ambient light
-      
-      // Combine slope color with hillshading
-      vec3 finalColor = slopeColor * hillshade;
-      
+      // Skip hillshading for avalanche slope classes (style 4) - categorical colors should stay consistent
+      vec3 finalColor;
+      if (u_style == 4) {
+        finalColor = slopeColor;
+      } else {
+        float n = texture(u_texture, adjustedTexCoord + vec2(0.0, -texelSize.y)).r;
+        float s = texture(u_texture, adjustedTexCoord + vec2(0.0, texelSize.y)).r;
+        float e = texture(u_texture, adjustedTexCoord + vec2(texelSize.x, 0.0)).r;
+        float w = texture(u_texture, adjustedTexCoord + vec2(-texelSize.x, 0.0)).r;
+
+        if (n < -9999.0) n = centerHeight;
+        if (s < -9999.0) s = centerHeight;
+        if (e < -9999.0) e = centerHeight;
+        if (w < -9999.0) w = centerHeight;
+
+        float dzdx = (e - w) / 2.0;
+        float dzdy = (n - s) / 2.0;
+
+        vec3 normal = normalize(vec3(-dzdx, -dzdy, pixelSizeMeters));
+        vec3 lightDir = normalize(vec3(0.5, 0.5, 0.8));
+        float hillshade = dot(normal, lightDir);
+        hillshade = clamp(hillshade, 0.3, 1.0); // Keep some ambient light
+
+        // Combine slope color with hillshading
+        finalColor = slopeColor * hillshade;
+      }
+
       // Full opacity to ensure visibility
       fragColor = vec4(finalColor, 1.0);
     }
@@ -797,6 +806,31 @@ export class SlopeTerrainRenderer {
         vec3 getSlopeColor(float slope) {
           // Not used for sun exposure style - calculation happens in calculateSunExposure
           return vec3(1.0, 0.0, 1.0);
+        }
+      `,
+      [MapStyleOverlay.AvalancheSlopeClasses]: `
+        // Color gradient for avalanche slope classes (muted colors for better map readability)
+        // Transparent: below 30° - Avalanche releases below 30° are rare
+        // Yellow: 30-35° - The avalanche risk begins to increase
+        // Orange: 35-40° - The avalanche risk is increasing sharply
+        // Red: 40-45° - The avalanche risk is reaching its peak
+        // Violet: over 45° - The avalanche risk remains high
+        vec3 getSlopeColor(float slope) {
+          if (slope < 30.0) {
+            discard; // Transparent below 30°
+          } else if (slope < 35.0) {
+            // Muted yellow (30-35°)
+            return vec3(1.0, 1.0, 0.5);
+          } else if (slope < 40.0) {
+            // Muted orange (35-40°)
+            return vec3(1.0, 0.7, 0.4);
+          } else if (slope < 45.0) {
+            // Muted red (40-45°)
+            return vec3(1.0, 0.5, 0.5);
+          } else {
+            // Muted violet (over 45°)
+            return vec3(0.75, 0.5, 0.85);
+          }
         }
       `
     };
@@ -1113,7 +1147,7 @@ export class SlopeTerrainRenderer {
     const conventionLocation = gl.getUniformLocation(program, "u_difficultyConvention");
     gl.uniform1i(conventionLocation, conventionInt);
 
-    // Set style uniform (0 = Slope, 1 = DownhillDifficulty, 2 = Aspect, 3 = SunExposure)
+    // Set style uniform (0 = Slope, 1 = DownhillDifficulty, 2 = Aspect, 3 = SunExposure, 4 = AvalancheSlopeClasses)
     const styleLocation = gl.getUniformLocation(program, "u_style");
     let styleInt = 0;
     switch (style) {
@@ -1128,6 +1162,9 @@ export class SlopeTerrainRenderer {
         break;
       case MapStyleOverlay.SunExposure:
         styleInt = 3;
+        break;
+      case MapStyleOverlay.AvalancheSlopeClasses:
+        styleInt = 4;
         break;
     }
     gl.uniform1i(styleLocation, styleInt);
