@@ -21,6 +21,8 @@ export default interface State {
   tracks: Track[];
   unitSystem: UnitHelpers.UnitSystem;
   sunExposureDate: Date;
+  isDrawingTrack: boolean;
+  drawingTrackCoordinates: [number, number][];
 }
 
 export interface StateChanges {
@@ -39,6 +41,8 @@ export interface StateChanges {
   tracks?: Track[];
   unitSystem?: UnitHelpers.UnitSystem;
   sunExposureDate?: Date;
+  isDrawingTrack?: boolean;
+  drawingTrackCoordinates?: [number, number][];
 }
 
 export function getInitialState(): State {
@@ -109,5 +113,7 @@ export function getInitialState(): State {
     tracks,
     unitSystem: getUnitSystem_NonReactive(),
     sunExposureDate,
+    isDrawingTrack: false,
+    drawingTrackCoordinates: [],
   };
 }

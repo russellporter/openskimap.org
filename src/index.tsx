@@ -12,6 +12,8 @@ import Sidebar from "./components/Sidebar";
 import State, { getInitialState, StateChanges } from "./components/State";
 import StateStore from "./components/StateStore";
 import { Themed } from "./components/Themed";
+import { TrackDrawingControls } from "./components/TrackDrawingControls";
+import { TrackDrawingManager } from "./components/TrackDrawingManager";
 import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
@@ -31,6 +33,14 @@ function initialize() {
   const layersRoot = ReactDOM.createRoot(
     document.getElementById("layers-modal")!
   );
+  const trackDrawingRoot = ReactDOM.createRoot(
+    document.getElementById("track-drawing-controls")!
+  );
+
+  // Track drawing manager - declared early so it's available in update function closure
+  let trackDrawingManager: TrackDrawingManager | null = null;
+  // Map reference - will be set after map is created
+  let mapInstance: Map | null = null;
 
   const store = new StateStore(getInitialState(), update);
 
@@ -74,6 +84,9 @@ function initialize() {
   
   // Initialize tracks on the map
   map.setTracks(store._state.tracks);
+
+  // Store map reference for use in update function
+  mapInstance = map;
 
   function update(state: State, changes: StateChanges) {
     updateURL({
@@ -194,6 +207,65 @@ function initialize() {
       localStorage.setItem("tracks", JSON.stringify(state.tracks));
       map.setTracks(state.tracks);
     }
+
+    // Handle track drawing state
+    if (changes.isDrawingTrack !== undefined && mapInstance) {
+      // Disable normal map interactions while drawing
+      mapInstance.setDrawingMode(state.isDrawingTrack);
+
+      if (state.isDrawingTrack) {
+        // Start drawing
+        if (!trackDrawingManager) {
+          trackDrawingManager = new TrackDrawingManager(mapInstance.getMaplibreMap(), store);
+        }
+        trackDrawingManager.startDrawing();
+      } else {
+        // Stop drawing
+        if (trackDrawingManager) {
+          trackDrawingManager.stopDrawing();
+        }
+      }
+    }
+
+    // Note: We don't update drawing visualization here on every coordinate change
+    // because TrackDrawingManager already updates locally for responsiveness.
+    // The state is kept in sync for the UI controls and persistence.
+
+    // Update track drawing controls UI
+    if (changes.isDrawingTrack !== undefined || changes.drawingTrackCoordinates !== undefined) {
+      const trackLength = calculateDrawingTrackLength(state.drawingTrackCoordinates);
+      trackDrawingRoot.render(
+        <Themed>
+          <TrackDrawingControls
+            eventBus={store}
+            isDrawing={state.isDrawingTrack}
+            pointCount={state.drawingTrackCoordinates.length}
+            trackLength={trackLength}
+          />
+        </Themed>
+      );
+    }
+  }
+
+  function calculateDrawingTrackLength(coordinates: [number, number][]): number {
+    if (coordinates.length < 2) return 0;
+
+    let totalDistance = 0;
+    for (let i = 1; i < coordinates.length; i++) {
+      const [lon1, lat1] = coordinates[i - 1];
+      const [lon2, lat2] = coordinates[i];
+      // Haversine formula
+      const R = 6371; // Earth's radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      totalDistance += R * c;
+    }
+
+    return totalDistance;
   }
 
   function onPageHide() {

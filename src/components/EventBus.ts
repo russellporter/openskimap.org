@@ -28,6 +28,11 @@ export default interface EventBus {
   addMarker(marker: MapMarker): void;
   addTrack(track: Track): void;
   removeTrack(trackId: string): void;
+  startDrawingTrack(): void;
+  addDrawingTrackPoint(coordinate: [number, number]): void;
+  removeLastDrawingTrackPoint(): void;
+  finishDrawingTrack(name: string): void;
+  cancelDrawingTrack(): void;
   showInfo(info: InfoData): void;
   hideInfo(): void;
   showFilters(): void;

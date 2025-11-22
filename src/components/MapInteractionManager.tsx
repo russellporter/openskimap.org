@@ -4,6 +4,7 @@ import EventBus from "./EventBus";
 export class MapInteractionManager {
   private map: maplibregl.Map;
   private eventBus: EventBus;
+  private interactionsEnabled: boolean = true;
 
   constructor(map: maplibregl.Map, eventBus: EventBus) {
     this.map = map;
@@ -12,6 +13,10 @@ export class MapInteractionManager {
     map.on("styledata", () => {
       this.attachListeners();
     });
+  }
+
+  setInteractionsEnabled(enabled: boolean): void {
+    this.interactionsEnabled = enabled;
   }
 
   private attachListeners() {
@@ -55,6 +60,7 @@ export class MapInteractionManager {
   }
 
   _onClickItemUnthrottled = (e: any) => {
+    if (!this.interactionsEnabled) return;
     this.eventBus.showInfo({
       id: e.features[0].properties.id,
       panToPosition: null,

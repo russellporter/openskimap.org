@@ -1,5 +1,5 @@
 import { Button, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, TextField, Typography } from "@mui/material";
-import { Close as CloseIcon, Upload as UploadIcon } from "@mui/icons-material";
+import { Close as CloseIcon, Upload as UploadIcon, Create as CreateIcon, Download as DownloadIcon } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import * as React from "react";
 import { MapStyle, MapStyleOverlay, SLOPE_OVERLAY_NAMES } from "../MapStyle";
@@ -59,12 +59,58 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
     }
   };
 
-  const handleRemoveTrack = (trackId: string) => {
-    props.eventBus.removeTrack(trackId);
+  const handleRemoveTrack = (track: Track) => {
+    if (window.confirm(`Remove "${track.name}"?`)) {
+      props.eventBus.removeTrack(track.id);
+    }
   };
 
   const handleGpxUploadClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleCreateTrack = () => {
+    props.eventBus.startDrawingTrack();
+  };
+
+  const handleDownloadTrack = (track: Track) => {
+    const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="OpenSkiMap.org">
+  <trk>
+    <name>${track.name}</name>
+    <trkseg>
+${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`).join('\n')}
+    </trkseg>
+  </trk>
+</gpx>`;
+
+    downloadFile(gpxContent, `${track.name.replace(/[^a-z0-9]/gi, '_')}.gpx`);
+  };
+
+  const handleDownloadAllTracks = () => {
+    const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="OpenSkiMap.org">
+${props.tracks.map(track => `  <trk>
+    <name>${track.name}</name>
+    <trkseg>
+${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`).join('\n')}
+    </trkseg>
+  </trk>`).join('\n')}
+</gpx>`;
+
+    downloadFile(gpxContent, 'openskimap_tracks.gpx');
+  };
+
+  const downloadFile = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'application/gpx+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -194,19 +240,36 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
                       ({track.lengthKm} km)
                     </Typography>
                   </Box>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleRemoveTrack(track.id)}
-                    sx={{ ml: 1 }}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
+                  <Box sx={{ display: 'flex' }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDownloadTrack(track)}
+                      title="Download GPX"
+                    >
+                      <DownloadIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveTrack(track)}
+                      title="Remove track"
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </Box>
               ))}
             </Box>
           )}
 
-          <Box sx={{ pl: 1 }}>
+          <Box sx={{ pl: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              variant="outlined"
+              startIcon={<CreateIcon />}
+              onClick={handleCreateTrack}
+              size="small"
+            >
+              Create Track
+            </Button>
             <Button
               variant="outlined"
               startIcon={<UploadIcon />}
@@ -216,6 +279,16 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
             >
               {isUploading ? 'Uploading...' : 'Add GPX Track'}
             </Button>
+            {props.tracks.length > 0 && (
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                onClick={handleDownloadAllTracks}
+                size="small"
+              >
+                Download All
+              </Button>
+            )}
             <input
               ref={fileInputRef}
               type="file"

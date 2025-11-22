@@ -168,6 +168,78 @@ export default class StateStore implements EventBus {
     this.update({ tracks: newTracks });
   };
 
+  startDrawingTrack = () => {
+    this.update({
+      isDrawingTrack: true,
+      drawingTrackCoordinates: [],
+      layersOpen: false // Close layers modal when starting to draw
+    });
+  };
+
+  addDrawingTrackPoint = (coordinate: [number, number]) => {
+    const newCoordinates = [...this._state.drawingTrackCoordinates, coordinate];
+    this.update({ drawingTrackCoordinates: newCoordinates });
+  };
+
+  removeLastDrawingTrackPoint = () => {
+    if (this._state.drawingTrackCoordinates.length > 0) {
+      const newCoordinates = this._state.drawingTrackCoordinates.slice(0, -1);
+      this.update({ drawingTrackCoordinates: newCoordinates });
+    }
+  };
+
+  finishDrawingTrack = (name: string) => {
+    if (this._state.drawingTrackCoordinates.length >= 2) {
+      const track = this.createTrackFromCoordinates(name, this._state.drawingTrackCoordinates);
+      const newTracks = [...this._state.tracks, track];
+      this.update({
+        tracks: newTracks,
+        isDrawingTrack: false,
+        drawingTrackCoordinates: []
+      });
+    } else {
+      this.update({
+        isDrawingTrack: false,
+        drawingTrackCoordinates: []
+      });
+    }
+  };
+
+  cancelDrawingTrack = () => {
+    this.update({
+      isDrawingTrack: false,
+      drawingTrackCoordinates: []
+    });
+  };
+
+  private createTrackFromCoordinates(name: string, coordinates: [number, number][]): Track {
+    const id = `track_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const color = '#4CAF50'; // Green for hand-drawn tracks
+    const lengthKm = this.calculateTrackLength(coordinates);
+    return { id, name, coordinates, color, lengthKm };
+  }
+
+  private calculateTrackLength(coordinates: [number, number][]): number {
+    if (coordinates.length < 2) return 0;
+
+    let totalDistance = 0;
+    for (let i = 1; i < coordinates.length; i++) {
+      const [lon1, lat1] = coordinates[i - 1];
+      const [lon2, lat2] = coordinates[i];
+      // Haversine formula
+      const R = 6371; // Earth's radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      totalDistance += R * c;
+    }
+
+    return Math.round(totalDistance * 10) / 10;
+  }
+
   showFilters = () => {
     this.update({ mapFiltersOpen: true });
   };

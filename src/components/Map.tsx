@@ -35,7 +35,6 @@ export class Map {
   private filtersVisible = false;
   private mapScaleControl: maplibregl.ScaleControl;
 
-  // @ts-ignore - interactionManager is stored for explicitness but doesn't need to be accessed
   private interactionManager: MapInteractionManager;
   private demSource: InstanceType<typeof mlcontour.DemSource>;
   private esriAttribution: EsriAttribution | null = null;
@@ -473,6 +472,7 @@ export class Map {
         // Add track layers
         this.tracks.forEach((track) => {
           const sourceId = `track-${track.id}`;
+          const outlineLayerId = `track-line-outline-${track.id}`;
           const layerId = `track-line-${track.id}`;
 
           // Add track source
@@ -491,21 +491,38 @@ export class Map {
             },
           };
 
-          // Add track layer before other-ski-area-icons
+          // Add track layers before other-ski-area-icons
           const baseIndex = baseStyle.layers.findIndex(
             (layer) => layer.id === "other-ski-area-icons"
           );
           const insertIndex =
             baseIndex >= 0 ? baseIndex : baseStyle.layers.length;
 
+          // Add white outline layer (wider, underneath)
           baseStyle.layers.splice(insertIndex, 0, {
+            id: outlineLayerId,
+            type: "line",
+            source: sourceId,
+            paint: {
+              "line-color": "#ffffff",
+              "line-width": 6,
+              "line-opacity": 0.9,
+            },
+            layout: {
+              "line-join": "round",
+              "line-cap": "round",
+            },
+          });
+
+          // Add colored line layer (on top)
+          baseStyle.layers.splice(insertIndex + 1, 0, {
             id: layerId,
             type: "line",
             source: sourceId,
             paint: {
               "line-color": track.color,
               "line-width": 3,
-              "line-opacity": 0.8,
+              "line-opacity": 1,
             },
             layout: {
               "line-join": "round",
@@ -636,5 +653,13 @@ export class Map {
 
   addControl = (control: maplibregl.IControl, position?: string) => {
     this.map.addControl(control, position as maplibregl.ControlPosition);
+  };
+
+  getMaplibreMap = (): maplibregl.Map => {
+    return this.map;
+  };
+
+  setDrawingMode = (enabled: boolean): void => {
+    this.interactionManager.setInteractionsEnabled(!enabled);
   };
 }

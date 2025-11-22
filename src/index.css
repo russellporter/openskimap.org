@@ -12,6 +12,12 @@ body {
   height: 100%;
 }
 
+#map.drawing-mode,
+#map.drawing-mode .maplibregl-canvas-container,
+#map.drawing-mode .maplibregl-canvas {
+  cursor: crosshair !important;
+}
+
 #settings-box {
   display: flex;
   position: absolute;
