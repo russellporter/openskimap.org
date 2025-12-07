@@ -9,6 +9,7 @@ import { CameraPosition, CameraPositionManager } from "../utils/CameraPositionMa
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
+import { HeadingIndicator } from "./HeadingIndicator";
 import { InfoControl } from "./InfoControl";
 import { InfoData } from "./InfoData";
 import { getVisibleSkiAreasCount } from "./MapVisibilityUtils";
@@ -40,6 +41,8 @@ export class Map {
   private demSource: InstanceType<typeof mlcontour.DemSource>;
   private esriAttribution: EsriAttribution | null = null;
   private attributionControl: maplibregl.AttributionControl;
+  private geolocateControl: maplibregl.GeolocateControl;
+  private headingIndicator: HeadingIndicator | null = null;
   private currentStyle: MapStyle | null = null;
   private currentFilters: MapFilters = defaultMapFilters;
   private terrainEnabled = false;
@@ -83,15 +86,19 @@ export class Map {
       ],
     });
     this.map.addControl(this.attributionControl, "bottom-right");
-    this.map.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true,
-        },
-        trackUserLocation: true,
-      }),
-      "bottom-right"
-    );
+
+    this.geolocateControl = new maplibregl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true,
+      },
+      trackUserLocation: true,
+    });
+    this.map.addControl(this.geolocateControl, "bottom-right");
+
+    this.headingIndicator = new HeadingIndicator({
+      geolocateControl: this.geolocateControl,
+    });
+    this.headingIndicator.onAdd(this.map);
 
     this.map.addControl(
       new maplibregl.NavigationControl({

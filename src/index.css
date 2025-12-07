@@ -101,3 +101,14 @@ body {
   /** Allow the info control to cover other controls if needed */
   z-index: 3;
 }
+
+.heading-indicator {
+  pointer-events: none;
+  transform-origin: center;
+}
+
+.heading-indicator svg {
+  display: block;
+}
+
+
