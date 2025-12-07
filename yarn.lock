@@ -1667,6 +1667,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@isaacs/balanced-match@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@isaacs/balanced-match@npm:4.0.1"
+  checksum: 102fbc6d2c0d5edf8f6dbf2b3feb21695a21bc850f11bc47c4f06aa83bd8884fde3fe9d6d797d619901d96865fdcb4569ac2a54c937992c48885c5e3d9967fe8
+  languageName: node
+  linkType: hard
+
+"@isaacs/brace-expansion@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@isaacs/brace-expansion@npm:5.0.0"
+  dependencies:
+    "@isaacs/balanced-match": ^4.0.1
+  checksum: d7a3b8b0ddbf0ccd8eeb1300e29dd0a0c02147e823d8138f248375a365682360620895c66d113e05ee02389318c654379b0e538b996345b83c914941786705b1
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -1844,9 +1860,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@maplibre/vt-pbf@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "@maplibre/vt-pbf@npm:4.0.3"
+"@maplibre/mlt@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@maplibre/mlt@npm:1.1.2"
+  dependencies:
+    "@mapbox/point-geometry": ^1.1.0
+  checksum: 2db019a5f81426c93c6fddbc460051867dbc26e331adb22bb30dac8535ef6079b11b1cceffe9115ecc7870d98b24d004e1868f2c70b509966934e48796661bfd
+  languageName: node
+  linkType: hard
+
+"@maplibre/vt-pbf@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "@maplibre/vt-pbf@npm:4.1.0"
   dependencies:
     "@mapbox/point-geometry": ^1.1.0
     "@mapbox/vector-tile": ^2.0.4
@@ -1855,7 +1880,7 @@ __metadata:
     geojson-vt: ^4.0.2
     pbf: ^4.0.1
     supercluster: ^8.0.1
-  checksum: 450a48748a4681d6b6d6a1e4f61e95f3f1da377fe780f04e5c4ecd4421370195a684151c5821591cb249a1925b732fbd338f04eee91294d7927ed968e8e92dcf
+  checksum: 39bbc3a4a9b0800665f68b71bbf7128423a8dbca3e352a07d486f2af40baf9a52bf8fa558992ed4ba587e9c26fad0a0a7e694f611c8d49b29e51fa3958041878
   languageName: node
   linkType: hard
 
@@ -3151,7 +3176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-spawn@npm:^7.0.0":
+"cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.6":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
   dependencies:
@@ -3676,6 +3701,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"foreground-child@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "foreground-child@npm:3.3.1"
+  dependencies:
+    cross-spawn: ^7.0.6
+    signal-exit: ^4.0.1
+  checksum: b2c1a6fc0bf0233d645d9fefdfa999abf37db1b33e5dab172b3cbfb0662b88bfbd2c9e7ab853533d199050ec6b65c03fcf078fc212d26e4990220e98c6930eef
+  languageName: node
+  linkType: hard
+
 "fs-extra@npm:^9.0.1":
   version: 9.1.0
   resolution: "fs-extra@npm:9.1.0"
@@ -3703,13 +3738,6 @@ __metadata:
   dependencies:
     minipass: ^7.0.3
   checksum: 8722a41109130851d979222d3ec88aabaceeaaf8f57b2a8f744ef8bd2d1ce95453b04a61daa0078822bc5cd21e008814f06fe6586f56fef511e71b8d2394d802
-  languageName: node
-  linkType: hard
-
-"fs.realpath@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "fs.realpath@npm:1.0.0"
-  checksum: 99ddea01a7e75aa276c250a04eedeffe5662bce66c65c07164ad6264f9de18fb21be9433ead460e54cff20e31721c811f4fb5d70591799df5f85dce6d6746fd0
   languageName: node
   linkType: hard
 
@@ -3833,17 +3861,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.1.6":
-  version: 7.2.3
-  resolution: "glob@npm:7.2.3"
+"glob@npm:^11.0.1":
+  version: 11.1.0
+  resolution: "glob@npm:11.1.0"
   dependencies:
-    fs.realpath: ^1.0.0
-    inflight: ^1.0.4
-    inherits: 2
-    minimatch: ^3.1.1
-    once: ^1.3.0
-    path-is-absolute: ^1.0.0
-  checksum: 29452e97b38fa704dabb1d1045350fb2467cf0277e155aa9ff7077e90ad81d1ea9d53d3ee63bd37c05b09a065e90f16aec4a65f5b8de401d1dac40bc5605d133
+    foreground-child: ^3.3.1
+    jackspeak: ^4.1.1
+    minimatch: ^10.1.1
+    minipass: ^7.1.2
+    package-json-from-dist: ^1.0.0
+    path-scurry: ^2.0.0
+  bin:
+    glob: dist/esm/bin.mjs
+  checksum: 1cfbdc743db77688727411f00233404eb9c67d7c89a4ff1f8b8e60031382d4f695ecf60f279d0d45e5ba2377610572d013a858a433b45a133cf20aba6e3206e0
   languageName: node
   linkType: hard
 
@@ -4008,23 +4038,6 @@ __metadata:
   version: 4.0.0
   resolution: "indent-string@npm:4.0.0"
   checksum: 824cfb9929d031dabf059bebfe08cf3137365e112019086ed3dcff6a0a7b698cb80cf67ccccde0e25b9e2d7527aa6cc1fed1ac490c752162496caba3e6699612
-  languageName: node
-  linkType: hard
-
-"inflight@npm:^1.0.4":
-  version: 1.0.6
-  resolution: "inflight@npm:1.0.6"
-  dependencies:
-    once: ^1.3.0
-    wrappy: 1
-  checksum: f4f76aa072ce19fae87ce1ef7d221e709afb59d445e05d47fba710e85470923a75de35bfae47da6de1b18afc3ce83d70facf44cfb0aff89f0a3f45c0a0244dfd
-  languageName: node
-  linkType: hard
-
-"inherits@npm:2":
-  version: 2.0.4
-  resolution: "inherits@npm:2.0.4"
-  checksum: 4a48a733847879d6cf6691860a6b1e3f0f4754176e4d71494c41f3475553768b10f84b5ce1d40fbd0e34e6bfbb864ee35858ad4dd2cf31e02fc4a154b724d7f1
   languageName: node
   linkType: hard
 
@@ -4266,6 +4279,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jackspeak@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "jackspeak@npm:4.1.1"
+  dependencies:
+    "@isaacs/cliui": ^8.0.2
+  checksum: daca714c5adebfb80932c0b0334025307b68602765098d73d52ec546bc4defdb083292893384261c052742255d0a77d8fcf96f4c669bcb4a99b498b94a74955e
+  languageName: node
+  linkType: hard
+
 "jake@npm:^10.8.5":
   version: 10.9.2
   resolution: "jake@npm:10.9.2"
@@ -4420,6 +4442,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^11.0.0":
+  version: 11.2.4
+  resolution: "lru-cache@npm:11.2.4"
+  checksum: cb8cf72b80a506593f51880bd5a765380d6d8eb82e99b2fbb2f22fe39e5f2f641d47a2509e74cc294617f32a4e90ae8f6214740fe00bc79a6178854f00419b24
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^5.1.1":
   version: 5.1.1
   resolution: "lru-cache@npm:5.1.1"
@@ -4465,9 +4494,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"maplibre-gl@npm:^5.11.0":
-  version: 5.11.0
-  resolution: "maplibre-gl@npm:5.11.0"
+"maplibre-gl@npm:^5.14.0":
+  version: 5.14.0
+  resolution: "maplibre-gl@npm:5.14.0"
   dependencies:
     "@mapbox/geojson-rewind": ^0.5.2
     "@mapbox/jsonlint-lines-primitives": ^2.0.2
@@ -4477,7 +4506,8 @@ __metadata:
     "@mapbox/vector-tile": ^2.0.4
     "@mapbox/whoots-js": ^3.1.0
     "@maplibre/maplibre-gl-style-spec": ^24.3.1
-    "@maplibre/vt-pbf": ^4.0.3
+    "@maplibre/mlt": ^1.1.2
+    "@maplibre/vt-pbf": ^4.1.0
     "@types/geojson": ^7946.0.16
     "@types/geojson-vt": 3.2.5
     "@types/supercluster": ^7.1.3
@@ -4491,7 +4521,7 @@ __metadata:
     quickselect: ^3.0.0
     supercluster: ^8.0.1
     tinyqueue: ^3.0.0
-  checksum: e94988323557acca9a8d9de584c230e3f3f28c20839a6ba7841d3192b29b2953f3e1506473f82d5958ad972cf46558bdfbeec183ec2cdbeacd81fb075b92347e
+  checksum: f8940124151fec83013a272782ccd7867018a9b9254f1df41efde333bc4c20275b0c638cc661759d5eeb118b806e925f2368bb8787b0ee288c15b96c336a7970
   languageName: node
   linkType: hard
 
@@ -4502,7 +4532,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^3.1.1, minimatch@npm:^3.1.2":
+"minimatch@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "minimatch@npm:10.1.1"
+  dependencies:
+    "@isaacs/brace-expansion": ^5.0.0
+  checksum: 8820c0be92994f57281f0a7a2cc4268dcc4b610f9a1ab666685716b4efe4b5898b43c835a8f22298875b31c7a278a5e3b7e253eee7c886546bb0b61fb94bca6b
+  languageName: node
+  linkType: hard
+
+"minimatch@npm:^3.1.2":
   version: 3.1.2
   resolution: "minimatch@npm:3.1.2"
   dependencies:
@@ -4737,15 +4776,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"once@npm:^1.3.0":
-  version: 1.4.0
-  resolution: "once@npm:1.4.0"
-  dependencies:
-    wrappy: 1
-  checksum: cd0a88501333edd640d95f0d2700fbde6bff20b3d4d9bdc521bdd31af0656b5706570d6c6afe532045a20bb8dc0849f8332d6f2a416e0ba6d3d3b98806c7db68
-  languageName: node
-  linkType: hard
-
 "openskidata-format@npm:^7.0.0":
   version: 7.0.0
   resolution: "openskidata-format@npm:7.0.0"
@@ -4785,21 +4815,21 @@ __metadata:
     chart.js: ^4.5.1
     clsx: ^2.1.1
     maplibre-contour: ^0.1.0
-    maplibre-gl: ^5.11.0
+    maplibre-gl: ^5.14.0
     memoize-one: ^6.0.0
     openskidata-format: ^7.0.0
-    prettier: ^3.6.2
+    prettier: ^3.7.4
     query-string: ^9.3.1
-    react: ^19.2.0
+    react: ^19.2.1
     react-chartjs-2: ^5.3.1
     react-detect-click-outside: ^1.1.7
-    react-dom: ^19.2.0
+    react-dom: ^19.2.1
     shallow-equal: ^3.1.0
     throttle-debounce: ^5.0.2
     tslib: ^2.8.1
     typescript: ^5.9.3
-    vite: ^7.2.1
-    vite-plugin-pwa: ^1.1.0
+    vite: ^7.2.6
+    vite-plugin-pwa: ^1.2.0
     whatwg-fetch: ^3.6.20
   languageName: unknown
   linkType: soft
@@ -4841,13 +4871,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-is-absolute@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "path-is-absolute@npm:1.0.1"
-  checksum: 060840f92cf8effa293bcc1bea81281bd7d363731d214cbe5c227df207c34cd727430f70c6037b5159c8a870b9157cba65e775446b0ab06fd5ecc7e54615a3b8
-  languageName: node
-  linkType: hard
-
 "path-key@npm:^3.1.0":
   version: 3.1.1
   resolution: "path-key@npm:3.1.1"
@@ -4869,6 +4892,16 @@ __metadata:
     lru-cache: ^10.2.0
     minipass: ^5.0.0 || ^6.0.2 || ^7.0.0
   checksum: 890d5abcd593a7912dcce7cf7c6bf7a0b5648e3dee6caf0712c126ca0a65c7f3d7b9d769072a4d1baf370f61ce493ab5b038d59988688e0c5f3f646ee3c69023
+  languageName: node
+  linkType: hard
+
+"path-scurry@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "path-scurry@npm:2.0.1"
+  dependencies:
+    lru-cache: ^11.0.0
+    minipass: ^7.1.2
+  checksum: a022c6c38fed836079d03f96540eafd4cd989acf287b99613c82300107f366e889513ad8b671a2039a9d251122621f9c6fa649f0bd4d50acf95a6943a6692dbf
   languageName: node
   linkType: hard
 
@@ -4952,12 +4985,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.6.2":
-  version: 3.6.2
-  resolution: "prettier@npm:3.6.2"
+"prettier@npm:^3.7.4":
+  version: 3.7.4
+  resolution: "prettier@npm:3.7.4"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 0206f5f437892e8858f298af8850bf9d0ef1c22e21107a213ba56bfb9c2387a2020bfda244a20161d8e3dad40c6b04101609a55d370dece53d0a31893b64f861
+  checksum: 955e37e87b1151ca3b3282463f5295f4c415821884791df152ff66e6eb1c5257115153cccba61b13962546100dd00ae45670ff27077dcab04c977d84036eaf80
   languageName: node
   linkType: hard
 
@@ -5064,14 +5097,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.2.0":
-  version: 19.2.0
-  resolution: "react-dom@npm:19.2.0"
+"react-dom@npm:^19.2.1":
+  version: 19.2.1
+  resolution: "react-dom@npm:19.2.1"
   dependencies:
     scheduler: ^0.27.0
   peerDependencies:
-    react: ^19.2.0
-  checksum: b6ec952f68a29dcc847143ad48974477e1d3b95cb0a6e0039dd93c7fe64d0ef51f2ca09a19c5eb892ba625ba88c4bcc6f8bc3bdd1c33ccc3f6f17acabbb4882f
+    react: ^19.2.1
+  checksum: 45a7c57696b6fcc9f018a1626a0c5f6da7085510bcebb9ab585414ea1b73061df1139d57b4384ece47c0a53d46045c28b93fe85e249771eca8cfac8d3e613833
   languageName: node
   linkType: hard
 
@@ -5111,10 +5144,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.2.0":
-  version: 19.2.0
-  resolution: "react@npm:19.2.0"
-  checksum: 33dd01bf699e1c5040eb249e0f552519adf7ee90b98c49d702a50bf23af6852ea46023a5f7f93966ab10acd7a45428fa0f193c686ecdaa7a75a03886e53ec3fe
+"react@npm:^19.2.1":
+  version: 19.2.1
+  resolution: "react@npm:19.2.1"
+  checksum: 9b32ace5c532ed78bc5a907bfec77d966c8f117049d9bf06b627c4cebe5ef2c899f18ed283f8ed5b85346176b5ccc5328ab6fae0b389f2936a87575ce0e47670
   languageName: node
   linkType: hard
 
@@ -5257,7 +5290,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^2.43.1":
+"rollup@npm:^2.79.2":
   version: 2.79.2
   resolution: "rollup@npm:2.79.2"
   dependencies:
@@ -6041,30 +6074,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-pwa@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "vite-plugin-pwa@npm:1.1.0"
+"vite-plugin-pwa@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "vite-plugin-pwa@npm:1.2.0"
   dependencies:
     debug: ^4.3.6
     pretty-bytes: ^6.1.1
     tinyglobby: ^0.2.10
-    workbox-build: ^7.3.0
-    workbox-window: ^7.3.0
+    workbox-build: ^7.4.0
+    workbox-window: ^7.4.0
   peerDependencies:
     "@vite-pwa/assets-generator": ^1.0.0
     vite: ^3.1.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
-    workbox-build: ^7.3.0
-    workbox-window: ^7.3.0
+    workbox-build: ^7.4.0
+    workbox-window: ^7.4.0
   peerDependenciesMeta:
     "@vite-pwa/assets-generator":
       optional: true
-  checksum: 75eb965d8df1ab96d52aabe9b4a8888392b098155f5bcea3d143c925c10136c1f3cdde70321aff4aa1377c5bcd8e03a2dacab2933ce3a6bf3139fbce83b18333
+  checksum: 4a18bf3cc4c5b756a27c24cae7fe6c81540f6a56df5f68d059d6ec5db1e8c0159fb4283bde53d9072bd2a408ae1ce652c26bbad41ae3e2bbc48fcaa8f9ce6d0c
   languageName: node
   linkType: hard
 
-"vite@npm:^7.2.1":
-  version: 7.2.1
-  resolution: "vite@npm:7.2.1"
+"vite@npm:^7.2.6":
+  version: 7.2.6
+  resolution: "vite@npm:7.2.6"
   dependencies:
     esbuild: ^0.25.0
     fdir: ^6.5.0
@@ -6113,7 +6146,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 6ccdeb4446d8d1690db516232a7d5dfe4435d069b32ee25cfef3896b4d0bb4326d80af3216a56b0a1e757d85393a21a87b1d5a3b06ca6ad21f885e17e661de7c
+  checksum: e552141f9d1fccd26f967db959498114219d422f4fb80e566a0b34e55f0881b0083ba4037773c7fd7f079017c9bab66a4f9ff630cf990d47c457d434ca44b522
   languageName: node
   linkType: hard
 
@@ -6190,28 +6223,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-background-sync@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-background-sync@npm:7.3.0"
+"workbox-background-sync@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-background-sync@npm:7.4.0"
   dependencies:
     idb: ^7.0.1
-    workbox-core: 7.3.0
-  checksum: c0be0da3ff8bdadebd556dac99238616962ffe7c2affdf19da73043d8e960f9b4d19e3a09fceb6748a3f1262073e8a6697ee9163585cdf019d792675343602de
+    workbox-core: 7.4.0
+  checksum: 9656463746bde1a86930c8b0d6e0b11246854406a8f4aef4631545d2b1783949364c4d5eba32669e083d80f37e643ce16c20bc2267fab9658ad8895c08bffc46
   languageName: node
   linkType: hard
 
-"workbox-broadcast-update@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-broadcast-update@npm:7.3.0"
+"workbox-broadcast-update@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-broadcast-update@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-  checksum: 75e017317a84ada70a7c2689f401603daf8d3e02b7224d9e88b69d14619b62c1453b08494d048080728df861b22ce2fbd5c746ff86a15a577b6433c92a1a7538
+    workbox-core: 7.4.0
+  checksum: 23ae40050e1545571c85eece879144a6a3eb786826da3b8559375a9007444e90223f2870e27a10edb8181623573062de95d36881229621a2763f75475bac2d51
   languageName: node
   linkType: hard
 
-"workbox-build@npm:^7.3.0":
-  version: 7.3.0
-  resolution: "workbox-build@npm:7.3.0"
+"workbox-build@npm:^7.4.0":
+  version: 7.4.0
+  resolution: "workbox-build@npm:7.4.0"
   dependencies:
     "@apideck/better-ajv-errors": ^0.3.1
     "@babel/core": ^7.24.4
@@ -6226,157 +6259,157 @@ __metadata:
     common-tags: ^1.8.0
     fast-json-stable-stringify: ^2.1.0
     fs-extra: ^9.0.1
-    glob: ^7.1.6
+    glob: ^11.0.1
     lodash: ^4.17.20
     pretty-bytes: ^5.3.0
-    rollup: ^2.43.1
+    rollup: ^2.79.2
     source-map: ^0.8.0-beta.0
     stringify-object: ^3.3.0
     strip-comments: ^2.0.1
     tempy: ^0.6.0
     upath: ^1.2.0
-    workbox-background-sync: 7.3.0
-    workbox-broadcast-update: 7.3.0
-    workbox-cacheable-response: 7.3.0
-    workbox-core: 7.3.0
-    workbox-expiration: 7.3.0
-    workbox-google-analytics: 7.3.0
-    workbox-navigation-preload: 7.3.0
-    workbox-precaching: 7.3.0
-    workbox-range-requests: 7.3.0
-    workbox-recipes: 7.3.0
-    workbox-routing: 7.3.0
-    workbox-strategies: 7.3.0
-    workbox-streams: 7.3.0
-    workbox-sw: 7.3.0
-    workbox-window: 7.3.0
-  checksum: 63e73498f59ff7ac76751988512ff13c78a1cc49ed0788e85322cbf2dc3c8fc364d4d6a4461a1bb733b0d130258c4b8dc190c45cda2d722394308f19ea34bf4c
+    workbox-background-sync: 7.4.0
+    workbox-broadcast-update: 7.4.0
+    workbox-cacheable-response: 7.4.0
+    workbox-core: 7.4.0
+    workbox-expiration: 7.4.0
+    workbox-google-analytics: 7.4.0
+    workbox-navigation-preload: 7.4.0
+    workbox-precaching: 7.4.0
+    workbox-range-requests: 7.4.0
+    workbox-recipes: 7.4.0
+    workbox-routing: 7.4.0
+    workbox-strategies: 7.4.0
+    workbox-streams: 7.4.0
+    workbox-sw: 7.4.0
+    workbox-window: 7.4.0
+  checksum: 95124accc3a9009cd72a88c49d36b9017db612004dc83cb2649850c970966f1d9d4fc5b72b894e3167678c9b1649dbeaae23a41cdb351ebe73665c7a00b97162
   languageName: node
   linkType: hard
 
-"workbox-cacheable-response@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-cacheable-response@npm:7.3.0"
+"workbox-cacheable-response@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-cacheable-response@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-  checksum: 7c31dec7eb34c5d6ecc2d66a767526c3a8e9e9147f319b3cc581f9f8e809746f3e2493ba100cc57398b6748859d41377b4f13e847e4159458a473882c3620c39
+    workbox-core: 7.4.0
+  checksum: 06ddf918e4f637fd04b6eac3abfbff157a665af63a91f97aabb3d3d0ad4af672224ab79a5850e06a00f1018c5c48ef2c575a1537dbd9a8e70e00a7c42bd45609
   languageName: node
   linkType: hard
 
-"workbox-core@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-core@npm:7.3.0"
-  checksum: 94aeecd52305a48bb154f84256d454f8cb78b5c9b4167d2b80dbed4561ce74e2ebbc0a99717f1c4425408e7d7a6270530cd399cc7d821e346301180ec3204ed6
+"workbox-core@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-core@npm:7.4.0"
+  checksum: 7a756964c494aaec2e5ba58a91f81482fcb2d9f455c41378624efdc6735e0a2451970c80b432f6c4a4ad78d57328c6de48a5e3ae54bfbfcf9aaf07ba67a0a5c3
   languageName: node
   linkType: hard
 
-"workbox-expiration@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-expiration@npm:7.3.0"
+"workbox-expiration@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-expiration@npm:7.4.0"
   dependencies:
     idb: ^7.0.1
-    workbox-core: 7.3.0
-  checksum: 0974cc5c986d40922cf2709368591a1f682a5f514da71782d213f72699f04de7e3ec6840debc9561d6a78bbf528ee0b502449905374e1b6181c610b06847e32d
+    workbox-core: 7.4.0
+  checksum: 67ee5afb00adba11e101307337b62b0a08f1c3dd394f293bd113ba2d95d16fd76b2746553ea6922aa35b11832e984f62e25663535235813c54b9beb0b259d293
   languageName: node
   linkType: hard
 
-"workbox-google-analytics@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-google-analytics@npm:7.3.0"
+"workbox-google-analytics@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-google-analytics@npm:7.4.0"
   dependencies:
-    workbox-background-sync: 7.3.0
-    workbox-core: 7.3.0
-    workbox-routing: 7.3.0
-    workbox-strategies: 7.3.0
-  checksum: 059b2e5398e8fad02572ed73562a2afb1ee6f79374e242c811788e69f1cdc58465be714316ad0398f0985d59767845aeeb887bdeb64942aba37458ea1dc5b178
+    workbox-background-sync: 7.4.0
+    workbox-core: 7.4.0
+    workbox-routing: 7.4.0
+    workbox-strategies: 7.4.0
+  checksum: d5cfbdbf9bc77ad2790bfb03828348ab2fe3ba3a485d7bebcccca44e21444c6f1bfb571447f7d692c33aaaf67f2abf07c39d7003974e57f8553c0177a5b7f7d9
   languageName: node
   linkType: hard
 
-"workbox-navigation-preload@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-navigation-preload@npm:7.3.0"
+"workbox-navigation-preload@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-navigation-preload@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-  checksum: 2da5db5efc336dd9ce4303ae3be034bb1fae658da0abd29317924589f136895f4a9f1c81d47a1f8af9b869c1bcea8e63e81b3b10708f2522929cf1a5c1ca3fb0
+    workbox-core: 7.4.0
+  checksum: 85a18d506819eed7f1a44cd0a4ec0062f924b15b5487dbe11d55d5331092320d1e5e62bfa60b440a41722f1f5626063cf46ad53e814f1c7f1215c16ea6faca6e
   languageName: node
   linkType: hard
 
-"workbox-precaching@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-precaching@npm:7.3.0"
+"workbox-precaching@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-precaching@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-    workbox-routing: 7.3.0
-    workbox-strategies: 7.3.0
-  checksum: 16c91d2cd65b9b23b11b4e83d3d778f6a07d040ee0921667d2654d67b688e649697c0a850e9083ccdf81b63345fa516df86edb77e19fd9f838adecf5f968480d
+    workbox-core: 7.4.0
+    workbox-routing: 7.4.0
+    workbox-strategies: 7.4.0
+  checksum: 68b62b79be7e6897df410d6c7a8fa0e34a11922d6c268b20c28a72dec7c9837803f2dc256de1c7d43d447c0a175b21049d4760a9be8887cd8886c9ac92efe5e0
   languageName: node
   linkType: hard
 
-"workbox-range-requests@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-range-requests@npm:7.3.0"
+"workbox-range-requests@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-range-requests@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-  checksum: 5e31e264e564fa80f11a574df348f3f73b775a620de0fe91e0b2bd705ae6d27e080353267f740d1ca89d8583783e77ecf06b67a4e4212fe1589f1437a1e50ce7
+    workbox-core: 7.4.0
+  checksum: bff6c109cedcc1daf67152a0bddd818d28a3d595e883ccd1a8da121fe96d1fc58265bcdb311509f029255b7e3a5b7616d204f948762377369dff1f8475641cfa
   languageName: node
   linkType: hard
 
-"workbox-recipes@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-recipes@npm:7.3.0"
+"workbox-recipes@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-recipes@npm:7.4.0"
   dependencies:
-    workbox-cacheable-response: 7.3.0
-    workbox-core: 7.3.0
-    workbox-expiration: 7.3.0
-    workbox-precaching: 7.3.0
-    workbox-routing: 7.3.0
-    workbox-strategies: 7.3.0
-  checksum: 65e6676a86b37e787e7abed61b81f2aa71377ef02368c510c75a3e2f17efb90e0be42d5e78d395ac970eed12c875492685412ed4c5bc4055f54105c1a35c0049
+    workbox-cacheable-response: 7.4.0
+    workbox-core: 7.4.0
+    workbox-expiration: 7.4.0
+    workbox-precaching: 7.4.0
+    workbox-routing: 7.4.0
+    workbox-strategies: 7.4.0
+  checksum: 707d394b63e47bf2d7213780693e21de38efd73a457e70726b97a6126ea67376d1bfde82d751c481ba452f3a7f0df8b2443503a0efc99d903a4c25b7359e81b4
   languageName: node
   linkType: hard
 
-"workbox-routing@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-routing@npm:7.3.0"
+"workbox-routing@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-routing@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-  checksum: 55047fd767a3fdfdd1510aecaa945daf63e6779882b40211ab402560d25370902feb1d17c3036cbfb86c8ce60d0514e4bbfdd3fbf397ee8ada950832edb7603a
+    workbox-core: 7.4.0
+  checksum: c1881a8f9a9404c26c7b20a546c45edacadd3d3347e141a8c3d099d56d3e79e818dd5087c54f625f2feef9c02981c3c1689815f51c76352e345be5364432b6ba
   languageName: node
   linkType: hard
 
-"workbox-strategies@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-strategies@npm:7.3.0"
+"workbox-strategies@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-strategies@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-  checksum: ac0c14afe2358c8b56974206b0d021412d04ab63b8d04f4950a09d0f28309a49146efef740a1e0bb2875fe55d561b48ff0fcb662e46a42060dbdf19ef641c5f1
+    workbox-core: 7.4.0
+  checksum: 22cfa34251e71bbe06ae3382172bbae66d071672a7725a88010796fc44a6eec7541b6d6ef1fc3a649abed298fea4c3bf10f6d9bb0d4347529a6141b9a7101d66
   languageName: node
   linkType: hard
 
-"workbox-streams@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-streams@npm:7.3.0"
+"workbox-streams@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-streams@npm:7.4.0"
   dependencies:
-    workbox-core: 7.3.0
-    workbox-routing: 7.3.0
-  checksum: 3aa2985eb7f944d11fe5afd468899b33f106c806e79fc91b3a7ba4cc8993a8c93b8adcc9af1cc00a3ad2deba3d0ab48b1c18c56d3353ab58614aa836770752fc
+    workbox-core: 7.4.0
+    workbox-routing: 7.4.0
+  checksum: fdf6985be5b7151245a4b3ff241962dda6478694ecaf640af2ad7ada9c3e041adab4dc9657f7beb4e7dfdb1bdd1aff5c3c4206200ddc433e2e954ac81b55bb39
   languageName: node
   linkType: hard
 
-"workbox-sw@npm:7.3.0":
-  version: 7.3.0
-  resolution: "workbox-sw@npm:7.3.0"
-  checksum: afac899245409cbb00d0683af8eff72e589e8bd14f47a414a7c9e9237f310fc273623e53327029ee71d9605af8646fa489cc786d7c2d70b042a65f4cc876c93f
+"workbox-sw@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-sw@npm:7.4.0"
+  checksum: cde5feeb8f9d040878ee9555c1e28b3798028bf40c61a75889ba618ad2dc2b1a4fc2771c4a514f6be736c8b4af318ff45f2272feff6d2206a283d9c50098e2b2
   languageName: node
   linkType: hard
 
-"workbox-window@npm:7.3.0, workbox-window@npm:^7.3.0":
-  version: 7.3.0
-  resolution: "workbox-window@npm:7.3.0"
+"workbox-window@npm:7.4.0, workbox-window@npm:^7.4.0":
+  version: 7.4.0
+  resolution: "workbox-window@npm:7.4.0"
   dependencies:
     "@types/trusted-types": ^2.0.2
-    workbox-core: 7.3.0
-  checksum: 8387955cc227d2bed24366d98e4e3d161d5b273096cec8b46d09000d3939bd92bdff9f5737a6920b548a7ff459e32e54f9802e315495b14885e83a53141763da
+    workbox-core: 7.4.0
+  checksum: 0ef595ce474b8657ed67a87c3d8735a7cc5cd060cc50732d43e59633426ea780addb1b13ef0a5c868bc4d3a0892044eaf15ea7f07f2ca153ee5567b1dd52e54a
   languageName: node
   linkType: hard
 
@@ -6399,13 +6432,6 @@ __metadata:
     string-width: ^5.0.1
     strip-ansi: ^7.0.1
   checksum: 371733296dc2d616900ce15a0049dca0ef67597d6394c57347ba334393599e800bab03c41d4d45221b6bc967b8c453ec3ae4749eff3894202d16800fdfe0e238
-  languageName: node
-  linkType: hard
-
-"wrappy@npm:1":
-  version: 1.0.2
-  resolution: "wrappy@npm:1.0.2"
-  checksum: 159da4805f7e84a3d003d8841557196034155008f817172d4e986bd591f74aa82aa7db55929a54222309e01079a65a92a9e6414da5a6aa4b01ee44a511ac3ee5
   languageName: node
   linkType: hard
 
