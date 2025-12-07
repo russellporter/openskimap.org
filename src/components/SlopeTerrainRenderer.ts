@@ -270,44 +270,49 @@ export class SlopeTerrainRenderer {
       return degrees(slope);
     }
     
-    // Calculate smoothed slope using larger sampling area
-    float calculateSmoothedSlope(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters) {
-      // Sample in a 5x5 grid for smoothing
+    // Calculate smoothed slope using zoom-dependent kernel size
+    float calculateSmoothedSlope(vec2 adjustedTexCoord, vec2 texelSize, float centerHeight, float pixelSizeMeters, int kernelRadius) {
+      // kernelRadius: 0 = no smoothing, 1 = 3x3, 2 = 5x5, etc.
+      if (kernelRadius == 0) {
+        // No smoothing - use standard slope calculation
+        return calculateStandardSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+      }
+
       float slopeSum = 0.0;
       int sampleCount = 0;
-      
-      for (int dy = -2; dy <= 2; dy++) {
-        for (int dx = -2; dx <= 2; dx++) {
+
+      for (int dy = -kernelRadius; dy <= kernelRadius; dy++) {
+        for (int dx = -kernelRadius; dx <= kernelRadius; dx++) {
           vec2 offset = vec2(float(dx), float(dy)) * texelSize;
           vec2 sampleCoord = adjustedTexCoord + offset;
-          
+
           // Sample center and neighbors for this position
           float center = texture(u_texture, sampleCoord).r;
           if (center < -9999.0) continue; // Skip invalid pixels
-          
+
           float n = texture(u_texture, sampleCoord + vec2(0.0, -texelSize.y)).r;
           float s = texture(u_texture, sampleCoord + vec2(0.0, texelSize.y)).r;
           float e = texture(u_texture, sampleCoord + vec2(texelSize.x, 0.0)).r;
           float w = texture(u_texture, sampleCoord + vec2(-texelSize.x, 0.0)).r;
-          
+
           // Use center value for invalid neighbors
           if (n < -9999.0) n = center;
           if (s < -9999.0) s = center;
           if (e < -9999.0) e = center;
           if (w < -9999.0) w = center;
-          
+
           // Simple gradient calculation
           float dzdx = (e - w) / 2.0;
           float dzdy = (n - s) / 2.0;
-          
+
           float gradientMagnitude = sqrt(dzdx * dzdx + dzdy * dzdy);
           float slope = atan(gradientMagnitude / pixelSizeMeters);
-          
+
           slopeSum += degrees(slope);
           sampleCount++;
         }
       }
-      
+
       return sampleCount > 0 ? slopeSum / float(sampleCount) : 0.0;
     }
     
@@ -711,7 +716,7 @@ export class SlopeTerrainRenderer {
         slopeColor = getSlopeColor(slopeDegrees);
       } else if (u_style == 1) { // DownhillDifficulty style - use smoothing only above zoom 13
         if (u_zoomLevel > 13.0) {
-          slopeDegrees = calculateSmoothedSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+          slopeDegrees = calculateSmoothedSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters, 2);
         } else {
           slopeDegrees = calculateStandardSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
         }
@@ -723,8 +728,16 @@ export class SlopeTerrainRenderer {
         }
       } else if (u_style == 3) { // Sun exposure style - calculate sun hours
         slopeColor = calculateSunExposure(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
-      } else if (u_style == 4) { // Avalanche slope classes style - use smoothed slope to reduce noise from boulders etc.
-        slopeDegrees = calculateSmoothedSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters);
+      } else if (u_style == 4) { // Avalanche slope classes style - use zoom-dependent smoothing
+        // Progressive smoothing: zoom < 14 = none, 14 = 3x3 kernel, 15+ = 5x5 kernel
+        int kernelRadius = 0;
+        if (u_zoomLevel >= 15.0) {
+          kernelRadius = 2; // 5x5 kernel
+        } else if (u_zoomLevel >= 14.0) {
+          kernelRadius = 1; // 3x3 kernel
+        }
+        // kernelRadius = 0 (no smoothing) for zoom < 14
+        slopeDegrees = calculateSmoothedSlope(adjustedTexCoord, texelSize, centerHeight, pixelSizeMeters, kernelRadius);
         slopeColor = getSlopeColor(slopeDegrees);
       }
 
