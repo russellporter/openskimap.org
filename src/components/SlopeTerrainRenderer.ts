@@ -439,8 +439,8 @@ export class SlopeTerrainRenderer {
                   foundHeight = true;
                 }
               } else {
-                // Minimal padding: only small border beyond center tile
-                float border = 1.0 / 514.0; // 1 pixel border
+                // Minimal padding: 3 pixel border beyond center tile
+                float border = 3.0 / 518.0; // 3 pixel border (512 + 6)
                 if (totalDistance < 2000.0 &&
                     checkPos.x >= -border && checkPos.x <= (1.0 + border) &&
                     checkPos.y >= -border && checkPos.y <= (1.0 + border)) {
@@ -536,9 +536,9 @@ export class SlopeTerrainRenderer {
       // Calculate per-pixel latitude
       vec2 originalTexCoord;
       if (u_style == 2) {
-        // For aspect style, should use minimal padding
+        // For aspect style, should use minimal padding (3px border)
         vec2 textureSize = vec2(textureSize(u_texture, 0));
-        originalTexCoord = (adjustedTexCoord * textureSize - 1.0) / (textureSize - 2.0);
+        originalTexCoord = (adjustedTexCoord * textureSize - 3.0) / (textureSize - 6.0);
       } else {
         // Fallback (shouldn't happen for aspect)
         originalTexCoord = adjustedTexCoord;
@@ -675,15 +675,15 @@ export class SlopeTerrainRenderer {
 
       // Map output coordinates to padded texture coordinates
       // For sun exposure (u_style == 3): 3x3 grid, center tile is middle third
-      // For other styles: minimal padding with 1px border
+      // For other styles: minimal padding with 3px border
       vec2 adjustedTexCoord;
       if (u_style == 3) {
         // Extended padding: map to center third of 3x3 grid
         // v_texCoord [0,1] -> texture coords for center tile [1/3, 2/3]
         adjustedTexCoord = v_texCoord / 3.0 + 1.0 / 3.0;
       } else {
-        // Minimal padding: map to center with 1px border
-        adjustedTexCoord = v_texCoord * (textureSize - 2.0) / textureSize + 1.0 / textureSize;
+        // Minimal padding: map to center with 3px border
+        adjustedTexCoord = v_texCoord * (textureSize - 6.0) / textureSize + 3.0 / textureSize;
       }
       
       // Sample the center pixel - elevation is stored directly in red channel
@@ -982,9 +982,9 @@ export class SlopeTerrainRenderer {
       outputWidth = paddedDemTile.width / 3;
       outputHeight = paddedDemTile.height / 3;
     } else {
-      // Minimal padding: 1px border, so subtract 2
-      outputWidth = paddedDemTile.width - 2;
-      outputHeight = paddedDemTile.height - 2;
+      // Minimal padding: 3px border on each side, so subtract 6
+      outputWidth = paddedDemTile.width - 6;
+      outputHeight = paddedDemTile.height - 6;
     }
 
     // Resize canvas to match output size
@@ -1211,21 +1211,36 @@ export class SlopeTerrainRenderer {
   }
 
   /**
-   * Creates a minimally padded DEM tile with 1-pixel border from 4 cardinal neighbors.
+   * Creates a minimally padded DEM tile with 3-pixel border from all 8 neighbors.
    * Used for basic slope/hillshading calculations where seam elimination is needed.
+   * Padding is 3 pixels to accommodate smoothed slope calculations (5x5 kernel).
    */
   private async getMinimalPaddedDemTile(
     z: number,
     x: number,
     y: number
   ): Promise<{ width: number; height: number; data: Float32Array } | null> {
-    // Fetch center tile + 4 cardinal neighbors only
-    const [centerTile, northTile, southTile, eastTile, westTile] = await Promise.all([
+    // Fetch center tile + all 8 neighbors to properly fill padding
+    const [
+      centerTile,
+      northTile,
+      southTile,
+      eastTile,
+      westTile,
+      northwestTile,
+      northeastTile,
+      southwestTile,
+      southeastTile
+    ] = await Promise.all([
       this.demSource.getDemTile(z, x, y),
       this.demSource.getDemTile(z, x, y - 1),
       this.demSource.getDemTile(z, x, y + 1),
       this.demSource.getDemTile(z, x + 1, y),
       this.demSource.getDemTile(z, x - 1, y),
+      this.demSource.getDemTile(z, x - 1, y - 1),
+      this.demSource.getDemTile(z, x + 1, y - 1),
+      this.demSource.getDemTile(z, x - 1, y + 1),
+      this.demSource.getDemTile(z, x + 1, y + 1),
     ]);
 
     if (!centerTile) {
@@ -1233,47 +1248,98 @@ export class SlopeTerrainRenderer {
     }
 
     const tileSize = centerTile.width;
-    const paddedSize = tileSize + 2;
+    const padding = 3; // 3 pixels to accommodate 5x5 smoothing kernel
+    const paddedSize = tileSize + 2 * padding;
     const paddedData = new Float32Array(paddedSize * paddedSize);
     paddedData.fill(-10000);
 
     // Copy center tile
     for (let y = 0; y < tileSize; y++) {
       for (let x = 0; x < tileSize; x++) {
-        paddedData[(y + 1) * paddedSize + (x + 1)] = centerTile.data[y * tileSize + x];
+        paddedData[(y + padding) * paddedSize + (x + padding)] = centerTile.data[y * tileSize + x];
       }
     }
 
-    // Fill borders from cardinal neighbors
+    // Fill top border from north neighbor (3 rows)
     if (northTile) {
-      for (let x = 0; x < tileSize; x++) {
-        paddedData[0 * paddedSize + (x + 1)] = northTile.data[(tileSize - 1) * tileSize + x];
+      for (let row = 0; row < padding; row++) {
+        const srcRow = tileSize - padding + row;
+        for (let x = 0; x < tileSize; x++) {
+          paddedData[row * paddedSize + (x + padding)] = northTile.data[srcRow * tileSize + x];
+        }
       }
     }
 
+    // Fill bottom border from south neighbor (3 rows)
     if (southTile) {
-      for (let x = 0; x < tileSize; x++) {
-        paddedData[(paddedSize - 1) * paddedSize + (x + 1)] = southTile.data[0 * tileSize + x];
+      for (let row = 0; row < padding; row++) {
+        const dstRow = tileSize + padding + row;
+        for (let x = 0; x < tileSize; x++) {
+          paddedData[dstRow * paddedSize + (x + padding)] = southTile.data[row * tileSize + x];
+        }
       }
     }
 
+    // Fill right border from east neighbor (3 columns)
     if (eastTile) {
       for (let y = 0; y < tileSize; y++) {
-        paddedData[(y + 1) * paddedSize + (paddedSize - 1)] = eastTile.data[y * tileSize + 0];
+        for (let col = 0; col < padding; col++) {
+          paddedData[(y + padding) * paddedSize + (tileSize + padding + col)] = eastTile.data[y * tileSize + col];
+        }
       }
     }
 
+    // Fill left border from west neighbor (3 columns)
     if (westTile) {
       for (let y = 0; y < tileSize; y++) {
-        paddedData[(y + 1) * paddedSize + 0] = westTile.data[y * tileSize + (tileSize - 1)];
+        for (let col = 0; col < padding; col++) {
+          const srcCol = tileSize - padding + col;
+          paddedData[(y + padding) * paddedSize + col] = westTile.data[y * tileSize + srcCol];
+        }
       }
     }
 
-    // Interpolate corners
-    paddedData[0] = (paddedData[1] + paddedData[paddedSize]) / 2; // Top-left
-    paddedData[paddedSize - 1] = (paddedData[paddedSize - 2] + paddedData[2 * paddedSize - 1]) / 2; // Top-right
-    paddedData[(paddedSize - 1) * paddedSize] = (paddedData[(paddedSize - 2) * paddedSize] + paddedData[(paddedSize - 1) * paddedSize + 1]) / 2; // Bottom-left
-    paddedData[paddedSize * paddedSize - 1] = (paddedData[paddedSize * paddedSize - 2] + paddedData[(paddedSize - 1) * paddedSize - 1]) / 2; // Bottom-right
+    // Fill top-left corner from northwest neighbor (3x3)
+    if (northwestTile) {
+      for (let row = 0; row < padding; row++) {
+        const srcRow = tileSize - padding + row;
+        for (let col = 0; col < padding; col++) {
+          const srcCol = tileSize - padding + col;
+          paddedData[row * paddedSize + col] = northwestTile.data[srcRow * tileSize + srcCol];
+        }
+      }
+    }
+
+    // Fill top-right corner from northeast neighbor (3x3)
+    if (northeastTile) {
+      for (let row = 0; row < padding; row++) {
+        const srcRow = tileSize - padding + row;
+        for (let col = 0; col < padding; col++) {
+          paddedData[row * paddedSize + (tileSize + padding + col)] = northeastTile.data[srcRow * tileSize + col];
+        }
+      }
+    }
+
+    // Fill bottom-left corner from southwest neighbor (3x3)
+    if (southwestTile) {
+      for (let row = 0; row < padding; row++) {
+        const dstRow = tileSize + padding + row;
+        for (let col = 0; col < padding; col++) {
+          const srcCol = tileSize - padding + col;
+          paddedData[dstRow * paddedSize + col] = southwestTile.data[row * tileSize + srcCol];
+        }
+      }
+    }
+
+    // Fill bottom-right corner from southeast neighbor (3x3)
+    if (southeastTile) {
+      for (let row = 0; row < padding; row++) {
+        const dstRow = tileSize + padding + row;
+        for (let col = 0; col < padding; col++) {
+          paddedData[dstRow * paddedSize + (tileSize + padding + col)] = southeastTile.data[row * tileSize + col];
+        }
+      }
+    }
 
     return {
       width: paddedSize,
