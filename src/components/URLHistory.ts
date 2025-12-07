@@ -25,7 +25,7 @@ export function updateURL(state: URLState) {
     markers:
       state.markers.length > 0 ? stringifyMarkers(state.markers) : undefined,
   });
-  window.history.pushState(
+  window.history.replaceState(
     state,
     "OpenSkiMap.org",
     "/" + (query.length > 0 ? "?" : "") + query + location.hash

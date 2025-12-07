@@ -5,6 +5,7 @@ import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
 import { MAP_STYLE_URLS, MapStyle, MapStyleOverlay, isSlopeOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
+import { CameraPosition, CameraPositionManager } from "../utils/CameraPositionManager";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
@@ -44,19 +45,23 @@ export class Map {
   private terrainEnabled = false;
   private currentSlopeOverlay: MapStyleOverlay | null = null;
   private slopeRenderer: SlopeTerrainRenderer | null = null;
+  private cameraPositionManager: CameraPositionManager;
 
   constructor(
-    center: maplibregl.LngLatLike,
-    zoom: number,
+    cameraPosition: CameraPosition,
     containerID: string | HTMLElement,
-    eventBus: EventBus
+    eventBus: EventBus,
+    cameraPositionManager: CameraPositionManager
   ) {
+    this.cameraPositionManager = cameraPositionManager;
     this.eventBus = eventBus;
     this.map = new maplibregl.Map({
-      container: containerID, // container id
-      center: center, // starting position [lng, lat]
-      zoom: zoom, // starting zoom,
-      hash: true,
+      container: containerID,
+      center: cameraPosition.center,
+      zoom: cameraPosition.zoom,
+      bearing: cameraPosition.bearing,
+      pitch: cameraPosition.pitch,
+      hash: false, // Custom hash management
       attributionControl: false,
     });
     this.markers = [];
@@ -186,6 +191,16 @@ export class Map {
         this.updateScaleControlUnits(unitSystem);
       },
       triggerWhenInitialized: true,
+    });
+
+    // Update camera position on map movement
+    this.map.on("moveend", () => {
+      this.cameraPositionManager.savePosition(
+        this.map.getCenter(),
+        this.map.getZoom(),
+        this.map.getBearing(),
+        this.map.getPitch()
+      );
     });
   }
 

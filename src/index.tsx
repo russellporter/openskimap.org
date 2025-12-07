@@ -19,6 +19,7 @@ import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
 import { readGpxFile } from "./utils/TrackParser";
+import { CameraPositionManager } from "./utils/CameraPositionManager";
 import "./index.css";
 
 function initialize() {
@@ -52,7 +53,6 @@ function initialize() {
 
   const store = new StateStore(getInitialState(), update);
 
-  window.addEventListener("pagehide", onPageHide);
   window.addEventListener(
     "popstate",
     () => {
@@ -155,17 +155,10 @@ function initialize() {
     false
   );
 
-  let center: maplibregl.LngLatLike;
-  let zoom: number;
-  if (localStorage["slippy.lat"] != null) {
-    center = [localStorage["slippy.lng"], localStorage["slippy.lat"]];
-    zoom = Number(localStorage["slippy.zoom"]);
-  } else {
-    center = [-100, 40];
-    zoom = 2;
-  }
-
-  const map = new Map(center, zoom, "map", store);
+  const cameraPositionManager = new CameraPositionManager();
+  const initialCamera = cameraPositionManager.getInitialPosition();
+  console.log("Initial camera position:", initialCamera);
+  const map = new Map(initialCamera, "map", store, cameraPositionManager);
 
   // Add layers control to map
   const layersControl = new LayersControl(store);
@@ -363,12 +356,6 @@ function initialize() {
     }
 
     return totalDistance;
-  }
-
-  function onPageHide() {
-    localStorage.setItem("slippy.lat", map.getCenter().lat.toString());
-    localStorage.setItem("slippy.lng", map.getCenter().lng.toString());
-    localStorage.setItem("slippy.zoom", map.getZoom().toString());
   }
 }
 
