@@ -15,6 +15,7 @@ import { InfoData } from "./InfoData";
 import { getVisibleSkiAreasCount } from "./MapVisibilityUtils";
 import { getFilterRules } from "./MapFilterRules";
 import { MapInteractionManager } from "./MapInteractionManager";
+import { registerSatelliteTileProtocol } from "./SatelliteTileProtocol";
 import { SearchBarControl } from "./SearchBarControl";
 import { panToZoomLevel } from "./SkiAreaInfo";
 import { SlopeTerrainRenderer } from "./SlopeTerrainRenderer";
@@ -121,6 +122,9 @@ export class Map {
     // Initialize slope terrain renderer early
     this.slopeRenderer = new SlopeTerrainRenderer(this.demSource);
     this.slopeRenderer?.registerSlopeProtocol();
+
+    // Register satellite tile protocol to filter empty tiles
+    registerSatelliteTileProtocol();
 
     // Check if map starts with tilt and enable terrain if so
     const initialPitch = this.map.getPitch();
@@ -354,14 +358,21 @@ export class Map {
         };
 
         // Modify terrain source if it exists to use the same demSource to avoid double loading
-        const updatedSources = { ...baseStyle.sources };
         if (
-          updatedSources.terrain &&
-          updatedSources.terrain.type === "raster-dem"
+          baseStyle.sources.terrain &&
+          baseStyle.sources.terrain.type === "raster-dem"
         ) {
-          updatedSources.terrain = {
-            ...updatedSources.terrain,
+          baseStyle.sources.terrain = {
+            ...baseStyle.sources.terrain,
             tiles: [this.demSource.sharedDemProtocolUrl],
+          };
+        }
+
+        // Modify satellite source to use custom protocol that filters empty tiles
+        if (baseStyle.sources.satellite && baseStyle.sources.satellite.type === "raster") {
+          baseStyle.sources.satellite = {
+            ...baseStyle.sources.satellite,
+            tiles: ["satellite-filtered://{z}/{y}/{x}"],
           };
         }
 
@@ -387,11 +398,11 @@ export class Map {
 
           // Hillshade is defined as a separate source than the 3d terrain (see https://github.com/maplibre/maplibre-gl-js/issues/2035 for details)
           if (
-            updatedSources.hillshade &&
-            updatedSources.hillshade.type === "raster-dem"
+            baseStyle.sources.hillshade &&
+            baseStyle.sources.hillshade.type === "raster-dem"
           ) {
-            updatedSources.hillshade = {
-              ...updatedSources.hillshade,
+            baseStyle.sources.hillshade = {
+              ...baseStyle.sources.hillshade,
               tiles: [this.demSource.sharedDemProtocolUrl],
             };
           }
@@ -400,7 +411,7 @@ export class Map {
           baseStyle = {
             ...baseStyle,
             sources: {
-              ...updatedSources,
+              ...baseStyle.sources,
               contours: {
                 type: "vector" as const,
                 tiles: contourTiles,
