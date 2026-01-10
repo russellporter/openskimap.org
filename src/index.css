@@ -102,13 +102,3 @@ body {
   z-index: 3;
 }
 
-.heading-indicator {
-  pointer-events: none;
-  transform-origin: center;
-}
-
-.heading-indicator svg {
-  display: block;
-}
-
-
