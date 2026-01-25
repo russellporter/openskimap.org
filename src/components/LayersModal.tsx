@@ -77,7 +77,7 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
 
   const handleDownloadTrack = (track: Track) => {
     const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="OpenSkiMap.org">
+<gpx version="1.1" creator="OpenSkiMap.org" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
   <trk>
     <name>${track.name}</name>
     <trkseg>
@@ -91,7 +91,7 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
 
   const handleDownloadAllTracks = () => {
     const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="OpenSkiMap.org">
+<gpx version="1.1" creator="OpenSkiMap.org" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
 ${props.tracks.map(track => `  <trk>
     <name>${track.name}</name>
     <trkseg>
