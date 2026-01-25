@@ -206,14 +206,10 @@ function initialize() {
       localStorage.setItem("sunExposureDate", state.sunExposureDate.toISOString());
     }
 
-    if (changes.sidebarOpen !== undefined || changes.mapStyle !== undefined) {
+    if (changes.sidebarOpen !== undefined) {
       sidebarRoot.render(
         <Themed>
-          <Sidebar
-            eventBus={store}
-            open={state.sidebarOpen}
-            selectedMapStyle={state.mapStyle}
-          />
+          <Sidebar eventBus={store} open={state.sidebarOpen} />
         </Themed>
       );
     }

@@ -1,10 +1,9 @@
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
+import LayersIcon from "@mui/icons-material/Layers";
 import MapIcon from "@mui/icons-material/Map";
 import PolicyIcon from "@mui/icons-material/Policy";
-import SatelliteIcon from "@mui/icons-material/Satellite";
 import SettingsIcon from "@mui/icons-material/Settings";
-import TerrainIcon from "@mui/icons-material/Terrain";
 import {
   Divider,
   Drawer,
@@ -14,13 +13,11 @@ import {
   ListItemText,
 } from "@mui/material";
 import * as React from "react";
-import { MapStyle } from "../MapStyle";
 import EventBus from "./EventBus";
 import * as ExternalURLOpener from "./ExternalURLOpener";
 
 interface Props {
   eventBus: EventBus;
-  selectedMapStyle: MapStyle;
   open: boolean;
 }
 
@@ -38,62 +35,13 @@ export default class Sidebar extends React.Component<Props, {}> {
             <List>
               <ListItem
                 button
-                key={"terrain"}
-                onClick={() => {
-                  this.props.eventBus.setMapStyle(MapStyle.Terrain);
-                }}
-                selected={this.props.selectedMapStyle === MapStyle.Terrain}
+                key={"layers"}
+                onClick={this.props.eventBus.openLayers}
               >
                 <ListItemIcon>
-                  <TerrainIcon />
+                  <LayersIcon />
                 </ListItemIcon>
-                <ListItemText primary={"Terrain"} />
-              </ListItem>
-              <ListItem
-                button
-                key={"satellite"}
-                onClick={() => {
-                  this.props.eventBus.setMapStyle(MapStyle.Satellite);
-                }}
-                selected={this.props.selectedMapStyle === MapStyle.Satellite}
-              >
-                <ListItemIcon>
-                  <SatelliteIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Satellite"} />
-              </ListItem>
-            </List>
-            <Divider />
-            <List>
-              <ListItem
-                button
-                key={"settings"}
-                onClick={this.props.eventBus.openSettings}
-              >
-                <ListItemIcon>
-                  <SettingsIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Settings"} />
-              </ListItem>
-              <ListItem
-                button
-                key={"edit"}
-                onClick={this.props.eventBus.editMap}
-              >
-                <ListItemIcon>
-                  <EditIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Edit"} />
-              </ListItem>
-              <ListItem
-                button
-                key={"about"}
-                onClick={this.props.eventBus.openAboutInfo}
-              >
-                <ListItemIcon>
-                  <InfoIcon />
-                </ListItemIcon>
-                <ListItemText primary={"About"} />
+                <ListItemText primary={"Layers"} />
               </ListItem>
               <ListItem
                 button
@@ -104,6 +52,38 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <MapIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Legend"} />
+              </ListItem>
+              <ListItem
+                button
+                key={"settings"}
+                onClick={this.props.eventBus.openSettings}
+              >
+                <ListItemIcon>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Settings"} />
+              </ListItem>
+              <Divider />
+              <ListItem
+                button
+                key={"edit"}
+                onClick={this.props.eventBus.editMap}
+              >
+                <ListItemIcon>
+                  <EditIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Edit Map"} />
+              </ListItem>
+              <Divider />
+              <ListItem
+                button
+                key={"about"}
+                onClick={this.props.eventBus.openAboutInfo}
+              >
+                <ListItemIcon>
+                  <InfoIcon />
+                </ListItemIcon>
+                <ListItemText primary={"About"} />
               </ListItem>
               <ListItem
                 button
