@@ -49,6 +49,14 @@ export default class StateStore implements EventBus {
     this.update({ legalOpen: false });
   };
 
+  openLegend = (section?: string) => {
+    this.update({ legendOpen: true, legendSection: section ?? null });
+  };
+
+  closeLegend = () => {
+    this.update({ legendOpen: false, legendSection: null });
+  };
+
   openSettings = () => {
     this.update({ settingsOpen: true });
   };
@@ -85,6 +93,7 @@ export default class StateStore implements EventBus {
     this.update({
       aboutInfoOpen: state.aboutInfoOpen,
       legalOpen: state.legalOpen,
+      legendOpen: state.legendOpen,
       info: state.selectedObjectID
         ? { id: state.selectedObjectID, panToPosition: "afterLoad" }
         : null,

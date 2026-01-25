@@ -7,6 +7,7 @@ import { GpxDropZone } from "./components/GpxDropZone";
 import { LayersControl } from "./components/LayersControl";
 import { LayersModal } from "./components/LayersModal";
 import { LegalModal } from "./components/LegalModal";
+import { LegendModal } from "./components/LegendModal";
 import { Map } from "./components/Map";
 import { SettingsModal } from "./components/SettingsModal";
 import Sidebar from "./components/Sidebar";
@@ -35,6 +36,9 @@ function initialize() {
   );
   const layersRoot = ReactDOM.createRoot(
     document.getElementById("layers-modal")!
+  );
+  const legendRoot = ReactDOM.createRoot(
+    document.getElementById("legend-modal")!
   );
   const trackDrawingRoot = ReactDOM.createRoot(
     document.getElementById("track-drawing-controls")!
@@ -182,6 +186,7 @@ function initialize() {
     updateURL({
       aboutInfoOpen: state.aboutInfoOpen,
       legalOpen: state.legalOpen,
+      legendOpen: state.legendOpen,
       selectedObjectID: state.info?.id ?? null,
       markers: state.markers,
     });
@@ -225,6 +230,20 @@ function initialize() {
       legalRoot.render(
         <Themed>
           <LegalModal eventBus={store} open={state.legalOpen} />
+        </Themed>
+      );
+    }
+
+    if (changes.legendOpen !== undefined || changes.legendSection !== undefined) {
+      const mapCenter = map.getCenter();
+      legendRoot.render(
+        <Themed>
+          <LegendModal
+            eventBus={store}
+            open={state.legendOpen}
+            mapCenter={mapCenter}
+            section={state.legendSection}
+          />
         </Themed>
       );
     }

@@ -11,6 +11,8 @@ export default interface State {
   aboutInfoOpen: boolean;
   legalOpen: boolean;
   settingsOpen: boolean;
+  legendOpen: boolean;
+  legendSection: string | null;
   layersOpen: boolean;
   mapFiltersOpen: boolean;
   mapStyle: MapStyle;
@@ -30,6 +32,8 @@ export interface StateChanges {
   aboutInfoOpen?: boolean;
   legalOpen?: boolean;
   settingsOpen?: boolean;
+  legendOpen?: boolean;
+  legendSection?: string | null;
   layersOpen?: boolean;
   mapFiltersOpen?: boolean;
   mapStyle?: MapStyle;
@@ -103,6 +107,8 @@ export function getInitialState(): State {
     aboutInfoOpen: false,
     legalOpen: false,
     settingsOpen: false,
+    legendOpen: false,
+    legendSection: null,
     layersOpen: false,
     mapFiltersOpen: false,
     mapStyle,

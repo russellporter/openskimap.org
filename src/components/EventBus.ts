@@ -13,6 +13,8 @@ export default interface EventBus {
   closeAboutInfo(): void;
   openLegal(): void;
   closeLegal(): void;
+  openLegend(section?: string): void;
+  closeLegend(): void;
   openSettings(): void;
   closeSettings(): void;
   openLayers(): void;

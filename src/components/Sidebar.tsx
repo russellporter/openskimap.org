@@ -1,5 +1,6 @@
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
+import MapIcon from "@mui/icons-material/Map";
 import PolicyIcon from "@mui/icons-material/Policy";
 import SatelliteIcon from "@mui/icons-material/Satellite";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -93,6 +94,16 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <InfoIcon />
                 </ListItemIcon>
                 <ListItemText primary={"About"} />
+              </ListItem>
+              <ListItem
+                button
+                key={"legend"}
+                onClick={() => this.props.eventBus.openLegend()}
+              >
+                <ListItemIcon>
+                  <MapIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Legend"} />
               </ListItem>
               <ListItem
                 button

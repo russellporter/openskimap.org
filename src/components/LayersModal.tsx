@@ -152,9 +152,14 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
         </Box>
 
         <Box sx={{ mt: 3 }}>
-          <Typography variant="subtitle1" sx={{ mb: 2 }}>
-            Slope Overlays <Typography component="span" variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>(Experimental)</Typography>
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="subtitle1">
+              Slope Overlays <Typography component="span" variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>(Experimental)</Typography>
+            </Typography>
+            <Button size="small" onClick={() => props.eventBus.openLegend("slope-overlays")}>
+              Legend
+            </Button>
+          </Box>
           <RadioGroup
             value={props.currentMapStyleOverlay || "none"}
             onChange={handleSlopeOverlayChange}
