@@ -1,5 +1,19 @@
-import { Button, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, TextField, Typography } from "@mui/material";
-import { Close as CloseIcon, Upload as UploadIcon, Create as CreateIcon, Download as DownloadIcon } from "@mui/icons-material";
+import {
+  Close as CloseIcon,
+  Create as CreateIcon,
+  Download as DownloadIcon,
+  Upload as UploadIcon,
+} from "@mui/icons-material";
+import {
+  Button,
+  Dialog,
+  FormControlLabel,
+  IconButton,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import * as React from "react";
 import { MapStyle, MapStyleOverlay, SLOPE_OVERLAY_NAMES } from "../MapStyle";
@@ -16,7 +30,9 @@ export interface LayersModalProps {
   sunExposureDate: Date;
 }
 
-export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) => {
+export const LayersModal: React.FunctionComponent<LayersModalProps> = (
+  props,
+) => {
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -25,7 +41,9 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
     props.eventBus.setMapStyle(newStyle);
   };
 
-  const handleSlopeOverlayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSlopeOverlayChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const value = event.target.value;
     if (value === "none") {
       props.eventBus.setMapStyleOverlay(null);
@@ -34,12 +52,14 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
     }
   };
 
-  const handleGpxFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGpxFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.toLowerCase().endsWith('.gpx')) {
-      alert('Please select a GPX file');
+    if (!file.name.toLowerCase().endsWith(".gpx")) {
+      alert("Please select a GPX file");
       return;
     }
 
@@ -50,13 +70,15 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
         props.eventBus.addTrack(track);
       }
     } catch (error) {
-      console.error('Error parsing GPX file:', error);
-      alert(error instanceof Error ? error.message : 'Failed to parse GPX file');
+      console.error("Error parsing GPX file:", error);
+      alert(
+        error instanceof Error ? error.message : "Failed to parse GPX file",
+      );
     } finally {
       setIsUploading(false);
       // Reset file input
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -81,32 +103,36 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (props) =>
   <trk>
     <name>${track.name}</name>
     <trkseg>
-${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`).join('\n')}
+${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`).join("\n")}
     </trkseg>
   </trk>
 </gpx>`;
 
-    downloadFile(gpxContent, `${track.name.replace(/[^a-z0-9]/gi, '_')}.gpx`);
+    downloadFile(gpxContent, `${track.name.replace(/[^a-z0-9]/gi, "_")}.gpx`);
   };
 
   const handleDownloadAllTracks = () => {
     const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="OpenSkiMap.org" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
-${props.tracks.map(track => `  <trk>
+${props.tracks
+  .map(
+    (track) => `  <trk>
     <name>${track.name}</name>
     <trkseg>
-${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`).join('\n')}
+${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`).join("\n")}
     </trkseg>
-  </trk>`).join('\n')}
+  </trk>`,
+  )
+  .join("\n")}
 </gpx>`;
 
-    downloadFile(gpxContent, 'openskimap_tracks.gpx');
+    downloadFile(gpxContent, "openskimap_tracks.gpx");
   };
 
   const downloadFile = (content: string, filename: string) => {
-    const blob = new Blob([content], { type: 'application/gpx+xml' });
+    const blob = new Blob([content], { type: "application/gpx+xml" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -128,7 +154,7 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
         <ModalHeader onClose={() => props.eventBus.closeLayers()}>
           <Typography variant="h6">Layers</Typography>
         </ModalHeader>
-        
+
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
             Base Map
@@ -152,11 +178,28 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
         </Box>
 
         <Box sx={{ mt: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          >
             <Typography variant="subtitle1">
-              Slope Overlays <Typography component="span" variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>(Experimental)</Typography>
+              Slope Overlays{" "}
+              <Typography
+                component="span"
+                variant="caption"
+                sx={{ color: "text.secondary", fontStyle: "italic" }}
+              >
+                (Experimental)
+              </Typography>
             </Typography>
-            <Button size="small" onClick={() => props.eventBus.openLegend("slope-overlays")}>
+            <Button
+              size="small"
+              onClick={() => props.eventBus.openLegend("slope-overlays")}
+            >
               Legend
             </Button>
           </Box>
@@ -165,15 +208,12 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
             onChange={handleSlopeOverlayChange}
             sx={{ pl: 1 }}
           >
-            <FormControlLabel
-              value="none"
-              control={<Radio />}
-              label="None"
-            />
+            <FormControlLabel value="none" control={<Radio />} label="None" />
             {Object.entries(SLOPE_OVERLAY_NAMES).map(([key, name]) => {
-              const label = key === MapStyleOverlay.SunExposure 
-                ? `${name} (${props.sunExposureDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
-                : name;
+              const label =
+                key === MapStyleOverlay.SunExposure
+                  ? `${name} (${props.sunExposureDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })})`
+                  : name;
               return (
                 <FormControlLabel
                   key={key}
@@ -184,13 +224,13 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
               );
             })}
           </RadioGroup>
-          
+
           {props.currentMapStyleOverlay === MapStyleOverlay.SunExposure && (
             <Box sx={{ mt: 2, pl: 4 }}>
               <TextField
                 type="date"
                 label="Date for sun calculation"
-                value={props.sunExposureDate.toISOString().split('T')[0]}
+                value={props.sunExposureDate.toISOString().split("T")[0]}
                 onChange={(e) => {
                   const newDate = new Date(e.target.value);
                   if (!isNaN(newDate.getTime())) {
@@ -210,34 +250,34 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
-            GPX Tracks
+            Tracks
           </Typography>
-          
+
           {props.tracks.length > 0 && (
             <Box sx={{ mb: 2, pl: 1 }}>
               {props.tracks.map((track) => (
                 <Box
                   key={track.id}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                     mb: 1,
                     p: 1,
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: 1,
-                    bgcolor: 'background.paper'
+                    bgcolor: "background.paper",
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
-                        borderRadius: '50%',
+                        borderRadius: "50%",
                         bgcolor: track.color,
-                        flexShrink: 0
+                        flexShrink: 0,
                       }}
                     />
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -247,7 +287,7 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
                       ({track.lengthKm} km)
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex' }}>
+                  <Box sx={{ display: "flex" }}>
                     <IconButton
                       size="small"
                       onClick={() => handleDownloadTrack(track)}
@@ -268,14 +308,14 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
             </Box>
           )}
 
-          <Box sx={{ pl: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Box sx={{ pl: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Button
               variant="outlined"
               startIcon={<CreateIcon />}
               onClick={handleCreateTrack}
               size="small"
             >
-              Create Track
+              Draw Track
             </Button>
             <Button
               variant="outlined"
@@ -284,7 +324,7 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
               disabled={isUploading}
               size="small"
             >
-              {isUploading ? 'Uploading...' : 'Add GPX Track'}
+              {isUploading ? "Uploading..." : "Upload Track (.gpx)"}
             </Button>
             {props.tracks.length > 0 && (
               <Button
@@ -301,7 +341,7 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
               type="file"
               accept=".gpx"
               onChange={handleGpxFileUpload}
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
             />
           </Box>
         </Box>

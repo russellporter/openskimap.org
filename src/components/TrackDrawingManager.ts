@@ -61,8 +61,21 @@ export class TrackDrawingManager {
   }
 
   updateCoordinates(coordinates: [number, number][]): void {
+    // Only update if coordinates actually changed (avoids redundant updates
+    // when local changes sync back from state)
+    if (this.coordinatesEqual(this.coordinates, coordinates)) {
+      return;
+    }
     this.coordinates = coordinates;
     this.updateDrawingVisualization();
+  }
+
+  private coordinatesEqual(a: [number, number][], b: [number, number][]): boolean {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i][0] !== b[i][0] || a[i][1] !== b[i][1]) return false;
+    }
+    return true;
   }
 
   private handleClick = (e: maplibregl.MapMouseEvent): void => {

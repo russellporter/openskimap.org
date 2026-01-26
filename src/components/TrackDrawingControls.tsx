@@ -1,5 +1,9 @@
+import {
+  Check as CheckIcon,
+  Close as CloseIcon,
+  Undo as UndoIcon,
+} from "@mui/icons-material";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import { Check as CheckIcon, Close as CloseIcon } from "@mui/icons-material";
 import * as React from "react";
 import EventBus from "./EventBus";
 
@@ -10,7 +14,9 @@ export interface TrackDrawingControlsProps {
   trackLength: number;
 }
 
-export const TrackDrawingControls: React.FunctionComponent<TrackDrawingControlsProps> = (props) => {
+export const TrackDrawingControls: React.FunctionComponent<
+  TrackDrawingControlsProps
+> = (props) => {
   const [trackName, setTrackName] = React.useState("My Track");
 
   if (!props.isDrawing) {
@@ -27,7 +33,12 @@ export const TrackDrawingControls: React.FunctionComponent<TrackDrawingControlsP
     setTrackName("My Track");
   };
 
+  const handleUndo = () => {
+    props.eventBus.removeLastDrawingTrackPoint();
+  };
+
   const canFinish = props.pointCount >= 2;
+  const canUndo = props.pointCount > 0;
 
   return (
     <Paper
@@ -35,8 +46,7 @@ export const TrackDrawingControls: React.FunctionComponent<TrackDrawingControlsP
       sx={{
         position: "absolute",
         top: 70,
-        left: "50%",
-        transform: "translateX(-50%)",
+        left: 12,
         zIndex: 1000,
         p: 2,
         minWidth: 300,
@@ -47,7 +57,8 @@ export const TrackDrawingControls: React.FunctionComponent<TrackDrawingControlsP
         Drawing Track
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Click on the map to add points. Right-click to remove the last point.
+        Tap or click on the map to add points. Right-click or use Undo to remove
+        the last point.
       </Typography>
 
       <TextField
@@ -59,11 +70,26 @@ export const TrackDrawingControls: React.FunctionComponent<TrackDrawingControlsP
         sx={{ mb: 2 }}
       />
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="caption" color="text.secondary">
           {props.pointCount} points | {props.trackLength.toFixed(1)} km
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<UndoIcon />}
+            onClick={handleUndo}
+            disabled={!canUndo}
+          >
+            Undo
+          </Button>
           <Button
             variant="outlined"
             size="small"
@@ -79,7 +105,7 @@ export const TrackDrawingControls: React.FunctionComponent<TrackDrawingControlsP
             onClick={handleFinish}
             disabled={!canFinish}
           >
-            Done
+            Save
           </Button>
         </Box>
       </Box>

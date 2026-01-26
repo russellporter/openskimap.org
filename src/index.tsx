@@ -332,9 +332,10 @@ function initialize() {
       }
     }
 
-    // Note: We don't update drawing visualization here on every coordinate change
-    // because TrackDrawingManager already updates locally for responsiveness.
-    // The state is kept in sync for the UI controls and persistence.
+    // Update drawing manager when coordinates change (e.g., from Undo button)
+    if (changes.drawingTrackCoordinates !== undefined && trackDrawingManager) {
+      trackDrawingManager.updateCoordinates(state.drawingTrackCoordinates);
+    }
 
     // Update track drawing controls UI
     if (changes.isDrawingTrack !== undefined || changes.drawingTrackCoordinates !== undefined) {
