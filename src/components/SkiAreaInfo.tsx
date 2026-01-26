@@ -77,7 +77,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
   );
 };
 
-function getActions(properties: SkiAreaProperties): JSX.Element[] {
+function getActions(properties: SkiAreaProperties): React.JSX.Element[] {
   const skimapOrgSource = properties.sources.find(
     (s) => s.type === SourceType.SKIMAP_ORG
   );

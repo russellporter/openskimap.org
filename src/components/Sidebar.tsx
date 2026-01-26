@@ -8,7 +8,7 @@ import {
   Divider,
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
@@ -33,8 +33,7 @@ export default class Sidebar extends React.Component<Props, {}> {
         >
           <div style={{ width: "256" }}>
             <List>
-              <ListItem
-                button
+              <ListItemButton
                 key={"layers"}
                 onClick={this.props.eventBus.openLayers}
               >
@@ -42,9 +41,8 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <LayersIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Layers"} />
-              </ListItem>
-              <ListItem
-                button
+              </ListItemButton>
+              <ListItemButton
                 key={"legend"}
                 onClick={() => this.props.eventBus.openLegend()}
               >
@@ -52,9 +50,8 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <MapIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Legend"} />
-              </ListItem>
-              <ListItem
-                button
+              </ListItemButton>
+              <ListItemButton
                 key={"settings"}
                 onClick={this.props.eventBus.openSettings}
               >
@@ -62,10 +59,9 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <SettingsIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Settings"} />
-              </ListItem>
+              </ListItemButton>
               <Divider />
-              <ListItem
-                button
+              <ListItemButton
                 key={"edit"}
                 onClick={this.props.eventBus.editMap}
               >
@@ -73,10 +69,9 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <EditIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Edit Map"} />
-              </ListItem>
+              </ListItemButton>
               <Divider />
-              <ListItem
-                button
+              <ListItemButton
                 key={"about"}
                 onClick={this.props.eventBus.openAboutInfo}
               >
@@ -84,9 +79,8 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <InfoIcon />
                 </ListItemIcon>
                 <ListItemText primary={"About"} />
-              </ListItem>
-              <ListItem
-                button
+              </ListItemButton>
+              <ListItemButton
                 key={"legal"}
                 onClick={this.props.eventBus.openLegal}
               >
@@ -94,16 +88,16 @@ export default class Sidebar extends React.Component<Props, {}> {
                   <PolicyIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Credits & Legal"} />
-              </ListItem>
+              </ListItemButton>
             </List>
             <Divider />
             <List>
-              <ListItem button onClick={ExternalURLOpener.openPrivacyPolicy}>
+              <ListItemButton onClick={ExternalURLOpener.openPrivacyPolicy}>
                 <ListItemText primary={"Privacy Policy"} />
-              </ListItem>
-              <ListItem button onClick={ExternalURLOpener.openCookiePolicy}>
+              </ListItemButton>
+              <ListItemButton onClick={ExternalURLOpener.openCookiePolicy}>
                 <ListItemText primary={"Cookie Policy"} />
-              </ListItem>
+              </ListItemButton>
             </List>
           </div>
         </div>

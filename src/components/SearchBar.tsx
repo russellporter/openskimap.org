@@ -65,7 +65,7 @@ const SearchBar: React.FC<Props> = (props) => {
   const results = state.results;
   const hideResults = state.hideResults;
 
-  const stateRef = useRef<State>();
+  const stateRef = useRef<State>(state);
   stateRef.current = state;
 
   const processSearchResults = (

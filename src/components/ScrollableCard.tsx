@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 export const ScrollableCard: React.FunctionComponent<
   React.PropsWithChildren<{
-    header: JSX.Element;
-    footer?: JSX.Element;
+    header: React.JSX.Element;
+    footer?: React.JSX.Element;
     width?: number;
   }>
 > = (props) => {
