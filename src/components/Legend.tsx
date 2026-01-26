@@ -147,12 +147,10 @@ const GradientBar = styled(Box)({
   boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)",
 });
 
-const GradientLabels = styled(Typography)({
+const GradientLabels = styled(Box)({
   display: "flex",
   justifyContent: "space-between",
   marginTop: 6,
-  fontSize: 11,
-  color: "#888",
 });
 
 const OverlayCard = styled(Box)({
@@ -863,10 +861,10 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
               }}
             />
             <GradientLabels>
-              <span>0° Flat</span>
-              <span>15°</span>
-              <span>30°</span>
-              <span>45°+</span>
+              <LabelSecondary>0° Flat</LabelSecondary>
+              <LabelSecondary>15°</LabelSecondary>
+              <LabelSecondary>30°</LabelSecondary>
+              <LabelSecondary>45°+</LabelSecondary>
             </GradientLabels>
           </OverlayCard>
 
@@ -880,11 +878,11 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
               }}
             />
             <GradientLabels>
-              <span>No sun</span>
-              <span>Very low</span>
-              <span>Low</span>
-              <span>Moderate</span>
-              <span>High</span>
+              <LabelSecondary>No sun</LabelSecondary>
+              <LabelSecondary>Very low</LabelSecondary>
+              <LabelSecondary>Low</LabelSecondary>
+              <LabelSecondary>Moderate</LabelSecondary>
+              <LabelSecondary>High</LabelSecondary>
             </GradientLabels>
           </OverlayCard>
 
