@@ -1,12 +1,12 @@
+import * as turf from "@turf/helpers";
 import mlcontour from "maplibre-contour";
 import * as maplibregl from "maplibre-gl";
-import * as turf from "@turf/helpers";
-import { 
+import {
+  getRunColor,
   getRunDifficultyConvention,
-  RunDifficultyConvention,
   getSlopeGradingScaleForUse,
+  RunDifficultyConvention,
   RunUse,
-  getRunColor
 } from "openskidata-format";
 import { MapStyleOverlay } from "../MapStyle";
 
@@ -22,7 +22,7 @@ class TexturePool {
     if (this.pool.length > 0) {
       return this.pool.pop()!;
     }
-    
+
     // Create new texture if pool is empty
     const texture = this.gl.createTexture();
     if (!texture) {
@@ -55,32 +55,32 @@ function hslToRgb(hslString: string): { r: number; g: number; b: number } {
   if (!match) {
     return { r: 0, g: 0, b: 0 };
   }
-  
+
   const h = parseInt(match[1]) / 360;
   const s = parseInt(match[2]) / 100;
   const l = parseInt(match[3]) / 100;
-  
+
   let r, g, b;
-  
+
   if (s === 0) {
     r = g = b = l; // achromatic
   } else {
     const hue2rgb = (p: number, q: number, t: number) => {
       if (t < 0) t += 1;
       if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
       return p;
     };
-    
+
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1/3);
+    r = hue2rgb(p, q, h + 1 / 3);
     g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1/3);
+    b = hue2rgb(p, q, h - 1 / 3);
   }
-  
+
   return { r, g, b };
 }
 
@@ -94,7 +94,7 @@ export class SlopeTerrainRenderer {
   private demSource: InstanceType<typeof mlcontour.DemSource>;
   private texturePool: TexturePool | null = null;
   public sunExposureDate: Date = new Date(new Date().getFullYear(), 0, 15); // Default Jan 15
-  
+
   // Coarse terrain zoom level for extended shadow casting
   private static readonly COARSE_TERRAIN_ZOOM = 8;
 
@@ -114,9 +114,9 @@ export class SlopeTerrainRenderer {
     const conventions = [
       RunDifficultyConvention.EUROPE,
       RunDifficultyConvention.JAPAN,
-      RunDifficultyConvention.NORTH_AMERICA
+      RunDifficultyConvention.NORTH_AMERICA,
     ];
-    
+
     // Generate the color function
     let shaderCode = `
       // Map slope to downhill difficulty colors based on regional convention
@@ -128,22 +128,22 @@ export class SlopeTerrainRenderer {
         
         vec3 color = vec3(0.0, 0.0, 0.0); // Default black
     `;
-    
+
     // Generate if-else chain for each convention
     conventions.forEach((convention, index) => {
       const scale = getSlopeGradingScaleForUse(RunUse.Downhill, convention);
-      
+
       shaderCode += `
-        ${index === 0 ? 'if' : 'else if'} (u_difficultyConvention == ${index}) { // ${convention.toUpperCase()}
+        ${index === 0 ? "if" : "else if"} (u_difficultyConvention == ${index}) { // ${convention.toUpperCase()}
       `;
-      
+
       // Generate conditions for each difficulty threshold
       let firstCondition = true;
       scale.stops.forEach((stop, stopIndex) => {
         if (stop.difficulty === null) {
           // No difficulty - transparent
           shaderCode += `
-          ${firstCondition ? 'if' : 'else if'} (gradient < ${stop.maxSteepness.toFixed(3)}f) {
+          ${firstCondition ? "if" : "else if"} (gradient < ${stop.maxSteepness.toFixed(3)}f) {
             discard; // Transparent for no difficulty
           }`;
           firstCondition = false;
@@ -151,14 +151,14 @@ export class SlopeTerrainRenderer {
           // Get the color for this difficulty and convention
           const colorString = getRunColor(convention, stop.difficulty);
           const rgb = hslToRgb(colorString);
-          
+
           // Check if this is the last stop or has Infinity threshold
           const isLastStop = stopIndex === scale.stops.length - 1;
           const hasInfiniteThreshold = stop.maxSteepness === Infinity;
-          
+
           if (!isLastStop && !hasInfiniteThreshold) {
             shaderCode += `
-          ${firstCondition ? 'if' : 'else if'} (gradient < ${stop.maxSteepness.toFixed(3)}f) {
+          ${firstCondition ? "if" : "else if"} (gradient < ${stop.maxSteepness.toFixed(3)}f) {
             color = vec3(${rgb.r.toFixed(3)}f, ${rgb.g.toFixed(3)}f, ${rgb.b.toFixed(3)}f);
           }`;
           } else if (hasInfiniteThreshold) {
@@ -183,18 +183,18 @@ export class SlopeTerrainRenderer {
           firstCondition = false;
         }
       });
-      
+
       shaderCode += `
         }`;
     });
-    
+
     // Close the convention if-else chain
     shaderCode += `
         
         return color;
       }
     `;
-    
+
     return shaderCode;
   }
 
@@ -806,7 +806,8 @@ export class SlopeTerrainRenderer {
           return color;
         }
       `,
-      [MapStyleOverlay.DownhillDifficulty]: this.generateDownhillDifficultyShaderCode(),
+      [MapStyleOverlay.DownhillDifficulty]:
+        this.generateDownhillDifficultyShaderCode(),
       [MapStyleOverlay.Aspect]: `
         // Placeholder for aspect style - actual calculation is in main shader
         vec3 getSlopeColor(float slope) {
@@ -845,7 +846,7 @@ export class SlopeTerrainRenderer {
             return vec3(0.75, 0.5, 0.85);
           }
         }
-      `
+      `,
     };
 
     return baseFragmentShader + colorFunctions[style] + slopeCalculationCode;
@@ -853,14 +854,14 @@ export class SlopeTerrainRenderer {
 
   public constructor(demSource: InstanceType<typeof mlcontour.DemSource>) {
     this.demSource = demSource;
-    
+
     // Always use OffscreenCanvas for optimal performance
     this.canvas = new OffscreenCanvas(512, 512);
     this.isSupported = this.initWebGL(this.canvas);
 
     if (!this.isSupported) {
       console.warn(
-        "WebGL is not supported on this device. Slope terrain rendering will not be available."
+        "WebGL is not supported on this device. Slope terrain rendering will not be available.",
       );
     }
   }
@@ -869,11 +870,10 @@ export class SlopeTerrainRenderer {
     return this.isSupported;
   }
 
-
   private createShader(
     gl: WebGLRenderingContext,
     type: number,
-    source: string
+    source: string,
   ): WebGLShader | null {
     const shader = gl.createShader(type);
     if (!shader) return null;
@@ -890,10 +890,21 @@ export class SlopeTerrainRenderer {
     return shader;
   }
 
-  private createProgram(gl: WebGL2RenderingContext, style: MapStyleOverlay): WebGLProgram | null {
+  private createProgram(
+    gl: WebGL2RenderingContext,
+    style: MapStyleOverlay,
+  ): WebGLProgram | null {
     // Create shaders
-    const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, this.vertexShaderSource);
-    const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, this.getFragmentShaderSource(style));
+    const vertexShader = this.createShader(
+      gl,
+      gl.VERTEX_SHADER,
+      this.vertexShaderSource,
+    );
+    const fragmentShader = this.createShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      this.getFragmentShaderSource(style),
+    );
 
     if (!vertexShader || !fragmentShader) {
       return null;
@@ -908,14 +919,20 @@ export class SlopeTerrainRenderer {
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error(`Program linking error for style ${style}:`, gl.getProgramInfoLog(program));
+      console.error(
+        `Program linking error for style ${style}:`,
+        gl.getProgramInfoLog(program),
+      );
       return null;
     }
 
     // Validate the program
     gl.validateProgram(program);
     if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-      console.error(`Program validation error for style ${style}:`, gl.getProgramInfoLog(program));
+      console.error(
+        `Program validation error for style ${style}:`,
+        gl.getProgramInfoLog(program),
+      );
       return null;
     }
 
@@ -974,7 +991,11 @@ export class SlopeTerrainRenderer {
     longitude: number,
     style: MapStyleOverlay,
     date?: Date,
-    lowResDemTile?: { width: number; height: number; data: Float32Array } | null
+    lowResDemTile?: {
+      width: number;
+      height: number;
+      data: Float32Array;
+    } | null,
   ): ImageData | null {
     if (!this.isSupported) {
       return null;
@@ -1018,7 +1039,7 @@ export class SlopeTerrainRenderer {
       0,
       gl.RED,
       gl.FLOAT,
-      paddedDemTile.data
+      paddedDemTile.data,
     );
 
     // Configure texture parameters for float data
@@ -1026,12 +1047,12 @@ export class SlopeTerrainRenderer {
     gl.texParameteri(
       gl.TEXTURE_2D,
       gl.TEXTURE_MIN_FILTER,
-      hasFloatLinear ? gl.LINEAR : gl.NEAREST
+      hasFloatLinear ? gl.LINEAR : gl.NEAREST,
     );
     gl.texParameteri(
       gl.TEXTURE_2D,
       gl.TEXTURE_MAG_FILTER,
-      hasFloatLinear ? gl.LINEAR : gl.NEAREST
+      hasFloatLinear ? gl.LINEAR : gl.NEAREST,
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -1051,14 +1072,22 @@ export class SlopeTerrainRenderer {
         0,
         gl.RED,
         gl.FLOAT,
-        lowResDemTile.data
+        lowResDemTile.data,
       );
-      
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, hasFloatLinear ? gl.LINEAR : gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, hasFloatLinear ? gl.LINEAR : gl.NEAREST);
+
+      gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MIN_FILTER,
+        hasFloatLinear ? gl.LINEAR : gl.NEAREST,
+      );
+      gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MAG_FILTER,
+        hasFloatLinear ? gl.LINEAR : gl.NEAREST,
+      );
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      
+
       // Reset to texture 0
       gl.activeTexture(gl.TEXTURE0);
     }
@@ -1083,46 +1112,69 @@ export class SlopeTerrainRenderer {
     gl.uniform1i(textureLocation, 0);
 
     // Set low-resolution texture uniform (if available)
-    if (lowResDemTile && zoomLevel >= SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM) {
+    if (
+      lowResDemTile &&
+      zoomLevel >= SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM
+    ) {
       console.log(`Setting up low-res texture uniforms for zoom ${zoomLevel}`);
-      const lowResTextureLocation = gl.getUniformLocation(program, "u_lowResTexture");
+      const lowResTextureLocation = gl.getUniformLocation(
+        program,
+        "u_lowResTexture",
+      );
       gl.uniform1i(lowResTextureLocation, 1);
-      
+
       // Calculate coordinate transformation parameters
       const lowResZoom = SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM;
       const lowResScale = Math.pow(2, zoomLevel - lowResZoom);
-      
+
       // Calculate coordinate transformation using actual tile coordinates
       // We know: lowResX = floor(x / lowResScale), lowResY = floor(y / lowResScale)
       // So the current high-res tile (x,y) maps to position within the low-res tile
       // Use exact tile coordinates to avoid floating-point precision errors
-      
+
       // The low-res tile that contains our high-res tile
       const lowResX = Math.floor(tileX / lowResScale);
       const lowResY = Math.floor(tileY / lowResScale);
-      
+
       // Position of current high-res tile within the low-res tile (0.0 to 1.0)
       const offsetX = (tileX - lowResX * lowResScale) / lowResScale;
       const offsetY = (tileY - lowResY * lowResScale) / lowResScale;
-      
-      const lowResScaleLocation = gl.getUniformLocation(program, "u_lowResScale");
+
+      const lowResScaleLocation = gl.getUniformLocation(
+        program,
+        "u_lowResScale",
+      );
       gl.uniform1f(lowResScaleLocation, lowResScale);
-      
-      const lowResOffsetLocation = gl.getUniformLocation(program, "u_lowResOffset");
+
+      const lowResOffsetLocation = gl.getUniformLocation(
+        program,
+        "u_lowResOffset",
+      );
       gl.uniform2f(lowResOffsetLocation, offsetX, offsetY);
-      
-      console.log(`Low-res uniforms: scale=${lowResScale}, offset=(${offsetX}, ${offsetY})`);
+
+      console.log(
+        `Low-res uniforms: scale=${lowResScale}, offset=(${offsetX}, ${offsetY})`,
+      );
     } else {
       // Set default values when low-res texture is not available
-      const lowResTextureLocation = gl.getUniformLocation(program, "u_lowResTexture");
+      const lowResTextureLocation = gl.getUniformLocation(
+        program,
+        "u_lowResTexture",
+      );
       gl.uniform1i(lowResTextureLocation, 0); // Use high-res texture as fallback
-      
-      const lowResScaleLocation = gl.getUniformLocation(program, "u_lowResScale");
+
+      const lowResScaleLocation = gl.getUniformLocation(
+        program,
+        "u_lowResScale",
+      );
       gl.uniform1f(lowResScaleLocation, 1.0);
-      
-      const lowResOffsetLocation = gl.getUniformLocation(program, "u_lowResOffset");
+
+      const lowResOffsetLocation = gl.getUniformLocation(
+        program,
+        "u_lowResOffset",
+      );
       gl.uniform2f(lowResOffsetLocation, 0.0, 0.0);
-      
+
       console.log(`No low-res texture available for zoom ${zoomLevel}`);
     }
 
@@ -1156,8 +1208,11 @@ export class SlopeTerrainRenderer {
         conventionInt = 2;
         break;
     }
-    
-    const conventionLocation = gl.getUniformLocation(program, "u_difficultyConvention");
+
+    const conventionLocation = gl.getUniformLocation(
+      program,
+      "u_difficultyConvention",
+    );
     gl.uniform1i(conventionLocation, conventionInt);
 
     // Set style uniform (0 = Slope, 1 = DownhillDifficulty, 2 = Aspect, 3 = SunExposure, 4 = AvalancheSlopeClasses)
@@ -1185,8 +1240,12 @@ export class SlopeTerrainRenderer {
     // Calculate day of year for sun exposure calculation
     const selectedDate = date || new Date(new Date().getFullYear(), 0, 15); // Default to Jan 15
     const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
-    const dayOfYear = Math.floor((selectedDate.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    
+    const dayOfYear =
+      Math.floor(
+        (selectedDate.getTime() - startOfYear.getTime()) /
+          (1000 * 60 * 60 * 24),
+      ) + 1;
+
     const dayOfYearLocation = gl.getUniformLocation(program, "u_dayOfYear");
     gl.uniform1f(dayOfYearLocation, dayOfYear);
 
@@ -1204,12 +1263,12 @@ export class SlopeTerrainRenderer {
       outputHeight,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
-      pixels
+      pixels,
     );
 
     // Return texture to pool instead of deleting
     this.texturePool!.releaseTexture(texture);
-    
+
     // Clean up low-resolution texture if it was used
     if (lowResTexture) {
       this.texturePool!.releaseTexture(lowResTexture);
@@ -1219,7 +1278,7 @@ export class SlopeTerrainRenderer {
     return new ImageData(
       new Uint8ClampedArray(pixels),
       outputWidth,
-      outputHeight
+      outputHeight,
     );
   }
 
@@ -1231,7 +1290,7 @@ export class SlopeTerrainRenderer {
   private async getMinimalPaddedDemTile(
     z: number,
     x: number,
-    y: number
+    y: number,
   ): Promise<{ width: number; height: number; data: Float32Array } | null> {
     // Fetch center tile + all 8 neighbors to properly fill padding
     const [
@@ -1243,7 +1302,7 @@ export class SlopeTerrainRenderer {
       northwestTile,
       northeastTile,
       southwestTile,
-      southeastTile
+      southeastTile,
     ] = await Promise.all([
       this.demSource.getDemTile(z, x, y),
       this.demSource.getDemTile(z, x, y - 1),
@@ -1269,7 +1328,8 @@ export class SlopeTerrainRenderer {
     // Copy center tile
     for (let y = 0; y < tileSize; y++) {
       for (let x = 0; x < tileSize; x++) {
-        paddedData[(y + padding) * paddedSize + (x + padding)] = centerTile.data[y * tileSize + x];
+        paddedData[(y + padding) * paddedSize + (x + padding)] =
+          centerTile.data[y * tileSize + x];
       }
     }
 
@@ -1278,7 +1338,8 @@ export class SlopeTerrainRenderer {
       for (let row = 0; row < padding; row++) {
         const srcRow = tileSize - padding + row;
         for (let x = 0; x < tileSize; x++) {
-          paddedData[row * paddedSize + (x + padding)] = northTile.data[srcRow * tileSize + x];
+          paddedData[row * paddedSize + (x + padding)] =
+            northTile.data[srcRow * tileSize + x];
         }
       }
     }
@@ -1288,7 +1349,8 @@ export class SlopeTerrainRenderer {
       for (let row = 0; row < padding; row++) {
         const dstRow = tileSize + padding + row;
         for (let x = 0; x < tileSize; x++) {
-          paddedData[dstRow * paddedSize + (x + padding)] = southTile.data[row * tileSize + x];
+          paddedData[dstRow * paddedSize + (x + padding)] =
+            southTile.data[row * tileSize + x];
         }
       }
     }
@@ -1297,7 +1359,8 @@ export class SlopeTerrainRenderer {
     if (eastTile) {
       for (let y = 0; y < tileSize; y++) {
         for (let col = 0; col < padding; col++) {
-          paddedData[(y + padding) * paddedSize + (tileSize + padding + col)] = eastTile.data[y * tileSize + col];
+          paddedData[(y + padding) * paddedSize + (tileSize + padding + col)] =
+            eastTile.data[y * tileSize + col];
         }
       }
     }
@@ -1307,7 +1370,8 @@ export class SlopeTerrainRenderer {
       for (let y = 0; y < tileSize; y++) {
         for (let col = 0; col < padding; col++) {
           const srcCol = tileSize - padding + col;
-          paddedData[(y + padding) * paddedSize + col] = westTile.data[y * tileSize + srcCol];
+          paddedData[(y + padding) * paddedSize + col] =
+            westTile.data[y * tileSize + srcCol];
         }
       }
     }
@@ -1318,7 +1382,8 @@ export class SlopeTerrainRenderer {
         const srcRow = tileSize - padding + row;
         for (let col = 0; col < padding; col++) {
           const srcCol = tileSize - padding + col;
-          paddedData[row * paddedSize + col] = northwestTile.data[srcRow * tileSize + srcCol];
+          paddedData[row * paddedSize + col] =
+            northwestTile.data[srcRow * tileSize + srcCol];
         }
       }
     }
@@ -1328,7 +1393,8 @@ export class SlopeTerrainRenderer {
       for (let row = 0; row < padding; row++) {
         const srcRow = tileSize - padding + row;
         for (let col = 0; col < padding; col++) {
-          paddedData[row * paddedSize + (tileSize + padding + col)] = northeastTile.data[srcRow * tileSize + col];
+          paddedData[row * paddedSize + (tileSize + padding + col)] =
+            northeastTile.data[srcRow * tileSize + col];
         }
       }
     }
@@ -1339,7 +1405,8 @@ export class SlopeTerrainRenderer {
         const dstRow = tileSize + padding + row;
         for (let col = 0; col < padding; col++) {
           const srcCol = tileSize - padding + col;
-          paddedData[dstRow * paddedSize + col] = southwestTile.data[row * tileSize + srcCol];
+          paddedData[dstRow * paddedSize + col] =
+            southwestTile.data[row * tileSize + srcCol];
         }
       }
     }
@@ -1349,7 +1416,8 @@ export class SlopeTerrainRenderer {
       for (let row = 0; row < padding; row++) {
         const dstRow = tileSize + padding + row;
         for (let col = 0; col < padding; col++) {
-          paddedData[dstRow * paddedSize + (tileSize + padding + col)] = southeastTile.data[row * tileSize + col];
+          paddedData[dstRow * paddedSize + (tileSize + padding + col)] =
+            southeastTile.data[row * tileSize + col];
         }
       }
     }
@@ -1357,7 +1425,7 @@ export class SlopeTerrainRenderer {
     return {
       width: paddedSize,
       height: paddedSize,
-      data: paddedData
+      data: paddedData,
     };
   }
 
@@ -1368,17 +1436,23 @@ export class SlopeTerrainRenderer {
   private async getExtendedPaddedDemTile(
     z: number,
     x: number,
-    y: number
+    y: number,
   ): Promise<{ width: number; height: number; data: Float32Array } | null> {
     // Fetch center tile + 8 neighbors for 3x3 grid
     const neighbors = [
-      [-1, -1], [0, -1], [1, -1], // northwest, north, northeast
-      [-1,  0], [0,  0], [1,  0], // west, center, east
-      [-1,  1], [0,  1], [1,  1]  // southwest, south, southeast
+      [-1, -1],
+      [0, -1],
+      [1, -1], // northwest, north, northeast
+      [-1, 0],
+      [0, 0],
+      [1, 0], // west, center, east
+      [-1, 1],
+      [0, 1],
+      [1, 1], // southwest, south, southeast
     ];
 
     const tilePromises = neighbors.map(([dx, dy]) =>
-      this.demSource.getDemTile(z, x + dx, y + dy)
+      this.demSource.getDemTile(z, x + dx, y + dy),
     );
 
     const tiles = await Promise.all(tilePromises);
@@ -1415,7 +1489,7 @@ export class SlopeTerrainRenderer {
     return {
       width: gridSize,
       height: gridSize,
-      data: paddedData
+      data: paddedData,
     };
   }
 
@@ -1429,16 +1503,20 @@ export class SlopeTerrainRenderer {
     maplibregl.addProtocol("slope-terrain", async (params) => {
       // Extract style, optional date, and DEM URL from the nested protocol format
       // URL format: slope-terrain://style/dem-protocol://z/x/y or slope-terrain://style/dayOfYear/dem-protocol://z/x/y
-      const urlMatch = params.url.match(/slope-terrain:\/\/([^\/]+)(?:\/(\d+))?\/(.*)/);
-      
+      const urlMatch = params.url.match(
+        /slope-terrain:\/\/([^\/]+)(?:\/(\d+))?\/(.*)/,
+      );
+
       if (!urlMatch) {
-        throw new Error(`Invalid slope-terrain URL format: ${params.url}. Expected: slope-terrain://style/dem-url or slope-terrain://style/dayOfYear/dem-url`);
+        throw new Error(
+          `Invalid slope-terrain URL format: ${params.url}. Expected: slope-terrain://style/dem-url or slope-terrain://style/dayOfYear/dem-url`,
+        );
       }
 
       const styleParam = urlMatch[1];
       const dayOfYearParam = urlMatch[2] ? parseInt(urlMatch[2], 10) : null;
       const demUrl = urlMatch[3];
-      
+
       // Extract z/x/y from the DEM URL
       const demMatch = demUrl.match(/(\d+)\/(\d+)\/(\d+)/);
       if (!demMatch) {
@@ -1448,7 +1526,7 @@ export class SlopeTerrainRenderer {
       const z = parseInt(demMatch[1], 10);
       const x = parseInt(demMatch[2], 10);
       const y = parseInt(demMatch[3], 10);
-      
+
       if (isNaN(z) || isNaN(x) || isNaN(y)) {
         throw new Error(`Invalid tile coordinates in URL: ${params.url}`);
       }
@@ -1456,35 +1534,52 @@ export class SlopeTerrainRenderer {
       // Validate and convert style parameter
       const style = styleParam as MapStyleOverlay;
       if (!Object.values(MapStyleOverlay).includes(style)) {
-        throw new Error(`Invalid style parameter: ${styleParam}. Valid styles: ${Object.values(MapStyleOverlay).join(', ')}`);
+        throw new Error(
+          `Invalid style parameter: ${styleParam}. Valid styles: ${Object.values(MapStyleOverlay).join(", ")}`,
+        );
       }
 
       const zoomLevel = z;
-      
+
       // Convert tile Y coordinate to latitude using Web Mercator formula
       const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, zoomLevel);
-      const latitude = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-      
+      const latitude =
+        (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+
       // Convert tile X coordinate to longitude
       const longitude = (x / Math.pow(2, zoomLevel)) * 360 - 180;
 
       // Get the padded DEM tile data - use extended padding for sun exposure, minimal for others
-      const demTile = style === MapStyleOverlay.SunExposure
-        ? await this.getExtendedPaddedDemTile(z, x, y)
-        : await this.getMinimalPaddedDemTile(z, x, y);
+      const demTile =
+        style === MapStyleOverlay.SunExposure
+          ? await this.getExtendedPaddedDemTile(z, x, y)
+          : await this.getMinimalPaddedDemTile(z, x, y);
 
       // Use fixed coarse terrain zoom for extended shadow casting (only needed for sun exposure)
       const lowResZoom = SlopeTerrainRenderer.COARSE_TERRAIN_ZOOM;
-      let lowResDemTile: { width: number; height: number; data: Float32Array } | null = null;
+      let lowResDemTile: {
+        width: number;
+        height: number;
+        data: Float32Array;
+      } | null = null;
 
       if (style === MapStyleOverlay.SunExposure && z >= lowResZoom) {
         // For sun exposure, load coarse terrain with extended padding for better shadow casting
         const lowResScale = Math.pow(2, z - lowResZoom);
         const lowResX = Math.floor(x / lowResScale);
         const lowResY = Math.floor(y / lowResScale);
-        console.log(`Loading low-res tile: z${lowResZoom}/${lowResX}/${lowResY} (scale: ${lowResScale}) for high-res z${z}/${x}/${y}`);
-        lowResDemTile = await this.getExtendedPaddedDemTile(lowResZoom, lowResX, lowResY);
-        console.log(`Low-res tile loaded:`, lowResDemTile ? 'SUCCESS' : 'FAILED');
+        console.log(
+          `Loading low-res tile: z${lowResZoom}/${lowResX}/${lowResY} (scale: ${lowResScale}) for high-res z${z}/${x}/${y}`,
+        );
+        lowResDemTile = await this.getExtendedPaddedDemTile(
+          lowResZoom,
+          lowResX,
+          lowResY,
+        );
+        console.log(
+          `Low-res tile loaded:`,
+          lowResDemTile ? "SUCCESS" : "FAILED",
+        );
       } else {
         console.log(`Skipping low-res tile for style ${style} at zoom ${z}`);
         lowResDemTile = null;
@@ -1499,7 +1594,7 @@ export class SlopeTerrainRenderer {
         if (context) {
           context.clearRect(0, 0, 512, 512);
           const blob = await new Promise<Blob | null>((resolve) =>
-            canvas.toBlob(resolve)
+            canvas.toBlob(resolve),
           );
           if (blob) {
             return { data: await blob.arrayBuffer() };
@@ -1528,7 +1623,7 @@ export class SlopeTerrainRenderer {
         longitude,
         style,
         dateForCalculation,
-        lowResDemTile
+        lowResDemTile,
       );
 
       if (!processedData) {
@@ -1546,7 +1641,7 @@ export class SlopeTerrainRenderer {
 
       context.putImageData(processedData, 0, 0);
       const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve)
+        canvas.toBlob(resolve),
       );
 
       if (!blob) {

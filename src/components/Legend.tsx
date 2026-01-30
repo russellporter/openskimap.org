@@ -836,7 +836,6 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
 
       <Divider sx={{ my: 3 }} />
 
-      {/* Slope Overlays */}
       <Section ref={slopeOverlaysRef}>
         <SectionTitle>Slope Overlays</SectionTitle>
         <Typography sx={{ fontSize: 13, color: "#666", mb: 2 }}>
@@ -851,7 +850,6 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
             gap: 2,
           }}
         >
-          {/* Classic Slope Overlay */}
           <OverlayCard>
             <OverlayTitle>Classic</OverlayTitle>
             <GradientBar
@@ -868,7 +866,6 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
             </GradientLabels>
           </OverlayCard>
 
-          {/* Sun Exposure Overlay */}
           <OverlayCard>
             <OverlayTitle>Sun Exposure</OverlayTitle>
             <GradientBar
@@ -886,9 +883,8 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
             </GradientLabels>
           </OverlayCard>
 
-          {/* Aspect (Winter Sun) Overlay */}
           <OverlayCard>
-            <OverlayTitle>Aspect (Winter Sun)</OverlayTitle>
+            <OverlayTitle>Aspect</OverlayTitle>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box
                 sx={{ position: "relative", flexShrink: 0, padding: "16px" }}
@@ -1036,7 +1032,6 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
             </Box>
           </OverlayCard>
 
-          {/* Avalanche Slope Classes Overlay */}
           <OverlayCard>
             <OverlayTitle>Avalanche Slope Classes</OverlayTitle>
             <LabelSecondary sx={{ mb: 1.5 }}>

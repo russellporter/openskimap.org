@@ -21,7 +21,7 @@ export const MAP_STYLE_URLS: Record<MapStyle, string> = {
 export const SLOPE_OVERLAY_NAMES: Record<MapStyleOverlay, string> = {
   [MapStyleOverlay.Slope]: "Classic",
   [MapStyleOverlay.DownhillDifficulty]: "Downhill Difficulty",
-  [MapStyleOverlay.Aspect]: "Aspect (Winter Sun)",
+  [MapStyleOverlay.Aspect]: "Aspect",
   [MapStyleOverlay.SunExposure]: "Sun Exposure",
   [MapStyleOverlay.AvalancheSlopeClasses]: "Avalanche Slope Classes",
 };
