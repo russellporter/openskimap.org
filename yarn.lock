@@ -4521,9 +4521,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"maplibre-gl@npm:^5.17.0":
+maplibre-gl@russellporter/maplibre-gl-js:
   version: 5.17.0
-  resolution: "maplibre-gl@npm:5.17.0"
+  resolution: "maplibre-gl@https://github.com/russellporter/maplibre-gl-js.git#commit=b0cb748c95e4956cedd7f632eedf3cd127cbe8c6"
   dependencies:
     "@mapbox/geojson-rewind": ^0.5.2
     "@mapbox/jsonlint-lines-primitives": ^2.0.2
@@ -4547,7 +4547,7 @@ __metadata:
     quickselect: ^3.0.0
     supercluster: ^8.0.1
     tinyqueue: ^3.0.0
-  checksum: 468ed93ed0b7229737d87b2101a9f90d92294159277f11b9e533394e1a305b6799fb75e9cf45b12827fbdb7f1f1a3e98afc37d5278092fed956b9925175de572
+  checksum: 04efcf05900ac0f6e18f6c451961b87116bbb1b38cb74247719fc965270aa01e899ec45b0048455eee78e59c7c0c739d5c463b1a376ce9432605622dc80fa59e
   languageName: node
   linkType: hard
 
@@ -4833,7 +4833,7 @@ __metadata:
     chart.js: ^4.5.1
     clsx: ^2.1.1
     maplibre-contour: ^0.1.0
-    maplibre-gl: ^5.17.0
+    maplibre-gl: russellporter/maplibre-gl-js
     memoize-one: ^6.0.0
     openskidata-format: ^7.0.0
     prettier: ^3.8.1

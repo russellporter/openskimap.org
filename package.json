@@ -27,7 +27,7 @@
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "maplibre-contour": "^0.1.0",
-    "maplibre-gl": "^5.17.0",
+    "maplibre-gl": "russellporter/maplibre-gl-js",
     "memoize-one": "^6.0.0",
     "openskidata-format": "^7.0.0",
     "query-string": "^9.3.1",
