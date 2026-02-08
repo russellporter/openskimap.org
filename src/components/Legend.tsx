@@ -491,6 +491,40 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
               </LabelSecondary>
             </Box>
           </LegendItem>
+
+          <LegendItem>
+            <LineSample viewBox="0 0 70 24">
+              <line
+                x1="5"
+                y1="12"
+                x2="47"
+                y2="12"
+                stroke="white"
+                strokeWidth="8"
+                strokeLinecap="round"
+              />
+              <line
+                x1="5"
+                y1="12"
+                x2="47"
+                y2="12"
+                stroke={colors.liftOperating}
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="47"
+                cy="12"
+                r="5"
+                fill="#C31313"
+                stroke="white"
+                strokeWidth="1"
+              />
+            </LineSample>
+            <Box>
+              <Label>Lift Station</Label>
+            </Box>
+          </LegendItem>
         </LegendGrid>
       </Section>
 
@@ -587,6 +621,41 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
       <Section>
         <IndicatorGrid>
           <IndicatorItem>
+            <LineSample viewBox="0 0 70 24">
+              <line
+                x1="5"
+                y1="12"
+                x2="65"
+                y2="12"
+                stroke="rgba(196, 251, 255, 0.88)"
+                strokeWidth="21"
+                strokeLinecap="round"
+              />
+              <line
+                x1="5"
+                y1="12"
+                x2="65"
+                y2="12"
+                stroke="white"
+                strokeWidth="9"
+                strokeLinecap="round"
+              />
+              <line
+                x1="5"
+                y1="12"
+                x2="65"
+                y2="12"
+                stroke={colors.blue}
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+            </LineSample>
+            <Box>
+              <Label sx={{ fontWeight: 500 }}>Snowmaking / Snowfarming</Label>
+            </Box>
+          </IndicatorItem>
+
+          <IndicatorItem>
             <RunLine strokeColor={colors.blue} casingColor={colors.litYellow} />
             <Box>
               <Label sx={{ fontWeight: 500 }}>Lit Run</Label>
@@ -672,6 +741,140 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
               <LabelSecondary>
                 Direction of travel indicated by arrows
               </LabelSecondary>
+            </Box>
+          </IndicatorItem>
+
+          <IndicatorItem>
+            <svg width="70" height="40" viewBox="0 0 70 40" style={{ flexShrink: 0 }}>
+              {/* Vertical road */}
+              <line
+                x1="35"
+                y1="2"
+                x2="35"
+                y2="38"
+                stroke="#cfcdca"
+                strokeWidth="7"
+                strokeLinecap="round"
+              />
+              <line
+                x1="35"
+                y1="2"
+                x2="35"
+                y2="38"
+                stroke="#fff"
+                strokeWidth="5"
+                strokeLinecap="round"
+              />
+              {/* Horizontal run line */}
+              <line
+                x1="5"
+                y1="20"
+                x2="65"
+                y2="20"
+                stroke="white"
+                strokeWidth="9"
+                strokeLinecap="round"
+              />
+              <line
+                x1="5"
+                y1="20"
+                x2="65"
+                y2="20"
+                stroke={colors.blue}
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              {/* Crossing icon */}
+              <g transform="translate(27.5, 13.5)">
+                <path
+                  d="M7.5 0.5C8.21265 0.5 8.90906 0.822654 9.35254 1.44141L9.4375 1.56836L9.43848 1.57031L14.1816 9.26953L14.1826 9.27148C14.3818 9.59763 14.5 9.97396 14.5 10.3496C14.5 10.9397 14.287 11.4864 13.877 11.8848C13.4667 12.2833 12.8941 12.5 12.2354 12.5H2.76465C2.10591 12.5 1.53332 12.2833 1.12305 11.8848C0.712951 11.4864 0.5 10.9397 0.5 10.3496C0.500004 9.97917 0.607907 9.60924 0.819336 9.26953L5.56152 1.57031C5.99189 0.863548 6.74456 0.5 7.5 0.5Z"
+                  fill="#FF9000"
+                  stroke="white"
+                />
+                <path
+                  d="M5.5 10L9.5 6"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M5.5 6L9.5 10"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </g>
+            </svg>
+            <Box>
+              <Label sx={{ fontWeight: 500 }}>Road Crossing</Label>
+              <LabelSecondary>Ski removal required</LabelSecondary>
+            </Box>
+          </IndicatorItem>
+
+          <IndicatorItem>
+            <svg width="70" height="40" viewBox="0 0 70 40" style={{ flexShrink: 0 }}>
+              {/* Vertical road */}
+              <line
+                x1="35"
+                y1="2"
+                x2="35"
+                y2="38"
+                stroke="#cfcdca"
+                strokeWidth="7"
+                strokeLinecap="round"
+              />
+              <line
+                x1="35"
+                y1="2"
+                x2="35"
+                y2="38"
+                stroke="#fff"
+                strokeWidth="5"
+                strokeLinecap="round"
+              />
+              {/* Horizontal run line */}
+              <line
+                x1="5"
+                y1="20"
+                x2="65"
+                y2="20"
+                stroke="white"
+                strokeWidth="9"
+                strokeLinecap="round"
+              />
+              <line
+                x1="5"
+                y1="20"
+                x2="65"
+                y2="20"
+                stroke={colors.blue}
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              {/* Crossing icon (maybe) */}
+              <g transform="translate(27.5, 13.5)" opacity="0.8">
+                <path
+                  d="M7.5 0.5C8.21265 0.5 8.90906 0.822654 9.35254 1.44141L9.4375 1.56836L9.43848 1.57031L14.1816 9.26953L14.1826 9.27148C14.3818 9.59763 14.5 9.97396 14.5 10.3496C14.5 10.9397 14.287 11.4864 13.877 11.8848C13.4667 12.2833 12.8941 12.5 12.2354 12.5H2.76465C2.10591 12.5 1.53332 12.2833 1.12305 11.8848C0.712951 11.4864 0.5 10.9397 0.5 10.3496C0.500004 9.97917 0.607907 9.60924 0.819336 9.26953L5.56152 1.57031C5.99189 0.863548 6.74456 0.5 7.5 0.5Z"
+                  fill="#FF9000"
+                  stroke="white"
+                />
+                <path
+                  d="M5.5 10L9.5 6"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M5.5 6L9.5 10"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </g>
+            </svg>
+            <Box>
+              <Label sx={{ fontWeight: 500 }}>Road Crossing</Label>
+              <LabelSecondary>Ski removal sometimes required</LabelSecondary>
             </Box>
           </IndicatorItem>
         </IndicatorGrid>
@@ -832,6 +1035,62 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
             </LabelSecondary>
           </Box>
         </Box>
+      </Section>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* Points of Interest */}
+      <Section>
+        <SectionTitle>Points of Interest</SectionTitle>
+        <LegendGrid>
+          <LegendItem>
+            <svg
+              width="24"
+              height="28"
+              viewBox="-1 -1 15 18"
+              style={{ flexShrink: 0 }}
+            >
+              <path
+                d="M2.55513 11.4688C3.59233 12.8178 4.90729 13.6818 6.5 14.061C8.09317 13.6823 9.40813 12.8184 10.4449 11.4694C11.4816 10.1205 12 8.62266 12 6.97599V3.01099L6.5 1.06099L1 3.01099V6.97599C0.999542 8.62222 1.51792 10.1198 2.55513 11.4688Z"
+                fill="white"
+              />
+              <path
+                d="M5.46875 9.83599H7.53125V8.21099H9.25V6.26099H7.53125V4.63599H5.46875V6.26099H3.75V8.21099H5.46875V9.83599ZM6.5 14.061C4.90729 13.6818 3.59233 12.8178 2.55513 11.4688C1.51792 10.1198 0.999542 8.62222 1 6.97599V3.01099L6.5 1.06099L12 3.01099V6.97599C12 8.62266 11.4816 10.1205 10.4449 11.4694C9.40813 12.8184 8.09317 13.6823 6.5 14.061Z"
+                fill="#FF0000"
+              />
+              <path
+                d="M13 6.97603C13 8.85083 12.4035 10.5611 11.2373 12.0786C10.0666 13.6018 8.55712 14.5996 6.73145 15.0336L6.5 15.0893L6.26855 15.0336C4.44346 14.5992 2.93376 13.6015 1.7627 12.0786C0.595979 10.5612 -0.000454302 8.85056 0 6.97603V2.30415L0.666016 2.0688L6.16602 0.118607L6.5 0.000442505L6.83398 0.118607L12.334 2.0688L13 2.30415V6.97603Z"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+              />
+            </svg>
+            <Box>
+              <Label>Avalanche Beacon Training / Checkpoint</Label>
+              <LabelSecondary>
+                A place to check, or train use of an avalanche beacon
+              </LabelSecondary>
+            </Box>
+          </LegendItem>
+
+          <LegendItem>
+            <svg
+              width="24"
+              height="20"
+              viewBox="-1 -1 19 16"
+              style={{ flexShrink: 0 }}
+            >
+              <path
+                d="M2.1543 0.5C2.71114 0.50023 3.23039 0.926481 3.23047 1.5332V4.06641C3.23047 5.33499 3.77546 6.56071 4.75977 7.4707C5.74547 8.38193 7.09039 8.90039 8.5 8.90039L8.76367 8.89355C10.0764 8.83326 11.3162 8.32493 12.2402 7.4707C13.2245 6.56071 13.7695 5.33499 13.7695 4.06641V1.5332C13.7696 0.926481 14.2889 0.50023 14.8457 0.5H15.4229C15.9799 0.5 16.4999 0.926317 16.5 1.5332V12.4668C16.4999 13.0737 15.9799 13.5 15.4229 13.5H1.57715C1.02013 13.5 0.500075 13.0737 0.5 12.4668V1.5332C0.500074 0.926317 1.02013 0.5 1.57715 0.5H2.1543Z"
+                fill="#FF9000"
+                stroke="white"
+              />
+            </svg>
+            <Box>
+              <Label>Halfpipe</Label>
+            </Box>
+          </LegendItem>
+        </LegendGrid>
       </Section>
 
       <Divider sx={{ my: 3 }} />
