@@ -1912,12 +1912,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@maplibre/mlt@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "@maplibre/mlt@npm:1.1.2"
+"@maplibre/mlt@npm:^1.1.6":
+  version: 1.1.6
+  resolution: "@maplibre/mlt@npm:1.1.6"
   dependencies:
     "@mapbox/point-geometry": "npm:^1.1.0"
-  checksum: 10/594273f7677ea6cc7f872b6b40082a35852bbfc57899da8662999e77ceef934f7d299d921475e44fbb1e57532060256b079ef5afc2400b085eb2cb4e8cd18ae6
+  checksum: 10/3023641a2b9fe25a04b46e71913da0c0d21801981be556a8ff794af730cd74bee71ea5f8b8fb50f182093363df08dfb3fa7b38472c7e9812d3dfc8d72ab5991a
   languageName: node
   linkType: hard
 
@@ -4521,9 +4521,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-maplibre-gl@russellporter/maplibre-gl-js:
-  version: 5.17.0
-  resolution: "maplibre-gl@https://github.com/russellporter/maplibre-gl-js.git#commit=b0cb748c95e4956cedd7f632eedf3cd127cbe8c6"
+"maplibre-gl@npm:^5.18.0":
+  version: 5.18.0
+  resolution: "maplibre-gl@npm:5.18.0"
   dependencies:
     "@mapbox/geojson-rewind": "npm:^0.5.2"
     "@mapbox/jsonlint-lines-primitives": "npm:^2.0.2"
@@ -4534,7 +4534,7 @@ maplibre-gl@russellporter/maplibre-gl-js:
     "@mapbox/whoots-js": "npm:^3.1.0"
     "@maplibre/geojson-vt": "npm:^5.0.4"
     "@maplibre/maplibre-gl-style-spec": "npm:^24.4.1"
-    "@maplibre/mlt": "npm:^1.1.2"
+    "@maplibre/mlt": "npm:^1.1.6"
     "@maplibre/vt-pbf": "npm:^4.2.1"
     "@types/geojson": "npm:^7946.0.16"
     "@types/supercluster": "npm:^7.1.3"
@@ -4547,7 +4547,7 @@ maplibre-gl@russellporter/maplibre-gl-js:
     quickselect: "npm:^3.0.0"
     supercluster: "npm:^8.0.1"
     tinyqueue: "npm:^3.0.0"
-  checksum: 10/3939cc5afd78d5301c6db73da023c22c0b6178d297db2a3bbf78bb64c9fea42e71b8e19d5c6a8a62d8c59dbe209a326864f4fc6c9372704ebb43c3fc0fc03614
+  checksum: 10/f5b1877939ae8680e4e03f6fff5014ef9820fc038cdf1ac50ad5d969cb7f0cfe531ac06dd0b498bfedb0f2a22e9e983b07f1d50cb1a777e180823f60e01fd729
   languageName: node
   linkType: hard
 
@@ -4833,7 +4833,7 @@ maplibre-gl@russellporter/maplibre-gl-js:
     chart.js: "npm:^4.5.1"
     clsx: "npm:^2.1.1"
     maplibre-contour: "npm:^0.1.0"
-    maplibre-gl: russellporter/maplibre-gl-js
+    maplibre-gl: "npm:^5.18.0"
     memoize-one: "npm:^6.0.0"
     openskidata-format: "npm:^7.0.0"
     prettier: "npm:^3.8.1"
