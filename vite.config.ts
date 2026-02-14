@@ -18,14 +18,15 @@ export default defineConfig({
               url.origin === "https://tiles.openskimap.org" ||
               url.origin === "https://tiles.openfreemap.org" ||
               url.origin === "https://services.arcgisonline.com",
-            handler: "CacheFirst",
+            handler: "NetworkFirst",
             options: {
               cacheName: `tiles-cache-v2`,
               expiration: {
                 maxEntries: 50000,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-                purgeOnQuotaError: true
+                purgeOnQuotaError: true,
               },
+              networkTimeoutSeconds: 3,
             },
           },
         ],
