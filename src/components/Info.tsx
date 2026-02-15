@@ -6,44 +6,23 @@ import {
 } from "openskidata-format";
 import * as maplibregl from "maplibre-gl";
 import * as React from "react";
-import { useEffect, useState } from "react";
 import EventBus from "./EventBus";
-import { loadGeoJSON } from "./GeoJSONLoader";
+import { MapFeature } from "./InfoData";
 import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";
-import { updatePageMetadata } from "./utils/PageMetadata";
 import * as UnitHelpers from "./utils/UnitHelpers";
-
-type MapFeature = RunFeature | LiftFeature | SkiAreaFeature;
 
 export const Info: React.FunctionComponent<{
   id: string;
+  feature: MapFeature;
   width: number;
   eventBus: EventBus;
   unitSystem: UnitHelpers.UnitSystem;
   onLoadFeature: (feature: MapFeature) => void;
   map: maplibregl.Map;
 }> = (props) => {
-  const [feature, setFeature] = useState<MapFeature | null>(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      let data: MapFeature;
-      try {
-        data = await loadGeoJSON<MapFeature>(props.id);
-      } catch (error) {
-        console.log(error);
-        props.eventBus.hideInfo();
-        return;
-      }
-
-      updatePageMetadata(data);
-      setFeature(data);
-      props.onLoadFeature(data);
-    };
-
-    fetchData();
-  }, [props.id]);
+  const feature = props.feature;
 
   return (
     <>

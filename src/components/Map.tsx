@@ -235,12 +235,19 @@ export class Map {
     if (info && info.panToPosition && info.panToPosition !== "afterLoad") {
       this.flyTo(info.panToPosition);
     }
+
+    if (this.infoControl !== null && info && this.infoControl._info.id === info.id) {
+      this.infoControl.updateInfo(info);
+      return;
+    }
+
     if (this.infoControl !== null) {
       this.map.removeControl(this.infoControl);
+      this.infoControl = null;
     }
-    this.infoControl =
-      info === null ? null : new InfoControl(info, this.eventBus);
-    if (this.infoControl !== null) {
+
+    if (info !== null && info.feature) {
+      this.infoControl = new InfoControl(info, this.eventBus);
       this.map.addControl(this.infoControl);
     }
   };

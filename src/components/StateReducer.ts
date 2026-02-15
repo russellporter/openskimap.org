@@ -3,10 +3,12 @@ import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import EventBus from "./EventBus";
-import { InfoData } from "./InfoData";
+import { InfoData, MapFeature } from "./InfoData";
 import State, { StateChanges } from "./State";
 import { URLState } from "./URLHistory";
 import { UnitSystem } from "./utils/UnitHelpers";
+import { loadGeoJSON } from "./GeoJSONLoader";
+import { updatePageMetadata } from "./utils/PageMetadata";
 
 export default class StateReducer implements EventBus {
   _state: State;
@@ -89,6 +91,25 @@ export default class StateReducer implements EventBus {
     this.update({ unitSystem });
   };
 
+  private loadInfoData = async (id: string) => {
+    try {
+      const feature = await loadGeoJSON<MapFeature>(id);
+      updatePageMetadata(feature);
+
+      if (this._state.info?.id === id) {
+        this.update({
+          info: {
+            ...this._state.info,
+            feature
+          }
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      this.hideInfo();
+    }
+  };
+
   urlUpdate = (state: URLState) => {
     this.update({
       aboutInfoOpen: state.aboutInfoOpen,
@@ -103,6 +124,10 @@ export default class StateReducer implements EventBus {
       },
       markers: state.markers,
     });
+
+    if (state.selectedObjectID) {
+      this.loadInfoData(state.selectedObjectID);
+    }
   };
 
   showInfo = (info: InfoData) => {
@@ -110,6 +135,8 @@ export default class StateReducer implements EventBus {
       info: info,
       mapFilters: { ...this._state.mapFilters, selectedObjectID: info.id },
     });
+
+    this.loadInfoData(info.id);
   };
 
   hideInfo = () => {

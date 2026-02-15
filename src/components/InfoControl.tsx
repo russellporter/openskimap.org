@@ -13,17 +13,22 @@ export class InfoControl implements maplibregl.IControl {
   _container: HTMLDivElement;
   _map: maplibregl.Map | null = null;
   _eventBus: EventBus;
-  _id: string;
+  _info: InfoData;
   _panToPositionAfterLoad: boolean = false;
   _root: ReactDOM.Root | null = null;
 
   constructor(info: InfoData, eventBus: EventBus) {
-    this._id = info.id;
+    this._info = info;
     this._panToPositionAfterLoad = info.panToPosition === "afterLoad";
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl";
   }
+
+  updateInfo = (info: InfoData) => {
+    this._info = info;
+    this.render();
+  };
 
   onAdd = (map: maplibregl.Map) => {
     this._root = ReactDOM.createRoot(this._container);
@@ -59,7 +64,8 @@ export class InfoControl implements maplibregl.IControl {
         <UnitSystemManager
           render={(unitSystem) => (
             <Info
-              id={this._id}
+              id={this._info.id}
+              feature={this._info.feature!}
               eventBus={this._eventBus}
               width={controlWidth(map)}
               unitSystem={unitSystem}
