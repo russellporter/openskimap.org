@@ -59,9 +59,16 @@ export default class About extends React.Component<Props> {
           Acceptable Use
         </Typography>
         <Typography paragraph={true}>
-          To manage costs, embedding of the website and direct use of tiles
-          hosted at tiles.openskimap.org is not permitted. Please prepare and
-          host your own tiles using the data below instead.
+          Embedding of the website in an iframe is permitted. If you want to
+          link to a specific feature (ski area, lift, run), it's recommended to
+          include both the <code>obj</code> query parameter (identifies the
+          feature) and the location hash. The feature ID may sometimes change —
+          in that case the map will still be shown in the right location, but
+          the feature won't be automatically selected.
+        </Typography>
+        <Typography paragraph={true}>
+          Direct use of tiles hosted at tiles.openskimap.org is not permitted.
+          Please prepare and host your own tiles using the data below instead.
         </Typography>
         <Typography variant="h6" id="modal-title">
           Code
