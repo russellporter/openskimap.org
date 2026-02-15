@@ -19,32 +19,32 @@ import { TrackDrawingManager } from "./components/TrackDrawingManager";
 import { setUnitSystem } from "./components/UnitSystemManager";
 import { getURLState, updateURL } from "./components/URLHistory";
 import { updatePageMetadata } from "./components/utils/PageMetadata";
-import { readGpxFile } from "./utils/TrackParser";
-import { CameraPositionManager } from "./utils/CameraPositionManager";
 import "./index.css";
+import { CameraPositionManager } from "./utils/CameraPositionManager";
+import { readGpxFile } from "./utils/TrackParser";
 
 function initialize() {
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);
   const aboutRoot = ReactDOM.createRoot(
-    document.getElementById("about-modal")!
+    document.getElementById("about-modal")!,
   );
   const legalRoot = ReactDOM.createRoot(
-    document.getElementById("legal-modal")!
+    document.getElementById("legal-modal")!,
   );
   const settingsRoot = ReactDOM.createRoot(
-    document.getElementById("settings-modal")!
+    document.getElementById("settings-modal")!,
   );
   const layersRoot = ReactDOM.createRoot(
-    document.getElementById("layers-modal")!
+    document.getElementById("layers-modal")!,
   );
   const legendRoot = ReactDOM.createRoot(
-    document.getElementById("legend-modal")!
+    document.getElementById("legend-modal")!,
   );
   const trackDrawingRoot = ReactDOM.createRoot(
-    document.getElementById("track-drawing-controls")!
+    document.getElementById("track-drawing-controls")!,
   );
   const gpxDropZoneRoot = ReactDOM.createRoot(
-    document.getElementById("gpx-drop-zone")!
+    document.getElementById("gpx-drop-zone")!,
   );
 
   // Track drawing manager - declared early so it's available in update function closure
@@ -62,7 +62,7 @@ function initialize() {
     () => {
       store.urlUpdate(getURLState());
     },
-    false
+    false,
   );
 
   // GPX drag-and-drop handlers
@@ -90,7 +90,7 @@ function initialize() {
     gpxDropZoneRoot.render(
       <Themed>
         <GpxDropZone visible={isDraggingFile} />
-      </Themed>
+      </Themed>,
     );
   }
 
@@ -139,7 +139,7 @@ function initialize() {
         } catch (error) {
           console.error("Failed to parse GPX file:", error);
           alert(
-            `Failed to load GPX file "${file.name}": ${error instanceof Error ? error.message : "Unknown error"}`
+            `Failed to load GPX file "${file.name}": ${error instanceof Error ? error.message : "Unknown error"}`,
           );
         }
       }
@@ -156,7 +156,7 @@ function initialize() {
 
   maplibregl.setRTLTextPlugin(
     "https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js",
-    false
+    false,
   );
 
   const cameraPositionManager = new CameraPositionManager();
@@ -175,7 +175,7 @@ function initialize() {
   store.urlUpdate(getURLState());
 
   update(store._state, store._state);
-  
+
   // Initialize tracks on the map
   map.setTracks(store._state.tracks);
 
@@ -198,19 +198,25 @@ function initialize() {
 
     if (changes.mapStyleOverlay !== undefined) {
       map.setSlopeOverlay(state.mapStyleOverlay);
-      localStorage.setItem("mapStyleOverlay", state.mapStyleOverlay ? state.mapStyleOverlay : "null");
+      localStorage.setItem(
+        "mapStyleOverlay",
+        state.mapStyleOverlay ? state.mapStyleOverlay : "null",
+      );
     }
 
     if (changes.sunExposureDate !== undefined) {
       map.setSunExposureDate(state.sunExposureDate);
-      localStorage.setItem("sunExposureDate", state.sunExposureDate.toISOString());
+      localStorage.setItem(
+        "sunExposureDate",
+        state.sunExposureDate.toISOString(),
+      );
     }
 
     if (changes.sidebarOpen !== undefined) {
       sidebarRoot.render(
         <Themed>
           <Sidebar eventBus={store} open={state.sidebarOpen} />
-        </Themed>
+        </Themed>,
       );
     }
 
@@ -218,7 +224,7 @@ function initialize() {
       aboutRoot.render(
         <Themed>
           <AboutModal eventBus={store} open={state.aboutInfoOpen} />
-        </Themed>
+        </Themed>,
       );
     }
 
@@ -226,11 +232,14 @@ function initialize() {
       legalRoot.render(
         <Themed>
           <LegalModal eventBus={store} open={state.legalOpen} />
-        </Themed>
+        </Themed>,
       );
     }
 
-    if (changes.legendOpen !== undefined || changes.legendSection !== undefined) {
+    if (
+      changes.legendOpen !== undefined ||
+      changes.legendSection !== undefined
+    ) {
       const mapCenter = map.getCenter();
       legendRoot.render(
         <Themed>
@@ -240,7 +249,7 @@ function initialize() {
             mapCenter={mapCenter}
             section={state.legendSection}
           />
-        </Themed>
+        </Themed>,
       );
     }
 
@@ -255,7 +264,7 @@ function initialize() {
             open={state.settingsOpen}
             unitSystem={state.unitSystem}
           />
-        </Themed>
+        </Themed>,
       );
     }
 
@@ -276,7 +285,7 @@ function initialize() {
             tracks={state.tracks}
             sunExposureDate={state.sunExposureDate}
           />
-        </Themed>
+        </Themed>,
       );
     }
 
@@ -321,7 +330,10 @@ function initialize() {
       if (state.isDrawingTrack) {
         // Start drawing
         if (!trackDrawingManager) {
-          trackDrawingManager = new TrackDrawingManager(mapInstance.getMaplibreMap(), store);
+          trackDrawingManager = new TrackDrawingManager(
+            mapInstance.getMaplibreMap(),
+            store,
+          );
         }
         trackDrawingManager.startDrawing();
       } else {
@@ -338,8 +350,13 @@ function initialize() {
     }
 
     // Update track drawing controls UI
-    if (changes.isDrawingTrack !== undefined || changes.drawingTrackCoordinates !== undefined) {
-      const trackLength = calculateDrawingTrackLength(state.drawingTrackCoordinates);
+    if (
+      changes.isDrawingTrack !== undefined ||
+      changes.drawingTrackCoordinates !== undefined
+    ) {
+      const trackLength = calculateDrawingTrackLength(
+        state.drawingTrackCoordinates,
+      );
       trackDrawingRoot.render(
         <Themed>
           <TrackDrawingControls
@@ -348,12 +365,14 @@ function initialize() {
             pointCount={state.drawingTrackCoordinates.length}
             trackLength={trackLength}
           />
-        </Themed>
+        </Themed>,
       );
     }
   }
 
-  function calculateDrawingTrackLength(coordinates: [number, number][]): number {
+  function calculateDrawingTrackLength(
+    coordinates: [number, number][],
+  ): number {
     if (coordinates.length < 2) return 0;
 
     let totalDistance = 0;
@@ -362,12 +381,15 @@ function initialize() {
       const [lon2, lat2] = coordinates[i];
       // Haversine formula
       const R = 6371; // Earth's radius in km
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat1 * Math.PI) / 180) *
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       totalDistance += R * c;
     }
 

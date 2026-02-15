@@ -3,17 +3,26 @@ import * as maplibregl from "maplibre-gl";
 import { throttle } from "throttle-debounce";
 import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
-import { MAP_STYLE_URLS, MapStyle, MapStyleOverlay, isSlopeOverlay } from "../MapStyle";
+import {
+  MAP_STYLE_URLS,
+  MapStyle,
+  MapStyleOverlay,
+  isSlopeOverlay,
+} from "../MapStyle";
+import {
+  CameraPosition,
+  CameraPositionManager,
+} from "../utils/CameraPositionManager";
 import { Track } from "../utils/TrackParser";
-import { CameraPosition, CameraPositionManager } from "../utils/CameraPositionManager";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
 import { InfoControl } from "./InfoControl";
 import { InfoData } from "./InfoData";
-import { getVisibleSkiAreasCount } from "./MapVisibilityUtils";
+import { LogoControl } from "./LogoControl";
 import { getFilterRules } from "./MapFilterRules";
 import { MapInteractionManager } from "./MapInteractionManager";
+import { getVisibleSkiAreasCount } from "./MapVisibilityUtils";
 import { registerSatelliteTileProtocol } from "./SatelliteTileProtocol";
 import { SearchBarControl } from "./SearchBarControl";
 import { panToZoomLevel } from "./SkiAreaInfo";
@@ -53,7 +62,7 @@ export class Map {
     cameraPosition: CameraPosition,
     containerID: string | HTMLElement,
     eventBus: EventBus,
-    cameraPositionManager: CameraPositionManager
+    cameraPositionManager: CameraPositionManager,
   ) {
     this.cameraPositionManager = cameraPositionManager;
     this.eventBus = eventBus;
@@ -86,6 +95,10 @@ export class Map {
     });
     this.map.addControl(this.attributionControl, "bottom-right");
 
+    if (window.self !== window.top) {
+      this.map.addControl(new LogoControl(), "bottom-right");
+    }
+
     this.geolocateControl = new maplibregl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true,
@@ -99,7 +112,7 @@ export class Map {
         showCompass: true,
         showZoom: false,
       }),
-      "bottom-right"
+      "bottom-right",
     );
 
     this.demSource = new mlcontour.DemSource({
@@ -132,7 +145,7 @@ export class Map {
       this.esriAttribution = new EsriAttribution(
         this.map,
         "https://static.arcgis.com/attribution/World_Imagery",
-        this.attributionControl
+        this.attributionControl,
       );
       this.esriAttribution.autoManage();
 
@@ -171,14 +184,14 @@ export class Map {
           this.map.setLayoutProperty(
             "building-3d",
             "visibility",
-            shouldEnableTerrain ? "visible" : "none"
+            shouldEnableTerrain ? "visible" : "none",
           );
         }
         if (this.map.getLayer("building-top")) {
           this.map.setLayoutProperty(
             "building-top",
             "visibility",
-            shouldEnableTerrain ? "none" : "visible"
+            shouldEnableTerrain ? "none" : "visible",
           );
         }
       }
@@ -203,7 +216,7 @@ export class Map {
         this.map.getCenter(),
         this.map.getZoom(),
         this.map.getBearing(),
-        this.map.getPitch()
+        this.map.getPitch(),
       );
     });
   }
@@ -217,7 +230,7 @@ export class Map {
   }
 
   private getContourTextFieldExpression(
-    unitSystem: UnitSystem
+    unitSystem: UnitSystem,
   ): maplibregl.ExpressionSpecification {
     const unit = unitSystem === "imperial" ? " ft" : " m";
     return ["concat", ["get", "ele"], unit];
@@ -240,7 +253,11 @@ export class Map {
       }
     }
 
-    if (this.infoControl !== null && info && this.infoControl._info.id === info.id) {
+    if (
+      this.infoControl !== null &&
+      info &&
+      this.infoControl._info.id === info.id
+    ) {
       this.infoControl.updateInfo(info);
       return;
     }
@@ -272,7 +289,7 @@ export class Map {
 
         // Define layer visibility rules
         const getLayerVisibility = (
-          layerId: string
+          layerId: string,
         ): "visible" | "none" | null => {
           // Unit-based layers
           if (layerId.endsWith("-metric"))
@@ -288,7 +305,10 @@ export class Map {
 
           // Hide hillshade layer when slope terrain overlay is enabled (except avalanche slope classes)
           if (layerId === "hillshade")
-            return isSlopeOverlay(this.currentSlopeOverlay) && this.currentSlopeOverlay !== MapStyleOverlay.AvalancheSlopeClasses ? "none" : "visible";
+            return isSlopeOverlay(this.currentSlopeOverlay) &&
+              this.currentSlopeOverlay !== MapStyleOverlay.AvalancheSlopeClasses
+              ? "none"
+              : "visible";
 
           // No visibility change needed
           return null;
@@ -338,12 +358,17 @@ export class Map {
                   visibility: "none",
                 },
               };
-            } else if (filterRule && filterRule !== true && Array.isArray(filterRule)) {
+            } else if (
+              filterRule &&
+              filterRule !== true &&
+              Array.isArray(filterRule)
+            ) {
               // Combine with existing filter if present
               const existingFilter = layer.filter;
-              const newFilter = existingFilter && mergeExistingFilter
-                ? ["all", existingFilter, filterRule]
-                : filterRule;
+              const newFilter =
+                existingFilter && mergeExistingFilter
+                  ? ["all", existingFilter, filterRule]
+                  : filterRule;
 
               updatedLayer = {
                 ...updatedLayer,
@@ -377,7 +402,10 @@ export class Map {
         }
 
         // Modify satellite source to use custom protocol that filters empty tiles
-        if (baseStyle.sources.satellite && baseStyle.sources.satellite.type === "raster") {
+        if (
+          baseStyle.sources.satellite &&
+          baseStyle.sources.satellite.type === "raster"
+        ) {
           baseStyle.sources.satellite = {
             ...baseStyle.sources.satellite,
             tiles: ["satellite-filtered://{z}/{y}/{x}"],
@@ -472,19 +500,30 @@ export class Map {
         }
 
         // Add slope terrain overlay if enabled
-        if (isSlopeOverlay(this.currentSlopeOverlay) && this.slopeRenderer?.checkSupport()) {
+        if (
+          isSlopeOverlay(this.currentSlopeOverlay) &&
+          this.slopeRenderer?.checkSupport()
+        ) {
           // Add slope terrain source with style parameter
           const sourceName = `slope-terrain-${this.currentSlopeOverlay}`;
           if (!baseStyle.sources[sourceName]) {
             // Include date in URL for SunExposure style to enable proper caching
             let tileUrl = `slope-terrain://${this.currentSlopeOverlay}`;
-            if (this.currentSlopeOverlay === MapStyleOverlay.SunExposure && this.slopeRenderer?.sunExposureDate) {
+            if (
+              this.currentSlopeOverlay === MapStyleOverlay.SunExposure &&
+              this.slopeRenderer?.sunExposureDate
+            ) {
               const date = this.slopeRenderer.sunExposureDate;
-              const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 1).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              const dayOfYear =
+                Math.floor(
+                  (date.getTime() -
+                    new Date(date.getFullYear(), 0, 1).getTime()) /
+                    (1000 * 60 * 60 * 24),
+                ) + 1;
               tileUrl += `/${dayOfYear}`;
             }
             tileUrl += `/${this.demSource.sharedDemProtocolUrl}`;
-            
+
             baseStyle.sources[sourceName] = {
               type: "raster",
               tiles: [tileUrl],
@@ -496,7 +535,7 @@ export class Map {
 
           // Add slope terrain layer after the park layer
           const baseIndex = baseStyle.layers.findIndex(
-            (layer) => layer.id === "park" || layer.id === "satellite"
+            (layer) => layer.id === "park" || layer.id === "satellite",
           );
           const insertIndex =
             baseIndex >= 0 ? baseIndex + 1 : baseStyle.layers.length;
@@ -534,7 +573,7 @@ export class Map {
 
           // Add track layers before other-ski-area-icons
           const baseIndex = baseStyle.layers.findIndex(
-            (layer) => layer.id === "other-ski-area-icons"
+            (layer) => layer.id === "other-ski-area-icons",
           );
           const insertIndex =
             baseIndex >= 0 ? baseIndex : baseStyle.layers.length;
@@ -634,13 +673,13 @@ export class Map {
     }
 
     this.filterControl.setVisibleSkiAreasCount(
-      getVisibleSkiAreasCount(this.map, this.currentFilters)
+      getVisibleSkiAreasCount(this.map, this.currentFilters),
     );
   };
 
   private updateVisibleSkiAreasCount = throttle(
     1000,
-    this.updateVisibleSkiAreasCountUnthrottled
+    this.updateVisibleSkiAreasCountUnthrottled,
   );
 
   setSlopeOverlay = (overlay: MapStyleOverlay | null) => {
@@ -676,7 +715,10 @@ export class Map {
     if (this.slopeRenderer) {
       this.slopeRenderer.sunExposureDate = date;
       // If sun exposure overlay is active, refresh the style
-      if (this.currentSlopeOverlay === MapStyleOverlay.SunExposure && this.currentStyle !== null) {
+      if (
+        this.currentSlopeOverlay === MapStyleOverlay.SunExposure &&
+        this.currentStyle !== null
+      ) {
         this.setStyle(this.currentStyle);
       }
     }
