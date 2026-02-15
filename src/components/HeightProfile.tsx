@@ -41,9 +41,18 @@ export interface HeightProfileProps {
   map?: maplibregl.Map; // Map is optional to allow the component to be used without highlight functionality
 }
 
+interface OverlayData {
+  elevation: number;
+  slopeDegrees: number;
+  slopePercent: number;
+  pixelX: number;
+  pixelY: number;
+}
+
 interface HeightProfileState {
   LineChart: typeof Line | null;
   chartHighlightPosition: maplibregl.LngLat | null;
+  overlayData: OverlayData | null;
 }
 
 interface ElevationDifficultyAndDistance {
@@ -57,6 +66,7 @@ export class HeightProfile extends React.Component<
   HeightProfileState
 > {
   private marker: maplibregl.Marker | null = null;
+  private highlightPixelCoords: { x: number; y: number } | null = null;
 
   convertedChartHighlightPosition = memoize(
     (
@@ -135,10 +145,6 @@ export class HeightProfile extends React.Component<
           if (horizontalDistance > 0) {
             const steepness = (current.y - next.y) / horizontalDistance;
             difficulty = getEstimatedRunDifficulty(steepness, difficultyScheme);
-            const degrees = Math.atan(Math.abs(steepness)) * (180 / Math.PI);
-            console.log(
-              `Segment ${i}→${i + 1}: dist=${horizontalDistance.toFixed(1)}m, elev ${current.y.toFixed(1)}→${next.y.toFixed(1)}, steepness=${steepness.toFixed(4)}, degrees=${degrees.toFixed(1)}°, difficulty=${difficulty}`,
-            );
           }
         } else if (result.length > 0) {
           // Last point inherits difficulty from previous segment
@@ -158,6 +164,7 @@ export class HeightProfile extends React.Component<
     this.state = {
       LineChart: null,
       chartHighlightPosition: null,
+      overlayData: null,
     };
   }
 
@@ -211,7 +218,12 @@ export class HeightProfile extends React.Component<
     this.setState({ chartHighlightPosition: position });
   };
 
-  onHover(event: ChartEvent, chart: Chart, distance: number): any {
+  onHover(
+    event: ChartEvent,
+    chart: Chart,
+    distance: number,
+    rawElevationsAndDistance: { x: number; y: number }[],
+  ): any {
     let area = chart.chartArea;
     let x = event.x;
     let y = event.y;
@@ -250,6 +262,21 @@ export class HeightProfile extends React.Component<
 
     const firstPoint = geometry.coordinates[0];
     this.markPositionOnMap(new maplibregl.LngLat(firstPoint[0], firstPoint[1]));
+
+    const elevation = getInterpolatedElevation(
+      rawElevationsAndDistance,
+      position,
+    );
+    const slope = getInterpolatedSlope(rawElevationsAndDistance, position);
+    this.setState({
+      overlayData: {
+        elevation,
+        slopeDegrees: slope.degrees,
+        slopePercent: slope.percent,
+        pixelX: x!,
+        pixelY: y!,
+      },
+    });
   }
 
   // Marker management
@@ -257,6 +284,9 @@ export class HeightProfile extends React.Component<
     if (this.marker !== null) {
       this.marker.remove();
       this.marker = null;
+    }
+    if (this.state.overlayData !== null) {
+      this.setState({ overlayData: null });
     }
   };
 
@@ -406,9 +436,14 @@ export class HeightProfile extends React.Component<
               const point = meta.data[0];
               drawPointMarker(point.x, point.y);
 
+              // Store pixel coords for overlay positioning
+              that.highlightPixelCoords = { x: point.x, y: point.y };
+
               // Hide the original point
               point.options.radius = 0;
             }
+          } else {
+            that.highlightPixelCoords = null;
           }
         },
       },
@@ -449,6 +484,32 @@ export class HeightProfile extends React.Component<
         },
       },
     ];
+
+    // Compute overlay data for map-hover highlights
+    let mapHoverOverlay: OverlayData | null = null;
+    if (
+      highlightPositionX !== null &&
+      this.highlightPixelCoords !== null
+    ) {
+      const elevation = getInterpolatedElevation(
+        rawElevationsAndDistance,
+        highlightPositionX,
+      );
+      const slope = getInterpolatedSlope(
+        rawElevationsAndDistance,
+        highlightPositionX,
+      );
+      mapHoverOverlay = {
+        elevation,
+        slopeDegrees: slope.degrees,
+        slopePercent: slope.percent,
+        pixelX: this.highlightPixelCoords.x,
+        pixelY: this.highlightPixelCoords.y,
+      };
+    }
+
+    // Use chart-hover overlay if available, otherwise map-hover overlay
+    const overlayData = this.state.overlayData ?? mapHoverOverlay;
 
     let that = this;
     return (
@@ -525,10 +586,38 @@ export class HeightProfile extends React.Component<
               },
             },
             onHover: function (event, _, chart): any {
-              that.onHover(event, chart, distance);
+              that.onHover(event, chart, distance, rawElevationsAndDistance);
             },
           }}
         />
+        {overlayData && (
+          <div
+            className="height-profile-overlay"
+            style={{
+              left:
+                overlayData.pixelX > 200
+                  ? overlayData.pixelX - 10
+                  : overlayData.pixelX + 10,
+              top: overlayData.pixelY - 40,
+              transform:
+                overlayData.pixelX > 200
+                  ? "translateX(-100%)"
+                  : "translateX(0)",
+            }}
+          >
+            <div>
+              {UnitHelpers.heightText(
+                overlayData.elevation,
+                unitSystem,
+                true,
+              )}
+            </div>
+            <div>
+              {Math.round(overlayData.slopeDegrees)}°{" "}
+              ({Math.round(overlayData.slopePercent)}%)
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -708,6 +797,45 @@ function hsla(hsl: string, amount: number) {
   }
 
   return `hsl(${result[1]}, ${result[2]}%, ${result[3]}%, ${amount})`;
+}
+
+// Get the interpolated slope at a given distance along the line
+function getInterpolatedSlope(
+  elevationsAndDistance: { x: number; y: number }[],
+  distance: number,
+): { degrees: number; percent: number } {
+  if (elevationsAndDistance.length < 2) {
+    return { degrees: 0, percent: 0 };
+  }
+
+  // Find the segment containing this distance
+  let beforeIndex = 0;
+  for (let i = 0; i < elevationsAndDistance.length; i++) {
+    if (elevationsAndDistance[i].x > distance) {
+      break;
+    }
+    beforeIndex = i;
+  }
+
+  // Clamp to valid segment
+  if (beforeIndex >= elevationsAndDistance.length - 1) {
+    beforeIndex = elevationsAndDistance.length - 2;
+  }
+
+  const before = elevationsAndDistance[beforeIndex];
+  const after = elevationsAndDistance[beforeIndex + 1];
+  const horizontalDistance = after.x - before.x;
+
+  if (horizontalDistance === 0) {
+    return { degrees: 0, percent: 0 };
+  }
+
+  // Positive steepness = downhill
+  const steepness = (before.y - after.y) / horizontalDistance;
+  const degrees = Math.atan(Math.abs(steepness)) * (180 / Math.PI);
+  const percent = Math.abs(steepness) * 100;
+
+  return { degrees, percent };
 }
 
 // Get the interpolated elevation value for a given distance along the line
