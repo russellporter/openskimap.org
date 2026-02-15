@@ -67,6 +67,7 @@ export class HeightProfile extends React.Component<
 > {
   private marker: maplibregl.Marker | null = null;
   private highlightPixelCoords: { x: number; y: number } | null = null;
+  private chartHoverPixelCoords: { x: number; y: number } | null = null;
 
   convertedChartHighlightPosition = memoize(
     (
@@ -268,13 +269,19 @@ export class HeightProfile extends React.Component<
       position,
     );
     const slope = getInterpolatedSlope(rawElevationsAndDistance, position);
+
+    // Compute the pixel Y from the interpolated elevation using the chart's Y scale
+    const pixelY = chart.scales.y.getPixelForValue(elevation);
+
+    this.chartHoverPixelCoords = { x: x!, y: pixelY };
+
     this.setState({
       overlayData: {
         elevation,
         slopeDegrees: slope.degrees,
         slopePercent: slope.percent,
         pixelX: x!,
-        pixelY: y!,
+        pixelY,
       },
     });
   }
@@ -285,6 +292,7 @@ export class HeightProfile extends React.Component<
       this.marker.remove();
       this.marker = null;
     }
+    this.chartHoverPixelCoords = null;
     if (this.state.overlayData !== null) {
       this.setState({ overlayData: null });
     }
@@ -417,16 +425,12 @@ export class HeightProfile extends React.Component<
             ctx.restore();
           };
 
-          // Draw hovered point on the chart (first dataset)
-          if (chart.getActiveElements().length > 0) {
-            const activeElement = chart.getActiveElements()[0];
-            if (activeElement.datasetIndex === 0) {
-              const meta = chart.getDatasetMeta(0);
-              const point = meta.data[activeElement.index];
-              if (point) {
-                drawPointMarker(point.x, point.y);
-              }
-            }
+          // Draw hovered point on the chart (continuously positioned)
+          if (that.chartHoverPixelCoords) {
+            drawPointMarker(
+              that.chartHoverPixelCoords.x,
+              that.chartHoverPixelCoords.y,
+            );
           }
 
           // Draw highlight from map hovering (second dataset)
