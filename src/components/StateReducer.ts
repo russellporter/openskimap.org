@@ -3,7 +3,9 @@ import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import EventBus from "./EventBus";
-import { InfoData, MapFeature } from "./InfoData";
+import { MapFeature, PanConfig } from "./InfoData";
+import * as maplibregl from "maplibre-gl";
+import { getFirstPoint } from "./utils/GeoJSON";
 import State, { StateChanges } from "./State";
 import { URLState } from "./URLHistory";
 import { UnitSystem } from "./utils/UnitHelpers";
@@ -91,18 +93,31 @@ export default class StateReducer implements EventBus {
     this.update({ unitSystem });
   };
 
-  private loadInfoData = async (id: string) => {
+  private loadInfoData = async (id: string, options: { panAfterLoad: boolean; animate: boolean }) => {
     try {
       const feature = await loadGeoJSON<MapFeature>(id);
       updatePageMetadata(feature);
 
       if (this._state.info?.id === id) {
-        this.update({
-          info: {
-            ...this._state.info,
-            feature
-          }
-        });
+        if (options.panAfterLoad) {
+          const point = getFirstPoint(feature.geometry);
+          const panTarget: maplibregl.LngLatLike = [point[0], point[1]];
+
+          this.update({
+            info: {
+              ...this._state.info,
+              feature,
+              pan: { target: panTarget, animate: options.animate }
+            }
+          });
+        } else {
+          this.update({
+            info: {
+              ...this._state.info,
+              feature
+            }
+          });
+        }
       }
     } catch (error) {
       console.log(error);
@@ -116,7 +131,7 @@ export default class StateReducer implements EventBus {
       legalOpen: state.legalOpen,
       legendOpen: state.legendOpen,
       info: state.selectedObjectID
-        ? { id: state.selectedObjectID, panToPosition: "afterLoad" }
+        ? { id: state.selectedObjectID, pan: { afterLoad: true, animate: false } }
         : null,
       mapFilters: {
         ...this._state.mapFilters,
@@ -126,17 +141,17 @@ export default class StateReducer implements EventBus {
     });
 
     if (state.selectedObjectID) {
-      this.loadInfoData(state.selectedObjectID);
+      this.loadInfoData(state.selectedObjectID, { panAfterLoad: true, animate: false });
     }
   };
 
-  showInfo = (info: InfoData) => {
+  showInfo = (id: string, pan: PanConfig = {}) => {
     this.update({
-      info: info,
-      mapFilters: { ...this._state.mapFilters, selectedObjectID: info.id },
+      info: { id, pan },
+      mapFilters: { ...this._state.mapFilters, selectedObjectID: id },
     });
 
-    this.loadInfoData(info.id);
+    this.loadInfoData(id, { panAfterLoad: pan.afterLoad ?? false, animate: pan.animate ?? true });
   };
 
   hideInfo = () => {

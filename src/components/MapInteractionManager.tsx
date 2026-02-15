@@ -61,10 +61,7 @@ export class MapInteractionManager {
 
   _onClickItemUnthrottled = (e: any) => {
     if (!this.interactionsEnabled) return;
-    this.eventBus.showInfo({
-      id: e.features[0].properties.id,
-      panToPosition: null,
-    });
+    this.eventBus.showInfo(e.features[0].properties.id);
   };
 
   _onClickItem = debounce(10, this._onClickItemUnthrottled, { atBegin: true });

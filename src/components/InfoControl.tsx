@@ -4,22 +4,18 @@ import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import { Info } from "./Info";
 import { InfoData } from "./InfoData";
-import { panToZoomLevel } from "./SkiAreaInfo";
 import { Themed } from "./Themed";
 import { UnitSystemManager } from "./UnitSystemManager";
-import { getFirstPoint } from "./utils/GeoJSON";
 
 export class InfoControl implements maplibregl.IControl {
   _container: HTMLDivElement;
   _map: maplibregl.Map | null = null;
   _eventBus: EventBus;
   _info: InfoData;
-  _panToPositionAfterLoad: boolean = false;
   _root: ReactDOM.Root | null = null;
 
   constructor(info: InfoData, eventBus: EventBus) {
     this._info = info;
-    this._panToPositionAfterLoad = info.panToPosition === "afterLoad";
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl";
@@ -70,15 +66,6 @@ export class InfoControl implements maplibregl.IControl {
               width={controlWidth(map)}
               unitSystem={unitSystem}
               map={map}
-              onLoadFeature={(feature) => {
-                if (this._panToPositionAfterLoad) {
-                  const point = getFirstPoint(feature.geometry);
-                  this._map?.flyTo({
-                    center: [point[0], point[1]],
-                    zoom: panToZoomLevel,
-                  });
-                }
-              }}
             />
           )}
         />

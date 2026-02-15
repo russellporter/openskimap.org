@@ -7,8 +7,14 @@ import {
 
 export type MapFeature = RunFeature | LiftFeature | SkiAreaFeature;
 
+export interface PanConfig {
+  target?: maplibregl.LngLatLike;
+  afterLoad?: boolean;
+  animate?: boolean;
+}
+
 export interface InfoData {
   id: string;
-  panToPosition: maplibregl.LngLatLike | null | "afterLoad";
+  pan: PanConfig;
   feature?: MapFeature;
 }

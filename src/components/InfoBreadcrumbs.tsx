@@ -152,10 +152,7 @@ function getBreadcrumbs(
           id: "skiArea-" + skiArea.properties.id,
           text: skiArea.properties.name ?? "Ski Area",
           onClick: () => {
-            eventBus.showInfo({
-              id: skiArea.properties.id,
-              panToPosition: null,
-            });
+            eventBus.showInfo(skiArea.properties.id);
           },
         },
       ];

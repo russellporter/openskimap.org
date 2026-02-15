@@ -2,7 +2,7 @@ import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
-import { InfoData } from "./InfoData";
+import { PanConfig } from "./InfoData";
 import { UnitSystem } from "./utils/UnitHelpers";
 
 export default interface EventBus {
@@ -35,7 +35,7 @@ export default interface EventBus {
   removeLastDrawingTrackPoint(): void;
   finishDrawingTrack(name: string): void;
   cancelDrawingTrack(): void;
-  showInfo(info: InfoData): void;
+  showInfo(id: string, pan?: PanConfig): void;
   hideInfo(): void;
   showFilters(): void;
   hideFilters(): void;

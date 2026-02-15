@@ -232,8 +232,12 @@ export class Map {
   };
 
   setInfo = (info: InfoData | null) => {
-    if (info && info.panToPosition && info.panToPosition !== "afterLoad") {
-      this.flyTo(info.panToPosition);
+    if (info?.pan.target) {
+      if (info.pan.animate === false) {
+        this.jumpTo(info.pan.target);
+      } else {
+        this.flyTo(info.pan.target);
+      }
     }
 
     if (this.infoControl !== null && info && this.infoControl._info.id === info.id) {
@@ -250,6 +254,10 @@ export class Map {
       this.infoControl = new InfoControl(info, this.eventBus);
       this.map.addControl(this.infoControl);
     }
+  };
+
+  jumpTo = (center: maplibregl.LngLatLike) => {
+    this.map.jumpTo({ center: center, zoom: panToZoomLevel });
   };
 
   flyTo = (center: maplibregl.LngLatLike) => {

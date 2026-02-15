@@ -30,7 +30,6 @@ import { debounce, throttle } from "throttle-debounce";
 import { MapMarker } from "../MapMarker";
 import EventBus from "./EventBus";
 import { formattedRunUse } from "./Formatters";
-import { InfoData } from "./InfoData";
 
 interface Props {
   eventBus: EventBus;
@@ -166,7 +165,14 @@ const SearchBar: React.FC<Props> = (props) => {
         eventBus.addMarker(result.data);
         break;
       case "location":
-        eventBus.showInfo(infoDataForResult(result));
+        const feature = result.data;
+        const geometry = centroid(feature).geometry;
+        eventBus.showInfo(
+          feature.properties.id,
+          geometry
+            ? { target: [geometry.coordinates[0], geometry.coordinates[1]], animate: true }
+            : {}
+        );
         break;
     }
   };
@@ -294,18 +300,6 @@ function resultID(result: Result): string {
     case "location":
       return "location_" + result.data.properties.id;
   }
-}
-
-function infoDataForResult(result: LocationResult): InfoData {
-  const feature = result.data;
-  const geometry = centroid(feature).geometry;
-  return {
-    id: result.data.properties.id,
-    panToPosition: geometry && [
-      geometry.coordinates[0],
-      geometry.coordinates[1],
-    ],
-  };
 }
 
 const SearchResult: React.FunctionComponent<{

@@ -19,7 +19,6 @@ export const Info: React.FunctionComponent<{
   width: number;
   eventBus: EventBus;
   unitSystem: UnitHelpers.UnitSystem;
-  onLoadFeature: (feature: MapFeature) => void;
   map: maplibregl.Map;
 }> = (props) => {
   const feature = props.feature;
