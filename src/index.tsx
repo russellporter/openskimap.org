@@ -12,7 +12,7 @@ import { Map } from "./components/Map";
 import { SettingsModal } from "./components/SettingsModal";
 import Sidebar from "./components/Sidebar";
 import State, { getInitialState, StateChanges } from "./components/State";
-import StateStore from "./components/StateStore";
+import StateReducer from "./components/StateReducer";
 import { Themed } from "./components/Themed";
 import { TrackDrawingControls } from "./components/TrackDrawingControls";
 import { TrackDrawingManager } from "./components/TrackDrawingManager";
@@ -55,7 +55,7 @@ function initialize() {
   let isDraggingFile = false;
   let dragCounter = 0;
 
-  const store = new StateStore(getInitialState(), update);
+  const store = new StateReducer(getInitialState(), update);
 
   window.addEventListener(
     "popstate",

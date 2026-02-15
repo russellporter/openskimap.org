@@ -8,7 +8,7 @@ import State, { StateChanges } from "./State";
 import { URLState } from "./URLHistory";
 import { UnitSystem } from "./utils/UnitHelpers";
 
-export default class StateStore implements EventBus {
+export default class StateReducer implements EventBus {
   _state: State;
   updateHandler: (state: State, changes: StateChanges) => void = () => {};
   editMapHandler: (() => void) | null = null;
