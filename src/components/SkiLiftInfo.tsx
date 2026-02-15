@@ -1,4 +1,5 @@
-import { CardActions, Typography } from "@mui/material";
+import { CardActions, Chip, Typography } from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
 import {
   getLiftColor,
   getLiftElevationData,
@@ -63,6 +64,13 @@ export const SkiLiftInfo: React.FunctionComponent<{
           {getLiftNameAndType(properties)}
         </span>
       </Typography>
+      {properties.access === 'private' ? (
+        <Chip
+          icon={<LockIcon />}
+          label="Private"
+          sx={{ mr: 1 }}
+        />
+      ) : null}
       <Typography className={"distance-and-elevation-info"}>
         {elevationData && (
           <span>

@@ -1,3 +1,4 @@
+import AcUnitIcon from "@mui/icons-material/AcUnit";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import HighlightIcon from "@mui/icons-material/Highlight";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
@@ -74,6 +75,20 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
       </Typography>
       {subtitle && <Typography>{subtitle}</Typography>}
       <GroomingLabel feature={feature} />
+      {properties.snowmaking === true ? (
+        <Chip
+          icon={<AcUnitIcon />}
+          label="Snowmaking"
+          sx={{ mr: 1 }}
+        />
+      ) : null}
+      {properties.snowfarming === true ? (
+        <Chip
+          icon={<AcUnitIcon />}
+          label="Snowfarming"
+          sx={{ mr: 1 }}
+        />
+      ) : null}
       {properties.oneway === true &&
       !properties.uses.includes(RunUse.Downhill) ? (
         <Chip
@@ -83,6 +98,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             </Avatar>
           }
           label="One Way"
+          sx={{ mr: 1 }}
         />
       ) : null}
       {properties.lit === true ? (
@@ -93,9 +109,10 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             </Avatar>
           }
           label="Night Lit"
+          sx={{ mr: 1 }}
         />
       ) : null}
-      {properties.gladed === true ? <Chip label="Gladed" /> : null}
+      {properties.gladed === true ? <Chip label="Gladed" sx={{ mr: 1 }} /> : null}
       {properties.patrolled === true ? (
         <Chip
           avatar={
@@ -104,6 +121,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             </Avatar>
           }
           label="Patrolled"
+          sx={{ mr: 1 }}
         />
       ) : null}
       {properties.patrolled === false ? (
@@ -114,6 +132,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             </Avatar>
           }
           label="Not Patrolled"
+          sx={{ mr: 1 }}
         />
       ) : null}
       <Typography className={"distance-and-elevation-info"}>
@@ -207,5 +226,5 @@ const GroomingLabel: React.FunctionComponent<{ feature: RunFeature }> = (
       return null;
   }
 
-  return <Chip label={text} />;
+  return <Chip label={text} sx={{ mr: 1 }} />;
 };

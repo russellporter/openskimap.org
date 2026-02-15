@@ -157,6 +157,45 @@ function elevationSummary(
   );
 }
 
+function formatSnowmakingInfo(
+  snowmakingKm: number,
+  snowfarmingKm: number,
+  unitSystem: UnitHelpers.UnitSystem
+): string {
+  const parts: string[] = [];
+
+  const roundedSnowmaking = Math.round(snowmakingKm);
+  const roundedSnowfarming = Math.round(snowfarmingKm);
+
+  if (roundedSnowmaking > 0) {
+    parts.push(
+      UnitHelpers.distanceText({
+        distanceInMeters: snowmakingKm * 1000,
+        unitSystem,
+        forceLongestUnit: true,
+        roundToNearestDecimal: true,
+      }) + " snowmaking"
+    );
+  }
+
+  if (roundedSnowfarming > 0) {
+    parts.push(
+      UnitHelpers.distanceText({
+        distanceInMeters: snowfarmingKm * 1000,
+        unitSystem,
+        forceLongestUnit: true,
+        roundToNearestDecimal: true,
+      }) + " snowfarming"
+    );
+  }
+
+  if (parts.length > 0) {
+    return " (" + parts.join(", ") + ")";
+  }
+
+  return "";
+}
+
 const SkiAreaStatisticsSummary: React.FunctionComponent<{
   activities: SkiAreaActivity[];
   statistics: SkiAreaStatistics;
@@ -206,6 +245,21 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
           return previous + current[1];
         }, 0);
 
+        // Calculate snowmaking and snowfarming totals
+        const statisticsForActivity = props.statistics.runs.byActivity[activityStatistics[0]];
+        let totalSnowmakingKm = 0;
+        let totalSnowfarmingKm = 0;
+
+        if (statisticsForActivity) {
+          difficulties.forEach((difficulty) => {
+            const stats = statisticsForActivity.byDifficulty[difficulty || "other"];
+            if (stats) {
+              totalSnowmakingKm += stats.snowmakingLengthInKm || 0;
+              totalSnowfarmingKm += stats.snowfarmingLengthInKm || 0;
+            }
+          });
+        }
+
         const roundedTotalKm = Math.round(totalRunKm);
         if (roundedTotalKm === 0) {
           return null;
@@ -222,6 +276,7 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
                 forceLongestUnit: true,
                 roundToNearestDecimal: true,
               })}
+              {formatSnowmakingInfo(totalSnowmakingKm, totalSnowfarmingKm, props.unitSystem)}
             </Typography>
             <RunDifficultyBarChart
               activity={activityStatistics[0]}
