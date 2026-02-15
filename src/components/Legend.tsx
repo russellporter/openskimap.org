@@ -475,13 +475,44 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
               <line
                 x1="5"
                 y1="12"
+                x2="65"
+                y2="12"
+                stroke={colors.liftOperating}
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray="6,8"
+                strokeDashoffset={0.1}
+              />
+            </LineSample>
+            <Box>
+              <Label>Operating (Private)</Label>
+              <LabelSecondary>
+                Not available to the general public.
+              </LabelSecondary>
+            </Box>
+          </LegendItem>
+
+          <LegendItem>
+            <LineSample viewBox="0 0 70 24">
+              <line
+                x1="5"
+                y1="12"
+                x2="65"
+                y2="12"
+                stroke="white"
+                strokeWidth="8"
+                strokeLinecap="round"
+              />
+              <line
+                x1="5"
+                y1="12"
                 x2="68"
                 y2="12"
                 stroke={colors.liftNonOperating}
-                strokeWidth="4"
+                strokeWidth="3"
                 strokeLinecap="round"
-                strokeDasharray="4,8"
-                strokeDashoffset="0"
+                strokeDasharray="6,10"
+                strokeDashoffset={-2.5}
               />
             </LineSample>
             <Box>
@@ -745,7 +776,12 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
           </IndicatorItem>
 
           <IndicatorItem>
-            <svg width="70" height="40" viewBox="0 0 70 40" style={{ flexShrink: 0 }}>
+            <svg
+              width="70"
+              height="40"
+              viewBox="0 0 70 40"
+              style={{ flexShrink: 0 }}
+            >
               {/* Vertical road */}
               <line
                 x1="35"
@@ -812,7 +848,12 @@ export const Legend: React.FunctionComponent<LegendProps> = ({
           </IndicatorItem>
 
           <IndicatorItem>
-            <svg width="70" height="40" viewBox="0 0 70 40" style={{ flexShrink: 0 }}>
+            <svg
+              width="70"
+              height="40"
+              viewBox="0 0 70 40"
+              style={{ flexShrink: 0 }}
+            >
               {/* Vertical road */}
               <line
                 x1="35"
