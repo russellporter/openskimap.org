@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import EventBus from "./EventBus";
+import { EmbedCode } from "./EmbedCode";
 import { ModalHeader } from "./ModalHeader";
 
 interface Props {
@@ -56,15 +57,23 @@ export default class About extends React.Component<Props> {
           <Link href="mailto:contact@skimap.org">contact@skimap.org</Link>.
         </Typography>
         <Typography variant="h6" id="modal-title">
-          Acceptable Use
+          Embedding
         </Typography>
         <Typography paragraph={true}>
-          Embedding of the website in an iframe is permitted. If you want to
-          link to a specific feature (ski area, lift, run), it's recommended to
-          include both the <code>obj</code> query parameter (identifies the
-          feature) and the location hash. The feature ID may sometimes change —
-          in that case the map will still be shown in the right location, but
-          the feature won't be automatically selected.
+          Embedding of the website in an iframe is permitted.
+        </Typography>
+        <EmbedCode />
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          paragraph={true}
+        >
+          To link to a specific feature, include both the <code>obj</code> query
+          parameter and the location hash. Feature IDs may change over time — the
+          location hash ensures the map still shows the right area.
+        </Typography>
+        <Typography variant="h6" id="modal-title">
+          Acceptable Use
         </Typography>
         <Typography paragraph={true}>
           Direct use of tiles hosted at tiles.openskimap.org is not permitted.
