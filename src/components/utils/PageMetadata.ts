@@ -22,10 +22,11 @@ export function updatePageMetadata(
   const name = feature !== null ? getDetailedTitle(feature) : null;
   if (name !== null && name.length > 0) {
     document.title = name + " - OpenSkiMap.org";
-    metaDescriptionElement.setAttribute(
-      "content",
-      `Explore a ski trail map of ${name} and learn more about the ski area.`
-    );
+    const locationText = feature !== null ? getLocationText(feature) : null;
+    const description = locationText
+      ? `Explore a ski trail map of ${name} ${locationText} and learn more about the ski area.`
+      : `Explore a ski trail map of ${name} and learn more about the ski area.`;
+    metaDescriptionElement.setAttribute("content", description);
   } else {
     document.title = "OpenSkiMap.org";
     metaDescriptionElement.setAttribute("content", originalMetaDescription);
@@ -53,6 +54,46 @@ function skiAreaNames(skiAreas: SkiAreaSummaryFeature[]): string | null {
   return names.length > 0 ? names : null;
 }
 
+function getLocationText(
+  feature: SkiAreaFeature | LiftFeature | RunFeature
+): string | null {
+  const places = feature.properties.places;
+  if (!places || places.length === 0) {
+    return null;
+  }
+
+  // Extract unique localities and countries
+  const localities = Array.from(
+    new Set(
+      places
+        .map((place) => place.localized.en.locality)
+        .filter((locality): locality is string => locality !== null)
+    )
+  );
+
+  const countries = Array.from(
+    new Set(places.map((place) => place.localized.en.country))
+  );
+
+  if (localities.length === 0 && countries.length === 0) {
+    return null;
+  }
+
+  const locationParts: string[] = [];
+
+  // Add localities if present
+  if (localities.length > 0) {
+    locationParts.push(localities.join(" / "));
+  }
+
+  // Add countries if present
+  if (countries.length > 0) {
+    locationParts.push(countries.join(" / "));
+  }
+
+  return "near " + locationParts.join(", ");
+}
+
 function getDetailedTitle(
   feature: SkiAreaFeature | LiftFeature | RunFeature
 ): string | null {
@@ -61,11 +102,11 @@ function getDetailedTitle(
     case FeatureType.Lift:
       return nullableToArray(getLiftNameAndType(properties))
         .concat(nullableToArray(skiAreaNames(properties.skiAreas)))
-        .join(" - ");
+        .join(" at ");
     case FeatureType.Run:
       return [getRunTitleAndSubtitle(properties).title]
         .concat(nullableToArray(skiAreaNames(properties.skiAreas)))
-        .join(" - ");
+        .join(" at ");
     case FeatureType.SkiArea:
       return properties.name;
   }
