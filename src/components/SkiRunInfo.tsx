@@ -112,6 +112,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
           sx={{ mr: 1 }}
         />
       ) : null}
+      {properties.tunnel === true ? <Chip label="Tunnel" sx={{ mr: 1 }} /> : null}
       {properties.gladed === true ? <Chip label="Gladed" sx={{ mr: 1 }} /> : null}
       {properties.patrolled === true ? (
         <Chip
