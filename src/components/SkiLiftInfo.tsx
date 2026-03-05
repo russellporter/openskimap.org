@@ -71,6 +71,9 @@ export const SkiLiftInfo: React.FunctionComponent<{
           sx={{ mr: 1 }}
         />
       ) : null}
+      {properties.tunnel === true ? (
+        <Chip label="Tunnel" sx={{ mr: 1 }} />
+      ) : null}
       <Typography className={"distance-and-elevation-info"}>
         {elevationData && (
           <span>
