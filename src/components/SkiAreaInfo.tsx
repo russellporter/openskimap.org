@@ -81,7 +81,7 @@ function getActions(properties: SkiAreaProperties): React.JSX.Element[] {
   const skimapOrgSource = properties.sources.find(
     (s) => s.type === SourceType.SKIMAP_ORG
   );
-  let actions = [];
+  let actions: React.JSX.Element[] = [];
   if (skimapOrgSource) {
     actions.push(
       <Button

@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
-import centroid from "@turf/centroid";
 import {
   FeatureType,
   getLiftNameAndType,
@@ -27,6 +26,7 @@ import * as React from "react";
 import { useCallback, useRef, useState } from "react";
 import { useDetectClickOutside } from "react-detect-click-outside";
 import { debounce, throttle } from "throttle-debounce";
+import { API_BASE_URL } from "../Config";
 import { MapMarker } from "../MapMarker";
 import EventBus from "./EventBus";
 import { formattedRunUse } from "./Formatters";
@@ -43,7 +43,6 @@ interface State {
   results: Result[];
   hideResults: boolean;
 }
-
 
 type CommandResult = { type: "add_marker"; data: MapMarker };
 type LocationResult = {
@@ -69,7 +68,7 @@ const SearchBar: React.FC<Props> = (props) => {
 
   const processSearchResults = (
     query: string,
-    locationResultsData: LocationResult["data"][]
+    locationResultsData: LocationResult["data"][],
   ) => {
     let results: Result[] = [];
 
@@ -97,24 +96,24 @@ const SearchBar: React.FC<Props> = (props) => {
       locationResultsData.map((resultData: LocationResult["data"]) => ({
         type: "location",
         data: resultData,
-      }))
+      })),
     );
 
     setState((prevState: State) => ({ ...prevState, results }));
   };
 
   const search = (query: string) => {
-    fetch(
-      "https://api.openskimap.org/search?query=" + encodeURIComponent(query)
-    ).then((response) => {
-      if (stateRef.current?.searchQuery === query) {
-        response
-          .json()
-          .then((locationResultsData: LocationResult["data"][]) => {
-            processSearchResults(query, locationResultsData);
-          });
-      }
-    });
+    fetch(API_BASE_URL + "/search?query=" + encodeURIComponent(query)).then(
+      (response) => {
+        if (stateRef.current?.searchQuery === query) {
+          response
+            .json()
+            .then((locationResultsData: LocationResult["data"][]) => {
+              processSearchResults(query, locationResultsData);
+            });
+        }
+      },
+    );
   };
 
   const searchDebounced = useCallback(debounce(500, search), []);
@@ -133,7 +132,7 @@ const SearchBar: React.FC<Props> = (props) => {
         ...prevState,
         selectedIndex: Math.min(
           state.results.length - 1,
-          state.selectedIndex + 1
+          state.selectedIndex + 1,
         ),
       }));
     }
@@ -166,13 +165,7 @@ const SearchBar: React.FC<Props> = (props) => {
         break;
       case "location":
         const feature = result.data;
-        const geometry = centroid(feature).geometry;
-        eventBus.showInfo(
-          feature.properties.id,
-          geometry
-            ? { target: [geometry.coordinates[0], geometry.coordinates[1]], animate: true }
-            : {}
-        );
+        eventBus.showInfo(feature.properties.id, { animate: true });
         break;
     }
   };
@@ -287,7 +280,7 @@ export const SearchResults: React.FunctionComponent<{
                 previous,
                 <Divider key={"divider-" + dividerIndex++} />,
                 current,
-              ] as any
+              ] as any,
           )}
       </List>
     </div>
@@ -315,13 +308,13 @@ const SearchResult: React.FunctionComponent<{
         secondary={getSecondaryText(props.result)}
         primaryTypographyProps={{
           sx: {
-            display: '-webkit-box',
+            display: "-webkit-box",
             WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
+            WebkitBoxOrient: "vertical",
             lineClamp: 3,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          },
         }}
       />
     </ListItemButton>
@@ -341,7 +334,8 @@ function getPrimaryText(result: Result): string | null {
 
       const locality =
         properties.type === FeatureType.SkiArea
-          ? properties.places.find((place) => place.localized.en.locality)?.localized.en.locality
+          ? properties.places.find((place) => place.localized.en.locality)
+              ?.localized.en.locality
           : null;
       return locality ?? null;
   }
@@ -363,7 +357,7 @@ function getSecondaryText(result: Result): string {
 }
 
 function getFeatureDetails(
-  properties: SkiAreaProperties | LiftProperties | RunProperties
+  properties: SkiAreaProperties | LiftProperties | RunProperties,
 ) {
   switch (properties.type) {
     case FeatureType.SkiArea:
@@ -387,7 +381,7 @@ function getFeatureDetails(
 }
 
 function getLocation(
-  properties: SkiAreaProperties | LiftProperties | RunProperties
+  properties: SkiAreaProperties | LiftProperties | RunProperties,
 ): string | null {
   let components: string[] = [];
 
@@ -396,9 +390,11 @@ function getLocation(
     properties.type === FeatureType.Lift ||
     properties.type === FeatureType.Run
   ) {
-    const skiAreaNames = properties.skiAreas.map((skiArea) => skiArea.properties.name).filter(isString)
+    const skiAreaNames = properties.skiAreas
+      .map((skiArea) => skiArea.properties.name)
+      .filter(isString);
     if (skiAreaNames.length > 0) {
-    components.push(skiAreaNames.join(" / "));
+      components.push(skiAreaNames.join(" / "));
     }
   }
 
@@ -422,13 +418,13 @@ function isString(e: any): e is string {
 
 function getUniqueLocalizedValues<T extends keyof Place["localized"]["en"]>(
   key: T,
-  places: Place[]
+  places: Place[],
 ): string[] {
   return [
     ...new Set(
       places
         .map((place) => place.localized.en[key])
-        .filter((value): value is NonNullable<typeof value> => value != null)
+        .filter((value): value is NonNullable<typeof value> => value != null),
     ),
   ];
 }

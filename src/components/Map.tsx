@@ -1,5 +1,6 @@
 import mlcontour from "maplibre-contour";
 import * as maplibregl from "maplibre-gl";
+import { ViewportHint } from "openskidata-format";
 import { throttle } from "throttle-debounce";
 import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
@@ -14,6 +15,7 @@ import {
   CameraPositionManager,
 } from "../utils/CameraPositionManager";
 import { Track } from "../utils/TrackParser";
+import { computeCameraPositionFromHint } from "./CameraPosition";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { FilterControl } from "./FilterControl";
@@ -250,12 +252,9 @@ export class Map {
   };
 
   setInfo = (info: InfoData | null) => {
-    if (info?.pan.target) {
-      if (info.pan.animate === false) {
-        this.jumpTo(info.pan.target);
-      } else {
-        this.flyTo(info.pan.target);
-      }
+    const viewportHint = info?.feature?.properties.viewportHint;
+    if (info?.pan !== undefined && viewportHint) {
+      this.goToViewport(viewportHint, info.pan?.animate !== false);
     }
 
     if (
@@ -284,6 +283,26 @@ export class Map {
 
   flyTo = (center: maplibregl.LngLatLike) => {
     this.map.flyTo({ center: center, zoom: panToZoomLevel });
+  };
+
+  goToViewport = (hint: ViewportHint, animate: boolean) => {
+    const position = computeCameraPositionFromHint(hint, this.map);
+    if (animate) {
+      this.map.flyTo({
+        center: position.center,
+        zoom: position.zoom,
+        bearing: position.bearing,
+        pitch: position.pitch,
+        duration: 2000,
+      });
+    } else {
+      this.map.jumpTo({
+        center: position.center,
+        zoom: position.zoom,
+        bearing: position.bearing,
+        pitch: position.pitch,
+      });
+    }
   };
 
   setStyle = (style: MapStyle) => {

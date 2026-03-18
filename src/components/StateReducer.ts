@@ -3,14 +3,12 @@ import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import EventBus from "./EventBus";
+import { loadGeoJSON } from "./GeoJSONLoader";
 import { MapFeature, PanConfig } from "./InfoData";
-import * as maplibregl from "maplibre-gl";
-import { getFirstPoint } from "./utils/GeoJSON";
 import State, { StateChanges } from "./State";
 import { URLState } from "./URLHistory";
-import { UnitSystem } from "./utils/UnitHelpers";
-import { loadGeoJSON } from "./GeoJSONLoader";
 import { updatePageMetadata } from "./utils/PageMetadata";
+import { UnitSystem } from "./utils/UnitHelpers";
 
 export default class StateReducer implements EventBus {
   _state: State;
@@ -19,7 +17,7 @@ export default class StateReducer implements EventBus {
 
   constructor(
     state: State,
-    updateHandler: (state: State, changes: StateChanges) => void = () => {}
+    updateHandler: (state: State, changes: StateChanges) => void = () => {},
   ) {
     this._state = state;
     this.updateHandler = updateHandler;
@@ -93,31 +91,26 @@ export default class StateReducer implements EventBus {
     this.update({ unitSystem });
   };
 
-  private loadInfoData = async (id: string, options: { panAfterLoad: boolean; animate: boolean }) => {
+  private loadInfoData = async (
+    id: string,
+    options: { panAfterLoad: boolean; animate: boolean },
+  ) => {
     try {
       const feature = await loadGeoJSON<MapFeature>(id);
       updatePageMetadata(feature);
 
       if (this._state.info?.id === id) {
-        if (options.panAfterLoad) {
-          const point = getFirstPoint(feature.geometry);
-          const panTarget: maplibregl.LngLatLike = [point[0], point[1]];
-
-          this.update({
-            info: {
-              ...this._state.info,
-              feature,
-              pan: { target: panTarget, animate: options.animate }
-            }
-          });
-        } else {
-          this.update({
-            info: {
-              ...this._state.info,
-              feature
-            }
-          });
-        }
+        this.update({
+          info: {
+            ...this._state.info,
+            feature,
+            pan: options.panAfterLoad
+              ? {
+                  animate: options.animate,
+                }
+              : undefined,
+          },
+        });
       }
     } catch (error) {
       console.log(error);
@@ -126,12 +119,16 @@ export default class StateReducer implements EventBus {
   };
 
   urlUpdate = (state: URLState) => {
+    const existingSelectedObjectID = this._state.mapFilters.selectedObjectID;
     this.update({
       aboutInfoOpen: state.aboutInfoOpen,
       legalOpen: state.legalOpen,
       legendOpen: state.legendOpen,
       info: state.selectedObjectID
-        ? { id: state.selectedObjectID, pan: { afterLoad: true, animate: false } }
+        ? {
+            id: state.selectedObjectID,
+            pan: { animate: false },
+          }
         : null,
       mapFilters: {
         ...this._state.mapFilters,
@@ -140,18 +137,27 @@ export default class StateReducer implements EventBus {
       markers: state.markers,
     });
 
-    if (state.selectedObjectID) {
-      this.loadInfoData(state.selectedObjectID, { panAfterLoad: true, animate: false });
+    if (
+      state.selectedObjectID &&
+      state.selectedObjectID !== existingSelectedObjectID
+    ) {
+      this.loadInfoData(state.selectedObjectID, {
+        panAfterLoad: true,
+        animate: false,
+      });
     }
   };
 
-  showInfo = (id: string, pan: PanConfig = {}) => {
+  showInfo = (id: string, pan?: PanConfig) => {
     this.update({
-      info: { id, pan },
+      info: { id },
       mapFilters: { ...this._state.mapFilters, selectedObjectID: id },
     });
 
-    this.loadInfoData(id, { panAfterLoad: pan.afterLoad ?? false, animate: pan.animate ?? true });
+    this.loadInfoData(id, {
+      panAfterLoad: pan !== undefined,
+      animate: pan?.animate == true,
+    });
   };
 
   hideInfo = () => {
@@ -215,7 +221,9 @@ export default class StateReducer implements EventBus {
   };
 
   removeTrack = (trackId: string) => {
-    const newTracks = this._state.tracks.filter(track => track.id !== trackId);
+    const newTracks = this._state.tracks.filter(
+      (track) => track.id !== trackId,
+    );
     this.update({ tracks: newTracks });
   };
 
@@ -223,7 +231,7 @@ export default class StateReducer implements EventBus {
     this.update({
       isDrawingTrack: true,
       drawingTrackCoordinates: [],
-      layersOpen: false // Close layers modal when starting to draw
+      layersOpen: false, // Close layers modal when starting to draw
     });
   };
 
@@ -241,17 +249,20 @@ export default class StateReducer implements EventBus {
 
   finishDrawingTrack = (name: string) => {
     if (this._state.drawingTrackCoordinates.length >= 2) {
-      const track = this.createTrackFromCoordinates(name, this._state.drawingTrackCoordinates);
+      const track = this.createTrackFromCoordinates(
+        name,
+        this._state.drawingTrackCoordinates,
+      );
       const newTracks = [...this._state.tracks, track];
       this.update({
         tracks: newTracks,
         isDrawingTrack: false,
-        drawingTrackCoordinates: []
+        drawingTrackCoordinates: [],
       });
     } else {
       this.update({
         isDrawingTrack: false,
-        drawingTrackCoordinates: []
+        drawingTrackCoordinates: [],
       });
     }
   };
@@ -259,13 +270,16 @@ export default class StateReducer implements EventBus {
   cancelDrawingTrack = () => {
     this.update({
       isDrawingTrack: false,
-      drawingTrackCoordinates: []
+      drawingTrackCoordinates: [],
     });
   };
 
-  private createTrackFromCoordinates(name: string, coordinates: [number, number][]): Track {
+  private createTrackFromCoordinates(
+    name: string,
+    coordinates: [number, number][],
+  ): Track {
     const id = `track_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const color = '#4CAF50'; // Green for hand-drawn tracks
+    const color = "#4CAF50"; // Green for hand-drawn tracks
     const lengthKm = this.calculateTrackLength(coordinates);
     return { id, name, coordinates, color, lengthKm };
   }
@@ -279,12 +293,15 @@ export default class StateReducer implements EventBus {
       const [lon2, lat2] = coordinates[i];
       // Haversine formula
       const R = 6371; // Earth's radius in km
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat1 * Math.PI) / 180) *
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       totalDistance += R * c;
     }
 

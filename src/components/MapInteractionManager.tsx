@@ -35,7 +35,7 @@ export class MapInteractionManager {
     const tappableLayers = (style.layers || [])
       .filter(
         (layer: any) =>
-          layer.id.indexOf("tappable") !== -1 || skiAreaLayers.has(layer.id)
+          layer.id.indexOf("tappable") !== -1 || skiAreaLayers.has(layer.id),
       )
       .map((layer: any) => layer.id)
       // Register tappable layers in a specific order so the top-most layers trigger the click handler first.
@@ -61,7 +61,7 @@ export class MapInteractionManager {
 
   _onClickItemUnthrottled = (e: any) => {
     if (!this.interactionsEnabled) return;
-    this.eventBus.showInfo(e.features[0].properties.id);
+    this.eventBus.showInfo(e.features[0].properties.id, undefined);
   };
 
   _onClickItem = debounce(10, this._onClickItemUnthrottled, { atBegin: true });

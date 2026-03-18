@@ -29,7 +29,7 @@ export type InfoBreadcrumbsProps = {
 };
 
 export const InfoBreadcrumbs: React.FunctionComponent<InfoBreadcrumbsProps> = (
-  props
+  props,
 ) => {
   const properties = props.feature.properties;
   const breadcrumbs = getBreadcrumbs(properties, props.eventBus);
@@ -71,7 +71,7 @@ export const InfoBreadcrumbs: React.FunctionComponent<InfoBreadcrumbsProps> = (
                     accumulatedResult: React.ReactNode[],
                     skiArea,
                     index,
-                    array
+                    array,
                   ) => {
                     accumulatedResult.push(skiArea);
                     if (index < array.length - 1) {
@@ -79,7 +79,7 @@ export const InfoBreadcrumbs: React.FunctionComponent<InfoBreadcrumbsProps> = (
                     }
                     return accumulatedResult;
                   },
-                  []
+                  [],
                 )}
             </span>
           ))}
@@ -97,7 +97,7 @@ type Breadcrumb = {
 
 function getBreadcrumbs(
   properties: SkiAreaProperties | LiftProperties | RunProperties,
-  eventBus: EventBus
+  eventBus: EventBus,
 ): Breadcrumb[][] {
   let skiAreas: SkiAreaSummaryFeature[] = [];
   if (
@@ -139,7 +139,7 @@ function getBreadcrumbs(
         .map((place) => ({
           id: "region-" + place.iso3166_2!,
           text: place.localized.en.region!,
-        }))
+        })),
     );
     regionBreadcrumbs.push(...regions);
   });
@@ -152,15 +152,15 @@ function getBreadcrumbs(
           id: "skiArea-" + skiArea.properties.id,
           text: skiArea.properties.name ?? "Ski Area",
           onClick: () => {
-            eventBus.showInfo(skiArea.properties.id);
+            eventBus.showInfo(skiArea.properties.id, { animate: true });
           },
         },
       ];
-    })
+    }),
   );
 
   return [countryBreadcrumbs, regionBreadcrumbs, skiAreaBreadcrumbs].filter(
-    (group) => group.length > 0
+    (group) => group.length > 0,
   );
 }
 
