@@ -255,7 +255,8 @@ function initialize() {
 
     if (
       changes.settingsOpen !== undefined ||
-      changes.unitSystem !== undefined
+      changes.unitSystem !== undefined ||
+      changes.terrainInspectorEnabled !== undefined
     ) {
       settingsRoot.render(
         <Themed>
@@ -263,9 +264,18 @@ function initialize() {
             eventBus={store}
             open={state.settingsOpen}
             unitSystem={state.unitSystem}
+            terrainInspectorEnabled={state.terrainInspectorEnabled}
           />
         </Themed>,
       );
+    }
+
+    if (changes.terrainInspectorEnabled !== undefined) {
+      localStorage.setItem(
+        "terrainInspectorEnabled",
+        String(state.terrainInspectorEnabled),
+      );
+      map.setTerrainInspectorEnabled(state.terrainInspectorEnabled);
     }
 
     if (

@@ -39,4 +39,5 @@ export default interface EventBus {
   hideInfo(): void;
   showFilters(): void;
   hideFilters(): void;
+  setTerrainInspectorEnabled(enabled: boolean): void;
 }

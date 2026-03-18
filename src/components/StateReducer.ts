@@ -298,6 +298,10 @@ export default class StateReducer implements EventBus {
     this.update({ mapFiltersOpen: false });
   };
 
+  setTerrainInspectorEnabled = (enabled: boolean) => {
+    this.update({ terrainInspectorEnabled: enabled });
+  };
+
   private update(changes: StateChanges): void {
     const state = this._state as { [key: string]: any };
     Object.keys(changes).forEach((key) => {

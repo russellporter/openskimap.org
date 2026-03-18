@@ -25,6 +25,7 @@ export default interface State {
   sunExposureDate: Date;
   isDrawingTrack: boolean;
   drawingTrackCoordinates: [number, number][];
+  terrainInspectorEnabled: boolean;
 }
 
 export interface StateChanges {
@@ -47,6 +48,7 @@ export interface StateChanges {
   sunExposureDate?: Date;
   isDrawingTrack?: boolean;
   drawingTrackCoordinates?: [number, number][];
+  terrainInspectorEnabled?: boolean;
 }
 
 export function getInitialState(): State {
@@ -121,5 +123,6 @@ export function getInitialState(): State {
     sunExposureDate,
     isDrawingTrack: false,
     drawingTrackCoordinates: [],
+    terrainInspectorEnabled: localStorage.getItem("terrainInspectorEnabled") === "true",
   };
 }

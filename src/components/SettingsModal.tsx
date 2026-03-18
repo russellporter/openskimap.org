@@ -8,6 +8,7 @@ import { UnitSystem } from "./utils/UnitHelpers";
 export const SettingsModal: React.FunctionComponent<{
   open: boolean;
   unitSystem: UnitSystem;
+  terrainInspectorEnabled: boolean;
   eventBus: EventBus;
 }> = (props) => {
   return (
@@ -18,7 +19,11 @@ export const SettingsModal: React.FunctionComponent<{
       }}
     >
       <Box sx={{ p: 4 }}>
-        <Settings eventBus={props.eventBus} unitSystem={props.unitSystem} />
+        <Settings
+          eventBus={props.eventBus}
+          unitSystem={props.unitSystem}
+          terrainInspectorEnabled={props.terrainInspectorEnabled}
+        />
       </Box>
     </Dialog>
   );

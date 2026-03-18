@@ -27,6 +27,7 @@ import { registerSatelliteTileProtocol } from "./SatelliteTileProtocol";
 import { SearchBarControl } from "./SearchBarControl";
 import { panToZoomLevel } from "./SkiAreaInfo";
 import { SlopeTerrainRenderer } from "./SlopeTerrainRenderer";
+import { TerrainInspectorControl } from "./TerrainInspectorControl";
 import {
   addUnitSystemChangeListener_NonReactive,
   getUnitSystem_NonReactive,
@@ -54,6 +55,8 @@ export class Map {
   private currentStyle: MapStyle | null = null;
   private currentFilters: MapFilters = defaultMapFilters;
   private terrainEnabled = false;
+  private terrainInspectorEnabled = false;
+  private terrainInspectorControl: TerrainInspectorControl | null = null;
   private currentSlopeOverlay: MapStyleOverlay | null = null;
   private slopeRenderer: SlopeTerrainRenderer | null = null;
   private cameraPositionManager: CameraPositionManager;
@@ -162,7 +165,7 @@ export class Map {
     // Enable/disable terrain based on pitch
     this.map.on("pitchend", () => {
       const pitch = this.map.getPitch();
-      const shouldEnableTerrain = pitch > 0;
+      const shouldEnableTerrain = pitch > 0 || this.terrainInspectorEnabled;
 
       if (shouldEnableTerrain !== this.terrainEnabled) {
         this.terrainEnabled = shouldEnableTerrain;
@@ -387,7 +390,7 @@ export class Map {
         let baseStyle = {
           ...newStyle,
           layers: updatedLayers,
-          terrain: this.terrainEnabled ? newStyle.terrain : undefined,
+          terrain: (this.terrainEnabled || this.terrainInspectorEnabled) ? newStyle.terrain : undefined,
         };
 
         // Modify terrain source if it exists to use the same demSource to avoid double loading
@@ -730,6 +733,32 @@ export class Map {
       // Trigger style refresh to update track layers
       if (this.currentStyle !== null) {
         this.setStyle(this.currentStyle);
+      }
+    });
+  };
+
+  setTerrainInspectorEnabled = (enabled: boolean) => {
+    this.terrainInspectorEnabled = enabled;
+    this.waitForMapLoaded(() => {
+      if (enabled) {
+        if (!this.terrainEnabled) {
+          const terrainSource = this.map.getSource("terrain");
+          if (terrainSource) {
+            this.map.setTerrain({ source: "terrain" });
+          }
+        }
+        if (!this.terrainInspectorControl) {
+          this.terrainInspectorControl = new TerrainInspectorControl(this.map);
+          this.map.addControl(this.terrainInspectorControl, "bottom-left");
+        }
+      } else {
+        if (this.terrainInspectorControl) {
+          this.map.removeControl(this.terrainInspectorControl);
+          this.terrainInspectorControl = null;
+        }
+        if (this.map.getPitch() === 0 && !this.terrainEnabled) {
+          this.map.setTerrain(null);
+        }
       }
     });
   };
