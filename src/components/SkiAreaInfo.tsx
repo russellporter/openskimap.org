@@ -15,10 +15,12 @@ import {
   getFormattedLiftType,
   getRunColor,
 } from "openskidata-format";
+import * as maplibregl from "maplibre-gl";
 import * as React from "react";
 import { CardHeader } from "./CardHeader";
 import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
+import { computeSkiAreaCameraPosition } from "./SkiAreaCameraPosition";
 import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { ScrollableCard } from "./ScrollableCard";
 import { SlopeAspectRose } from "./SlopeAspectRose";
@@ -30,6 +32,7 @@ export const panToZoomLevel = 12.5;
 
 interface SkiAreaPopupProps {
   feature: SkiAreaFeature;
+  map: maplibregl.Map;
   eventBus: EventBus;
   unitSystem: UnitHelpers.UnitSystem;
   width?: number;
@@ -39,7 +42,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
   props
 ) => {
   const properties = props.feature.properties;
-  const actions = getActions(properties);
+  const actions = getActions(properties, props.map, properties.id);
   return (
     <ScrollableCard
       width={props.width}
@@ -77,11 +80,15 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
   );
 };
 
-function getActions(properties: SkiAreaProperties): React.JSX.Element[] {
+function getActions(
+  properties: SkiAreaProperties,
+  map: maplibregl.Map,
+  skiAreaId: string
+): React.JSX.Element[] {
   const skimapOrgSource = properties.sources.find(
     (s) => s.type === SourceType.SKIMAP_ORG
   );
-  let actions = [];
+  let actions: React.JSX.Element[] = [];
   if (skimapOrgSource) {
     actions.push(
       <Button
@@ -97,6 +104,28 @@ function getActions(properties: SkiAreaProperties): React.JSX.Element[] {
   }
 
   actions = actions.concat(getWebsiteActions(properties.websites));
+
+  actions.push(
+    <Button
+      key="optimalView"
+      size="small"
+      color="primary"
+      onClick={() => {
+        const position = computeSkiAreaCameraPosition(map, skiAreaId);
+        if (position) {
+          map.flyTo({
+            center: position.center,
+            zoom: position.zoom,
+            bearing: position.bearing,
+            pitch: position.pitch,
+            duration: 2000,
+          });
+        }
+      }}
+    >
+      Optimal View
+    </Button>
+  );
 
   return actions;
 }

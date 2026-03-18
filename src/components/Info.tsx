@@ -45,6 +45,7 @@ export const Info: React.FunctionComponent<{
       {feature && feature.properties.type == FeatureType.SkiArea && (
         <SkiAreaInfo
           feature={feature as SkiAreaFeature}
+          map={props.map}
           eventBus={props.eventBus}
           unitSystem={props.unitSystem}
           width={props.width}
