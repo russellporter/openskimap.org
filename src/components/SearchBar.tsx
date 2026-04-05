@@ -199,7 +199,8 @@ const SearchBar: React.FC<Props> = (props) => {
           onFocus={() => {
             setState((prevState) => ({ ...prevState, hideResults: false }));
           }}
-          style={{ marginLeft: "8", flex: "1" }}
+          sx={{ ml: 1, flex: 1, minWidth: 0 }}
+          inputProps={{ style: { textOverflow: "ellipsis" } }}
           placeholder="Search Ski Areas, Lifts, and Runs"
           onChange={(e) => {
             setState((prevState) => ({ ...prevState, hideResults: false }));
