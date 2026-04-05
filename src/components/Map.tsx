@@ -748,7 +748,7 @@ export class Map {
           }
         }
         if (!this.terrainInspectorControl) {
-          this.terrainInspectorControl = new TerrainInspectorControl(this.map);
+          this.terrainInspectorControl = new TerrainInspectorControl(this.map, this.geolocateControl);
           this.map.addControl(this.terrainInspectorControl, "bottom-left");
         }
       } else {

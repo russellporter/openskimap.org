@@ -6,6 +6,29 @@ export interface TerrainData {
   slopeDegrees: number;
   slopePercent: number;
   aspectDegrees: number;
+  distanceMeters: number | null;
+}
+
+function distanceText(distanceMeters: number, unitSystem: UnitSystem): string {
+  if (unitSystem === "imperial") {
+    const feet = distanceMeters * 3.28084;
+    const miles = distanceMeters / 1609.344;
+    if (feet < 5280) {
+      return `${Math.round(feet)} ft`;
+    } else if (miles < 10) {
+      return `${Math.round(miles * 10) / 10} mi`;
+    } else {
+      return `${Math.round(miles)} mi`;
+    }
+  } else {
+    if (distanceMeters < 1000) {
+      return `${Math.round(distanceMeters)} m`;
+    } else if (distanceMeters < 10000) {
+      return `${Math.round(distanceMeters / 100) / 10} km`;
+    } else {
+      return `${Math.round(distanceMeters / 1000)} km`;
+    }
+  }
 }
 
 function aspectCompass(degrees: number): string {
@@ -87,7 +110,7 @@ export const TerrainInspector: React.FunctionComponent<Props> = ({
           backdropFilter: "blur(4px)",
         }}
       >
-        ▲ {elevation} &nbsp; ⬙ {slope} &nbsp; ↗ {aspect}
+        ▲ {elevation} &nbsp; ⬙ {slope} &nbsp; ↗ {aspect}{data.distanceMeters !== null && <> &nbsp; ⊙ {distanceText(data.distanceMeters, unitSystem)}</>}
       </div>
     </>
   );

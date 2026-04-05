@@ -9,22 +9,81 @@ import { UnitSystemManager } from "./UnitSystemManager";
 const isMobile = window.matchMedia("(pointer: coarse)").matches;
 const SAMPLE_RADIUS_METERS = 2;
 
+function haversineDistance(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export class TerrainInspectorControl implements maplibregl.IControl {
   private _map: maplibregl.Map;
+  private _geolocateControl: maplibregl.GeolocateControl;
   private _container: HTMLDivElement;
   private _root: ReactDOM.Root | null = null;
   private _data: TerrainData | null = null;
+  private _userLocation: { lng: number; lat: number } | null = null;
+  private _lastSampledLocation: { lng: number; lat: number } | null = null;
 
-  constructor(map: maplibregl.Map) {
+  constructor(
+    map: maplibregl.Map,
+    geolocateControl: maplibregl.GeolocateControl
+  ) {
     this._map = map;
+    this._geolocateControl = geolocateControl;
     this._container = document.createElement("div");
     this._container.style.cssText =
       "position:fixed;bottom:0;left:0;width:100%;pointer-events:none;";
   }
 
+  private _onTrackUserLocationEnd = () => {
+    // trackuserlocationend fires both when going to BACKGROUND (camera stops
+    // following but GPS continues) and when turning off entirely (OFF). Only
+    // clear the location in the OFF case.
+    if (this._geolocateControl._watchState === "OFF") {
+      this._userLocation = null;
+      if (this._data) {
+        this._data = { ...this._data, distanceMeters: null };
+        this._render();
+      }
+    }
+  };
+
+  private _onGeolocate = (e: GeolocationPosition) => {
+    this._userLocation = {
+      lng: e.coords.longitude,
+      lat: e.coords.latitude,
+    };
+    if (this._data && this._lastSampledLocation) {
+      this._data = {
+        ...this._data,
+        distanceMeters: haversineDistance(
+          this._userLocation.lat,
+          this._userLocation.lng,
+          this._lastSampledLocation.lat,
+          this._lastSampledLocation.lng
+        ),
+      };
+    }
+    this._render();
+  };
+
   onAdd = (_map: maplibregl.Map): HTMLElement => {
     this._root = ReactDOM.createRoot(this._container);
     this._render();
+
+    this._geolocateControl.on("geolocate", this._onGeolocate);
+    this._geolocateControl.on("trackuserlocationend", this._onTrackUserLocationEnd);
 
     if (isMobile) {
       this._map.on("move", this._onMoveThrottled);
@@ -40,6 +99,9 @@ export class TerrainInspectorControl implements maplibregl.IControl {
   };
 
   onRemove = (): void => {
+    this._geolocateControl.off("geolocate", this._onGeolocate);
+    this._geolocateControl.off("trackuserlocationend", this._onTrackUserLocationEnd);
+
     if (isMobile) {
       this._map.off("move", this._onMoveThrottled);
       this._map.off("moveend", this._onMoveEnd);
@@ -81,6 +143,7 @@ export class TerrainInspectorControl implements maplibregl.IControl {
   };
 
   private _sampleAt(lng: number, lat: number): void {
+    this._lastSampledLocation = { lng, lat };
     const map = this._map;
 
     const dLat = SAMPLE_RADIUS_METERS / 111111;
@@ -114,11 +177,21 @@ export class TerrainInspectorControl implements maplibregl.IControl {
     const aspectDegrees =
       ((Math.atan2(dE, dN) * 180) / Math.PI + 180) % 360;
 
+    const distanceMeters = this._userLocation
+      ? haversineDistance(
+          this._userLocation.lat,
+          this._userLocation.lng,
+          lat,
+          lng
+        )
+      : null;
+
     this._data = {
       elevationMeters: elevCenter,
       slopeDegrees,
       slopePercent,
       aspectDegrees,
+      distanceMeters,
     };
     this._render();
   }
