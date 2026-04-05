@@ -69,6 +69,7 @@ export class Map {
   ) {
     this.cameraPositionManager = cameraPositionManager;
     this.eventBus = eventBus;
+    const isEmbedded = window.self !== window.top;
     this.map = new maplibregl.Map({
       container: containerID,
       center: cameraPosition.center,
@@ -77,6 +78,7 @@ export class Map {
       pitch: cameraPosition.pitch,
       hash: false, // Custom hash management
       attributionControl: false,
+      cooperativeGestures: isEmbedded,
     });
     this.markers = [];
     this.filterControl = new FilterControl(eventBus);
@@ -98,7 +100,7 @@ export class Map {
     });
     this.map.addControl(this.attributionControl, "bottom-right");
 
-    if (window.self !== window.top) {
+    if (isEmbedded) {
       this.map.addControl(new LogoControl(), "bottom-right");
     }
 
@@ -390,7 +392,10 @@ export class Map {
         let baseStyle = {
           ...newStyle,
           layers: updatedLayers,
-          terrain: (this.terrainEnabled || this.terrainInspectorEnabled) ? newStyle.terrain : undefined,
+          terrain:
+            this.terrainEnabled || this.terrainInspectorEnabled
+              ? newStyle.terrain
+              : undefined,
         };
 
         // Modify terrain source if it exists to use the same demSource to avoid double loading
@@ -748,7 +753,10 @@ export class Map {
           }
         }
         if (!this.terrainInspectorControl) {
-          this.terrainInspectorControl = new TerrainInspectorControl(this.map, this.geolocateControl);
+          this.terrainInspectorControl = new TerrainInspectorControl(
+            this.map,
+            this.geolocateControl,
+          );
           this.map.addControl(this.terrainInspectorControl, "bottom-left");
         }
       } else {
