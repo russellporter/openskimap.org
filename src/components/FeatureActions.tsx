@@ -6,7 +6,7 @@ export function getWebsiteActions(websites: string[]): React.JSX.Element[] {
     return [];
   }
 
-  return websites.map((website, index) => (
+  return websites.slice(0, 2).map((website, index) => (
     <Button
       key={`website-${index}`}
       size="small"

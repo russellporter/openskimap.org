@@ -50,7 +50,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
         />
       }
       footer={
-        actions.length > 0 ? <CardActions>{actions}</CardActions> : undefined
+        actions.length > 0 ? <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions> : undefined
       }
     >
       <Typography variant="h5" component="h2">

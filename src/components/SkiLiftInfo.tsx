@@ -43,7 +43,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
         />
       }
       footer={
-        actions.length > 0 ? <CardActions>{actions}</CardActions> : undefined
+        actions.length > 0 ? <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions> : undefined
       }
     >
       <Typography gutterBottom variant="h5" component="h2">
