@@ -2,7 +2,7 @@ import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
-import { PanConfig } from "./InfoData";
+import { PanConfig } from "./SelectedObject";
 import { UnitSystem } from "./utils/UnitHelpers";
 
 export default interface EventBus {

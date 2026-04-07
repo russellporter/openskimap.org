@@ -8,6 +8,7 @@ export interface URLState {
   legendOpen: boolean;
   markers: MapMarker[];
   selectedObjectID: string | null;
+  showInfo: boolean;
 }
 
 export function updateURL(state: URLState) {
@@ -24,6 +25,8 @@ export function updateURL(state: URLState) {
     legal: state.legalOpen ? null : undefined,
     legend: state.legendOpen ? null : undefined,
     obj: state.selectedObjectID !== null ? state.selectedObjectID : undefined,
+    show_info:
+      state.selectedObjectID && !state.showInfo ? "false" : undefined,
     markers:
       state.markers.length > 0 ? stringifyMarkers(state.markers) : undefined,
   });
@@ -44,6 +47,7 @@ export function getURLState(): URLState {
       query.obj !== undefined && typeof query.obj === "string"
         ? query.obj
         : null,
+    showInfo: query.show_info !== "false",
     markers:
       query.markers !== undefined && typeof query.markers === "string"
         ? parseMarkers(query.markers)

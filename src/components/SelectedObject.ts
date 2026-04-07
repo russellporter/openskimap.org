@@ -6,8 +6,9 @@ export interface PanConfig {
   animate: boolean;
 }
 
-export interface InfoData {
+export interface SelectedObject {
   id: string;
   pan?: PanConfig;
   feature?: MapFeature;
+  showInfo: boolean;
 }

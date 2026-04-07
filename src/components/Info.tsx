@@ -7,7 +7,7 @@ import {
 import * as maplibregl from "maplibre-gl";
 import * as React from "react";
 import EventBus from "./EventBus";
-import { MapFeature } from "./InfoData";
+import { MapFeature } from "./SelectedObject";
 import { SkiAreaInfo } from "./SkiAreaInfo";
 import { SkiLiftInfo } from "./SkiLiftInfo";
 import { SkiRunInfo } from "./SkiRunInfo";

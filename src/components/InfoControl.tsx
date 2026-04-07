@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom/client";
 import controlWidth from "./controlWidth";
 import EventBus from "./EventBus";
 import { Info } from "./Info";
-import { InfoData } from "./InfoData";
+import { SelectedObject } from "./SelectedObject";
 import { Themed } from "./Themed";
 import { UnitSystemManager } from "./UnitSystemManager";
 
@@ -11,17 +11,17 @@ export class InfoControl implements maplibregl.IControl {
   _container: HTMLDivElement;
   _map: maplibregl.Map | null = null;
   _eventBus: EventBus;
-  _info: InfoData;
+  _info: SelectedObject;
   _root: ReactDOM.Root | null = null;
 
-  constructor(info: InfoData, eventBus: EventBus) {
+  constructor(info: SelectedObject, eventBus: EventBus) {
     this._info = info;
     this._eventBus = eventBus;
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl";
   }
 
-  updateInfo = (info: InfoData) => {
+  updateInfo = (info: SelectedObject) => {
     this._info = info;
     this.render();
   };

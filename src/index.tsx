@@ -187,7 +187,8 @@ function initialize() {
       aboutInfoOpen: state.aboutInfoOpen,
       legalOpen: state.legalOpen,
       legendOpen: state.legendOpen,
-      selectedObjectID: state.info?.id ?? null,
+      selectedObjectID: state.selectedObject?.id ?? null,
+      showInfo: state.selectedObject?.showInfo ?? true,
       markers: state.markers,
     });
 
@@ -303,11 +304,11 @@ function initialize() {
       map.setFiltersVisible(changes.mapFiltersOpen);
     }
 
-    if (changes.info !== undefined) {
-      if (changes.info === null) {
+    if (changes.selectedObject !== undefined) {
+      if (changes.selectedObject === null) {
         updatePageMetadata(null);
       }
-      map.setInfo(changes.info);
+      map.setSelectedObject(changes.selectedObject);
     }
 
     if (changes.mapFilters !== undefined) {

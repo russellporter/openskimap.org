@@ -20,6 +20,7 @@ export interface CameraPosition {
 export function computeCameraPositionFromHint(
   hint: ViewportHint,
   map: maplibregl.Map,
+  isInfoCardShown: boolean,
 ): CameraPosition {
   const [centerLng, centerLat] = hint.center;
 
@@ -28,7 +29,7 @@ export function computeCameraPositionFromHint(
     const canvas = map.getCanvas();
     const viewportWidth = canvas.clientWidth;
     const viewportHeight = canvas.clientHeight;
-    const infoCardWidth = controlWidth(map);
+    const infoCardWidth = isInfoCardShown ? controlWidth(map) : 0;
     const applyInfoCardOffset = infoCardWidth < viewportWidth * (2 / 3);
     const effectiveViewportWidth = applyInfoCardOffset
       ? viewportWidth - infoCardWidth
@@ -85,7 +86,7 @@ export function computeCameraPositionFromHint(
 
   // The info card occupies the left side of the viewport; frame the ski area in the
   // remainder, but only when the card leaves enough horizontal space (> 1/3 of viewport).
-  const infoCardWidth = controlWidth(map);
+  const infoCardWidth = isInfoCardShown ? controlWidth(map) : 0;
   const applyInfoCardOffset = infoCardWidth < viewportWidth * (2 / 3);
   const effectiveViewportWidth = applyInfoCardOffset
     ? viewportWidth - infoCardWidth

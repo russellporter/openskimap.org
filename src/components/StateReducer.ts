@@ -4,7 +4,7 @@ import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import EventBus from "./EventBus";
 import { loadGeoJSON } from "./GeoJSONLoader";
-import { MapFeature, PanConfig } from "./InfoData";
+import { MapFeature, PanConfig } from "./SelectedObject";
 import State, { StateChanges } from "./State";
 import { URLState } from "./URLHistory";
 import { updatePageMetadata } from "./utils/PageMetadata";
@@ -99,10 +99,10 @@ export default class StateReducer implements EventBus {
       const feature = await loadGeoJSON<MapFeature>(id);
       updatePageMetadata(feature);
 
-      if (this._state.info?.id === id) {
+      if (this._state.selectedObject?.id === id) {
         this.update({
-          info: {
-            ...this._state.info,
+          selectedObject: {
+            ...this._state.selectedObject,
             feature,
             pan: options.panAfterLoad
               ? {
@@ -120,19 +120,21 @@ export default class StateReducer implements EventBus {
 
   urlUpdate = (state: URLState) => {
     const existingSelectedObjectID = this._state.mapFilters.selectedObjectID;
+    const showInfo = state.selectedObjectID ? state.showInfo : false;
     this.update({
       aboutInfoOpen: state.aboutInfoOpen,
       legalOpen: state.legalOpen,
       legendOpen: state.legendOpen,
-      info: state.selectedObjectID
+      selectedObject: state.selectedObjectID
         ? {
             id: state.selectedObjectID,
             pan: { animate: false },
+            showInfo,
           }
         : null,
       mapFilters: {
         ...this._state.mapFilters,
-        selectedObjectID: state.selectedObjectID,
+        selectedObjectID: showInfo ? state.selectedObjectID : null,
       },
       markers: state.markers,
     });
@@ -150,7 +152,7 @@ export default class StateReducer implements EventBus {
 
   showInfo = (id: string, pan?: PanConfig) => {
     this.update({
-      info: { id },
+      selectedObject: { id, showInfo: true },
       mapFilters: { ...this._state.mapFilters, selectedObjectID: id },
     });
 
@@ -162,7 +164,7 @@ export default class StateReducer implements EventBus {
 
   hideInfo = () => {
     this.update({
-      info: null,
+      selectedObject: null,
       mapFilters: { ...this._state.mapFilters, selectedObjectID: null },
     });
   };

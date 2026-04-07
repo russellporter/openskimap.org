@@ -2,7 +2,7 @@ import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
-import { InfoData } from "./InfoData";
+import { SelectedObject } from "./SelectedObject";
 import { getUnitSystem_NonReactive } from "./UnitSystemManager";
 import * as UnitHelpers from "./utils/UnitHelpers";
 
@@ -18,7 +18,7 @@ export default interface State {
   mapStyle: MapStyle;
   mapStyleOverlay: MapStyleOverlay | null;
   mapFilters: MapFilters;
-  info: InfoData | null;
+  selectedObject: SelectedObject | null;
   markers: MapMarker[];
   tracks: Track[];
   unitSystem: UnitHelpers.UnitSystem;
@@ -40,7 +40,7 @@ export interface StateChanges {
   mapStyle?: MapStyle;
   mapStyleOverlay?: MapStyleOverlay | null;
   mapFilters?: MapFilters;
-  info?: InfoData | null;
+  selectedObject?: SelectedObject | null;
   markers?: MapMarker[];
   latestMarker?: MapMarker;
   tracks?: Track[];
@@ -116,7 +116,7 @@ export function getInitialState(): State {
     mapStyle,
     mapStyleOverlay,
     mapFilters: defaultMapFilters,
-    info: null,
+    selectedObject: null,
     markers: [],
     tracks,
     unitSystem: getUnitSystem_NonReactive(),
