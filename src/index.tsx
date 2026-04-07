@@ -188,6 +188,7 @@ function initialize() {
       legalOpen: state.legalOpen,
       legendOpen: state.legendOpen,
       selectedObjectID: state.selectedObject?.id ?? null,
+      selectedObjectIDType: state.selectedObject?.idType ?? "openskimap",
       showInfo: state.selectedObject?.showInfo ?? true,
       markers: state.markers,
     });

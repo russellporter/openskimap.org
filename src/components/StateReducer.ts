@@ -4,7 +4,7 @@ import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import EventBus from "./EventBus";
 import { loadGeoJSON } from "./GeoJSONLoader";
-import { MapFeature, PanConfig } from "./SelectedObject";
+import { MapFeature, ObjectIDType, PanConfig } from "./SelectedObject";
 import State, { StateChanges } from "./State";
 import { URLState } from "./URLHistory";
 import { updatePageMetadata } from "./utils/PageMetadata";
@@ -93,16 +93,18 @@ export default class StateReducer implements EventBus {
 
   private loadInfoData = async (
     id: string,
+    idType: ObjectIDType,
     options: { panAfterLoad: boolean; animate: boolean },
   ) => {
     try {
-      const feature = await loadGeoJSON<MapFeature>(id);
+      const feature = await loadGeoJSON<MapFeature>(id, idType);
       updatePageMetadata(feature);
 
       if (this._state.selectedObject?.id === id) {
+        const selectedObject = this._state.selectedObject;
         this.update({
           selectedObject: {
-            ...this._state.selectedObject,
+            ...selectedObject,
             feature,
             pan: options.panAfterLoad
               ? {
@@ -110,6 +112,12 @@ export default class StateReducer implements EventBus {
                 }
               : undefined,
           },
+          ...(selectedObject.showInfo && {
+            mapFilters: {
+              ...this._state.mapFilters,
+              selectedObjectID: feature.properties.id,
+            },
+          }),
         });
       }
     } catch (error) {
@@ -128,13 +136,17 @@ export default class StateReducer implements EventBus {
       selectedObject: state.selectedObjectID
         ? {
             id: state.selectedObjectID,
+            idType: state.selectedObjectIDType,
             pan: { animate: false },
             showInfo,
           }
         : null,
       mapFilters: {
         ...this._state.mapFilters,
-        selectedObjectID: showInfo ? state.selectedObjectID : null,
+        selectedObjectID:
+          showInfo && state.selectedObjectIDType === "openskimap"
+            ? state.selectedObjectID
+            : null,
       },
       markers: state.markers,
     });
@@ -143,20 +155,20 @@ export default class StateReducer implements EventBus {
       state.selectedObjectID &&
       state.selectedObjectID !== existingSelectedObjectID
     ) {
-      this.loadInfoData(state.selectedObjectID, {
+      this.loadInfoData(state.selectedObjectID, state.selectedObjectIDType, {
         panAfterLoad: true,
         animate: false,
       });
     }
   };
 
-  showInfo = (id: string, pan?: PanConfig) => {
+  showInfo = (id: string, pan?: PanConfig, idType: ObjectIDType = "openskimap") => {
     this.update({
-      selectedObject: { id, showInfo: true },
+      selectedObject: { id, idType, showInfo: true },
       mapFilters: { ...this._state.mapFilters, selectedObjectID: id },
     });
 
-    this.loadInfoData(id, {
+    this.loadInfoData(id, idType, {
       panAfterLoad: pan !== undefined,
       animate: pan?.animate == true,
     });
