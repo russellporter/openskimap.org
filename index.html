@@ -1,14 +1,5 @@
 <!DOCTYPE html>
   <head>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css"
-    />
-    <script
-      src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"
-      data-cfasync="false"
-    ></script>
     <script>
       var _paq = (window._paq = window._paq || []);
       /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -25,15 +16,6 @@
         g.src = u + "matomo.js";
         s.parentNode.insertBefore(g, s);
       })();
-    </script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "UA-2618724-7");
     </script>
     <meta
       name="viewport"
@@ -64,26 +46,5 @@
     <div id="track-drawing-controls"></div>
     <div id="gpx-drop-zone"></div>
     <script type="module" src="/src/index.tsx"></script>
-
-    <script>
-      window.cookieconsent.initialise({
-        location: true,
-        palette: {
-          popup: {
-            background: "#f4f4f4",
-            text: "#000000",
-          },
-          button: {
-            background: "transparent",
-            text: "#000000",
-            border: "#e0e0e0",
-          },
-        },
-        content: {
-          message:
-            "This website stores data such as cookies to enable important site functionality including analytics, and personalization. By remaining on this web site you indicate your consent.",
-        },
-      });
-    </script>
   </body>
 </html>
