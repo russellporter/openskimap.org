@@ -3,6 +3,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import LayersIcon from "@mui/icons-material/Layers";
 import MapIcon from "@mui/icons-material/Map";
 import PolicyIcon from "@mui/icons-material/Policy";
+import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Divider,
@@ -33,6 +34,15 @@ export default class Sidebar extends React.Component<Props, {}> {
         >
           <div style={{ width: "256" }}>
             <List>
+              <ListItemButton
+                key={"search"}
+                onClick={this.props.eventBus.openSearch}
+              >
+                <ListItemIcon>
+                  <SearchIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Search"} />
+              </ListItemButton>
               <ListItemButton
                 key={"layers"}
                 onClick={this.props.eventBus.openLayers}

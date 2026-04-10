@@ -8,18 +8,26 @@ import {
   Button,
   Dialog,
   FormControlLabel,
+  FormGroup,
+  FormLabel,
   IconButton,
   Radio,
   RadioGroup,
+  Slider,
   TextField,
   Typography,
 } from "@mui/material";
 import { Box } from "@mui/system";
+import { SkiAreaActivity } from "openskidata-format";
 import * as React from "react";
+import MapFilters from "../MapFilters";
 import { MapStyle, MapStyleOverlay, SLOPE_OVERLAY_NAMES } from "../MapStyle";
 import { Track, readGpxFile } from "../utils/TrackParser";
+import { DownhillCheckbox, NordicCheckbox } from "./Checkbox";
 import EventBus from "./EventBus";
 import { ModalHeader } from "./ModalHeader";
+import { UnitSystemManager } from "./UnitSystemManager";
+import * as UnitHelpers from "./utils/UnitHelpers";
 
 export interface LayersModalProps {
   open: boolean;
@@ -28,6 +36,8 @@ export interface LayersModalProps {
   currentMapStyleOverlay: MapStyleOverlay | null;
   tracks: Track[];
   sunExposureDate: Date;
+  mapFilters: MapFilters;
+  visibleSkiAreasCount: number;
 }
 
 export const LayersModal: React.FunctionComponent<LayersModalProps> = (
@@ -141,13 +151,30 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
     URL.revokeObjectURL(url);
   };
 
+  const isDownhillEnabled = !props.mapFilters.hiddenActivities.includes(
+    SkiAreaActivity.Downhill,
+  );
+  const isNordicEnabled = !props.mapFilters.hiddenActivities.includes(
+    SkiAreaActivity.Nordic,
+  );
+
+  const initialMinElevationValue = React.useRef(
+    props.mapFilters.minElevation || 0,
+  ).current;
+  const initialMinVerticalValue = React.useRef(
+    props.mapFilters.minVertical || 0,
+  ).current;
+  const initialMinRunLengthValue = React.useRef(
+    props.mapFilters.minRunLength || 0,
+  ).current;
+
   return (
     <Dialog
       open={props.open}
       onClose={() => {
         props.eventBus.closeLayers();
       }}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
     >
       <Box sx={{ p: 3 }}>
@@ -155,99 +182,243 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
           <Typography variant="h6">Layers</Typography>
         </ModalHeader>
 
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 2 }}>
-            Base Map
-          </Typography>
-          <RadioGroup
-            value={props.currentMapStyle}
-            onChange={handleMapStyleChange}
-            sx={{ pl: 1 }}
-          >
-            <FormControlLabel
-              value={MapStyle.Terrain}
-              control={<Radio />}
-              label="Terrain"
-            />
-            <FormControlLabel
-              value={MapStyle.Satellite}
-              control={<Radio />}
-              label="Satellite"
-            />
-          </RadioGroup>
-        </Box>
-
-        <Box sx={{ mt: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 2,
-            }}
-          >
-            <Typography variant="subtitle1">
-              Slope Overlays{" "}
-              <Typography
-                component="span"
-                variant="caption"
-                sx={{ color: "text.secondary", fontStyle: "italic" }}
-              >
-                (Experimental)
+        {/* Two-column grid: existing sections left, new sections right */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 3,
+            mt: 2,
+          }}
+        >
+          {/* Left column: Activities + Ski Areas */}
+          <Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Activities
               </Typography>
-            </Typography>
-            <Button
-              size="small"
-              onClick={() => props.eventBus.openLegend("slope-overlays")}
-            >
-              Legend
-            </Button>
-          </Box>
-          <RadioGroup
-            value={props.currentMapStyleOverlay || "none"}
-            onChange={handleSlopeOverlayChange}
-            sx={{ pl: 1 }}
-          >
-            <FormControlLabel value="none" control={<Radio />} label="None" />
-            {Object.entries(SLOPE_OVERLAY_NAMES).map(([key, name]) => {
-              const label =
-                key === MapStyleOverlay.SunExposure
-                  ? `${name} (${props.sunExposureDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })})`
-                  : name;
-              return (
+              <FormGroup sx={{ pl: 1 }}>
                 <FormControlLabel
-                  key={key}
-                  value={key}
-                  control={<Radio />}
-                  label={label}
-                />
-              );
-            })}
-          </RadioGroup>
-
-          {props.currentMapStyleOverlay === MapStyleOverlay.SunExposure && (
-            <Box sx={{ mt: 2, pl: 4 }}>
-              <TextField
-                type="date"
-                label="Date for sun calculation"
-                value={props.sunExposureDate.toISOString().split("T")[0]}
-                onChange={(e) => {
-                  const newDate = new Date(e.target.value);
-                  if (!isNaN(newDate.getTime())) {
-                    props.eventBus.setSunExposureDate(newDate);
+                  control={
+                    <DownhillCheckbox
+                      checked={isDownhillEnabled}
+                      onChange={() =>
+                        props.eventBus.toggleActivity(SkiAreaActivity.Downhill)
+                      }
+                    />
                   }
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                size="small"
-                fullWidth
-                sx={{ maxWidth: 200 }}
+                  label="Downhill &amp; Backcountry"
+                />
+                <FormControlLabel
+                  control={
+                    <NordicCheckbox
+                      checked={isNordicEnabled}
+                      onChange={() =>
+                        props.eventBus.toggleActivity(SkiAreaActivity.Nordic)
+                      }
+                    />
+                  }
+                  label="Nordic"
+                />
+              </FormGroup>
+            </Box>
+
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Ski Areas
+              </Typography>
+              <UnitSystemManager
+                render={(unitSystem) => (
+                  <Box sx={{ pl: 1 }}>
+                    <Box sx={{ mb: 2 }}>
+                      <FormLabel component="legend">
+                        Minimum Elevation (
+                        {UnitHelpers.labelForLengthUnit(
+                          UnitHelpers.closestEquivalent("meters", unitSystem),
+                        )}
+                        )
+                      </FormLabel>
+                      <Box sx={{ mx: 1 }}>
+                        <Slider
+                          defaultValue={initialMinElevationValue}
+                          min={0}
+                          max={5000}
+                          valueLabelDisplay="auto"
+                          valueLabelFormat={(value) =>
+                            UnitHelpers.heightText(value, unitSystem, true)
+                          }
+                          onChange={(_, value) =>
+                            props.eventBus.setMinimumElevation(value as number)
+                          }
+                        />
+                      </Box>
+                    </Box>
+                    <Box sx={{ mb: 2 }}>
+                      <FormLabel component="legend">
+                        Minimum Vertical (
+                        {UnitHelpers.labelForLengthUnit(
+                          UnitHelpers.closestEquivalent("meters", unitSystem),
+                        )}
+                        )
+                      </FormLabel>
+                      <Box sx={{ mx: 1 }}>
+                        <Slider
+                          defaultValue={initialMinVerticalValue}
+                          min={0}
+                          max={2000}
+                          valueLabelDisplay="auto"
+                          valueLabelFormat={(value) =>
+                            UnitHelpers.heightText(value, unitSystem, true)
+                          }
+                          onChange={(_, value) =>
+                            props.eventBus.setMinimumVertical(value as number)
+                          }
+                        />
+                      </Box>
+                    </Box>
+                    <Box sx={{ mb: 2 }}>
+                      <FormLabel component="legend">
+                        Run Length (
+                        {UnitHelpers.labelForLengthUnit(
+                          UnitHelpers.closestEquivalent(
+                            "kilometers",
+                            unitSystem,
+                          ),
+                        )}
+                        )
+                      </FormLabel>
+                      <Box sx={{ mx: 1 }}>
+                        <Slider
+                          defaultValue={initialMinRunLengthValue}
+                          min={0}
+                          max={500}
+                          valueLabelDisplay="auto"
+                          valueLabelFormat={(value) =>
+                            UnitHelpers.distanceText({
+                              distanceInMeters: value * 1000,
+                              unitSystem,
+                              forceLongestUnit: true,
+                              withSpace: true,
+                              roundToNearestDecimal: true,
+                            })
+                          }
+                          onChange={(_, value) =>
+                            props.eventBus.setMinimumRunLength(value as number)
+                          }
+                        />
+                      </Box>
+                    </Box>
+                    <Typography variant="subtitle2">
+                      {props.visibleSkiAreasCount} visible ski areas
+                    </Typography>
+                  </Box>
+                )}
               />
             </Box>
-          )}
+          </Box>
+
+          {/* Right column: Base Map + Slope Overlays */}
+          <Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Base Map
+              </Typography>
+              <RadioGroup
+                value={props.currentMapStyle}
+                onChange={handleMapStyleChange}
+                sx={{ pl: 1 }}
+              >
+                <FormControlLabel
+                  value={MapStyle.Terrain}
+                  control={<Radio />}
+                  label="Terrain"
+                />
+                <FormControlLabel
+                  value={MapStyle.Satellite}
+                  control={<Radio />}
+                  label="Satellite"
+                />
+              </RadioGroup>
+            </Box>
+
+            <Box sx={{ mt: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="subtitle1">
+                  Slope Overlays{" "}
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontStyle: "italic" }}
+                  >
+                    (Experimental)
+                  </Typography>
+                </Typography>
+                <Button
+                  size="small"
+                  onClick={() => props.eventBus.openLegend("slope-overlays")}
+                >
+                  Legend
+                </Button>
+              </Box>
+              <RadioGroup
+                value={props.currentMapStyleOverlay || "none"}
+                onChange={handleSlopeOverlayChange}
+                sx={{ pl: 1 }}
+              >
+                <FormControlLabel
+                  value="none"
+                  control={<Radio />}
+                  label="None"
+                />
+                {Object.entries(SLOPE_OVERLAY_NAMES).map(([key, name]) => {
+                  const label =
+                    key === MapStyleOverlay.SunExposure
+                      ? `${name} (${props.sunExposureDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })})`
+                      : name;
+                  return (
+                    <FormControlLabel
+                      key={key}
+                      value={key}
+                      control={<Radio />}
+                      label={label}
+                    />
+                  );
+                })}
+              </RadioGroup>
+
+              {props.currentMapStyleOverlay === MapStyleOverlay.SunExposure && (
+                <Box sx={{ mt: 2, pl: 4 }}>
+                  <TextField
+                    type="date"
+                    label="Date for sun calculation"
+                    value={props.sunExposureDate.toISOString().split("T")[0]}
+                    onChange={(e) => {
+                      const newDate = new Date(e.target.value);
+                      if (!isNaN(newDate.getTime())) {
+                        props.eventBus.setSunExposureDate(newDate);
+                      }
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    size="small"
+                    fullWidth
+                    sx={{ maxWidth: 200 }}
+                  />
+                </Box>
+              )}
+            </Box>
+          </Box>
         </Box>
 
+        {/* Tracks section — full width */}
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
             Tracks

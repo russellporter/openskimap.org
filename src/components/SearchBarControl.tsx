@@ -10,10 +10,10 @@ export class SearchBarControl implements maplibregl.IControl {
   _root: ReactDOM.Root | null = null;
   _map: maplibregl.Map | null = null;
   _eventBus: EventBus;
-  _filtersShown: boolean = false;
-
-  constructor(eventBus: EventBus) {
+  _isEmbedded: boolean;
+  constructor(eventBus: EventBus, isEmbedded: boolean) {
     this._eventBus = eventBus;
+    this._isEmbedded = isEmbedded;
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl";
   }
@@ -35,18 +35,23 @@ export class SearchBarControl implements maplibregl.IControl {
     this._map = null;
   };
 
-  setFiltersShown = (shown: boolean) => {
-    this._filtersShown = shown;
-    this.render();
+  expandSearch = () => {
+    // Defer to avoid being overridden by useDetectClickOutside
+    // which sets expanded=false in the same click event
+    setTimeout(() => {
+      document.dispatchEvent(new Event("expand-search"));
+    }, 0);
   };
 
   private render = () => {
+    const mapWidth = this._map!.getCanvasContainer().offsetWidth;
+    const shouldCollapse = this._isEmbedded || mapWidth < 600;
     this._root?.render(
       <Themed>
         <SearchBar
           eventBus={this._eventBus}
           width={controlWidth(this._map!)}
-          filtersShown={this._filtersShown}
+          shouldCollapse={shouldCollapse}
         />
       </Themed>
     );

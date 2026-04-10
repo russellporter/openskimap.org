@@ -1,6 +1,6 @@
 import mlcontour from "maplibre-contour";
 import * as maplibregl from "maplibre-gl";
-import { ViewportHint } from "openskidata-format";
+import { FeatureType, ViewportHint } from "openskidata-format";
 import { throttle } from "throttle-debounce";
 import MapFilters, { defaultMapFilters } from "../MapFilters";
 import { MapMarker } from "../MapMarker";
@@ -18,7 +18,6 @@ import { Track } from "../utils/TrackParser";
 import { computeCameraPositionFromHint } from "./CameraPosition";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
-import { FilterControl } from "./FilterControl";
 import { InfoControl } from "./InfoControl";
 import { SelectedObject } from "./SelectedObject";
 import { LogoControl } from "./LogoControl";
@@ -41,12 +40,11 @@ export class Map {
 
   private eventBus: EventBus;
   private infoControl: InfoControl | null = null;
-  private filterControl: FilterControl;
   private searchBarControl: SearchBarControl;
   private markers: maplibregl.Marker[];
   private tracks: Track[] = [];
   private loaded = false;
-  private filtersVisible = false;
+  private layersOpen = false;
   private mapScaleControl: maplibregl.ScaleControl;
 
   private interactionManager: MapInteractionManager;
@@ -83,8 +81,7 @@ export class Map {
       cooperativeGestures: isEmbedded,
     });
     this.markers = [];
-    this.filterControl = new FilterControl(eventBus);
-    this.searchBarControl = new SearchBarControl(eventBus);
+    this.searchBarControl = new SearchBarControl(eventBus, isEmbedded);
 
     this.interactionManager = new MapInteractionManager(this.map, eventBus);
 
@@ -113,6 +110,12 @@ export class Map {
       trackUserLocation: true,
     });
     this.map.addControl(this.geolocateControl, "bottom-right");
+
+    navigator.permissions?.query({ name: "geolocation" }).then((result) => {
+      if (result.state === "denied") {
+        this.map.removeControl(this.geolocateControl);
+      }
+    });
 
     this.map.addControl(
       new maplibregl.NavigationControl({
@@ -253,8 +256,8 @@ export class Map {
 
   setSelectedObject = (selectedObject: SelectedObject | null) => {
     const viewportHint = selectedObject?.feature?.properties.viewportHint;
-    if (selectedObject?.pan !== undefined && viewportHint) {
-      this.goToViewport(viewportHint, selectedObject.pan?.animate !== false, selectedObject.showInfo);
+    if (selectedObject?.pan !== undefined && viewportHint && selectedObject.feature) {
+      this.goToViewport(viewportHint, selectedObject.pan?.animate !== false, selectedObject.showInfo, selectedObject.feature.properties.type);
     }
 
     if (
@@ -286,8 +289,8 @@ export class Map {
     this.map.flyTo({ center: center, zoom: panToZoomLevel });
   };
 
-  goToViewport = (hint: ViewportHint, animate: boolean, isInfoCardShown: boolean) => {
-    const position = computeCameraPositionFromHint(hint, this.map, isInfoCardShown);
+  goToViewport = (hint: ViewportHint, animate: boolean, isInfoCardShown: boolean, featureType: FeatureType) => {
+    const position = computeCameraPositionFromHint(hint, this.map, isInfoCardShown, featureType);
     if (animate) {
       this.map.flyTo({
         center: position.center,
@@ -647,7 +650,6 @@ export class Map {
   private setFiltersUnthrottled = (filters: MapFilters) => {
     this.currentFilters = filters;
     this.waitForMapLoaded(() => {
-      this.filterControl.setFilters(filters);
       // Refresh the style to apply filters instead of using filterManager for layer updates
       if (this.currentStyle !== null) {
         this.setStyle(this.currentStyle);
@@ -658,15 +660,12 @@ export class Map {
 
   setFilters = throttle(100, this.setFiltersUnthrottled);
 
-  setFiltersVisible = (visible: boolean) => {
+  setLayersOpen = (open: boolean) => {
     this.waitForMapLoaded(() => {
-      this.filtersVisible = visible;
-      this.searchBarControl.setFiltersShown(visible);
-      if (visible) {
-        this.map.addControl(this.filterControl);
+      this.layersOpen = open;
+      if (open) {
         this.map.on("render", this.updateVisibleSkiAreasCount);
       } else {
-        this.map.removeControl(this.filterControl);
         this.map.off("render", this.updateVisibleSkiAreasCount);
       }
 
@@ -696,11 +695,11 @@ export class Map {
   };
 
   private updateVisibleSkiAreasCountUnthrottled = () => {
-    if (!this.filtersVisible) {
+    if (!this.layersOpen) {
       return;
     }
 
-    this.filterControl.setVisibleSkiAreasCount(
+    this.eventBus.setVisibleSkiAreasCount(
       getVisibleSkiAreasCount(this.map, this.currentFilters),
     );
   };
@@ -789,6 +788,10 @@ export class Map {
         }
       }
     });
+  };
+
+  expandSearch = () => {
+    this.searchBarControl.expandSearch();
   };
 
   addControl = (control: maplibregl.IControl, position?: string) => {

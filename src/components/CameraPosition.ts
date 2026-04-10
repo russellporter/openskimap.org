@@ -1,5 +1,5 @@
 import * as maplibregl from "maplibre-gl";
-import { ViewportHint } from "openskidata-format";
+import { FeatureType, ViewportHint } from "openskidata-format";
 import controlWidth from "./controlWidth";
 
 export interface CameraPosition {
@@ -21,7 +21,9 @@ export function computeCameraPositionFromHint(
   hint: ViewportHint,
   map: maplibregl.Map,
   isInfoCardShown: boolean,
+  featureType: FeatureType,
 ): CameraPosition {
+  const maxZoom = featureType === FeatureType.SkiArea ? 14.5 : 17;
   const [centerLng, centerLat] = hint.center;
 
   // No bearing means no elevation data → top-down view, no perspective correction needed.
@@ -43,7 +45,7 @@ export function computeCameraPositionFromHint(
     const zoomFromHeight = Math.log2(
       (viewportHeight * C * cosLat) / hint.rotatedHeightMeters,
     );
-    const zoom = Math.min(zoomFromWidth, zoomFromHeight);
+    const zoom = Math.min(zoomFromWidth, zoomFromHeight, maxZoom);
 
     // Shift centre rightward (in world coords) by half the info card width so the
     // feature appears centred in the visible portion of the viewport.
@@ -98,7 +100,7 @@ export function computeCameraPositionFromHint(
   const zoomFromHeight = Math.log2(
     (viewportHeight * C * cosLat) / hint.rotatedHeightMeters,
   );
-  const zoom = Math.min(zoomFromWidth, zoomFromHeight);
+  const zoom = Math.min(zoomFromWidth, zoomFromHeight, maxZoom);
 
   // Shift the look-at point along camera Y (bearing direction) so the ski area fills the
   // asymmetric perspective viewport: the camera centre must sit at nearFraction of the

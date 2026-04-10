@@ -14,6 +14,7 @@ export default class StateReducer implements EventBus {
   _state: State;
   updateHandler: (state: State, changes: StateChanges) => void = () => {};
   editMapHandler: (() => void) | null = null;
+  openSearchHandler: (() => void) | null = null;
 
   constructor(
     state: State,
@@ -25,6 +26,10 @@ export default class StateReducer implements EventBus {
 
   editMap = () => {
     this.editMapHandler!();
+  };
+
+  openSearch = () => {
+    this.openSearchHandler?.();
   };
 
   openSidebar = () => {
@@ -322,11 +327,8 @@ export default class StateReducer implements EventBus {
     return Math.round(totalDistance * 10) / 10;
   }
 
-  showFilters = () => {
-    this.update({ mapFiltersOpen: true });
-  };
-  hideFilters = () => {
-    this.update({ mapFiltersOpen: false });
+  setVisibleSkiAreasCount = (count: number) => {
+    this.update({ visibleSkiAreasCount: count });
   };
 
   setTerrainInspectorEnabled = (enabled: boolean) => {

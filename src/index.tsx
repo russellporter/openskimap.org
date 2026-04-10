@@ -161,7 +161,6 @@ function initialize() {
 
   const cameraPositionManager = new CameraPositionManager();
   const initialCamera = cameraPositionManager.getInitialPosition();
-  console.log("Initial camera position:", initialCamera);
   const map = new Map(initialCamera, "map", store, cameraPositionManager);
 
   // Add layers control to map
@@ -170,6 +169,10 @@ function initialize() {
 
   store.editMapHandler = () => {
     editMap(map);
+  };
+
+  store.openSearchHandler = () => {
+    map.expandSearch();
   };
 
   store.urlUpdate(getURLState());
@@ -285,7 +288,9 @@ function initialize() {
       changes.mapStyle !== undefined ||
       changes.mapStyleOverlay !== undefined ||
       changes.tracks !== undefined ||
-      changes.sunExposureDate !== undefined
+      changes.sunExposureDate !== undefined ||
+      changes.mapFilters !== undefined ||
+      changes.visibleSkiAreasCount !== undefined
     ) {
       layersRoot.render(
         <Themed>
@@ -296,13 +301,15 @@ function initialize() {
             currentMapStyleOverlay={state.mapStyleOverlay}
             tracks={state.tracks}
             sunExposureDate={state.sunExposureDate}
+            mapFilters={state.mapFilters}
+            visibleSkiAreasCount={state.visibleSkiAreasCount}
           />
         </Themed>,
       );
     }
 
-    if (changes.mapFiltersOpen !== undefined) {
-      map.setFiltersVisible(changes.mapFiltersOpen);
+    if (changes.layersOpen !== undefined) {
+      map.setLayersOpen(state.layersOpen);
     }
 
     if (changes.selectedObject !== undefined) {

@@ -7,6 +7,7 @@ import { UnitSystem } from "./utils/UnitHelpers";
 
 export default interface EventBus {
   editMap(): void;
+  openSearch(): void;
   openSidebar(): void;
   closeSidebar(): void;
   openAboutInfo(): void;
@@ -27,6 +28,7 @@ export default interface EventBus {
   setMinimumElevation(elevation: number): void;
   setMinimumVertical(vertical: number): void;
   setMinimumRunLength(runLength: number): void;
+  setVisibleSkiAreasCount(count: number): void;
   addMarker(marker: MapMarker): void;
   addTrack(track: Track): void;
   removeTrack(trackId: string): void;
@@ -37,7 +39,5 @@ export default interface EventBus {
   cancelDrawingTrack(): void;
   showInfo(id: string, pan?: PanConfig): void;
   hideInfo(): void;
-  showFilters(): void;
-  hideFilters(): void;
   setTerrainInspectorEnabled(enabled: boolean): void;
 }

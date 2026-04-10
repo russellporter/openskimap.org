@@ -14,13 +14,13 @@ export default interface State {
   legendOpen: boolean;
   legendSection: string | null;
   layersOpen: boolean;
-  mapFiltersOpen: boolean;
   mapStyle: MapStyle;
   mapStyleOverlay: MapStyleOverlay | null;
   mapFilters: MapFilters;
   selectedObject: SelectedObject | null;
   markers: MapMarker[];
   tracks: Track[];
+  visibleSkiAreasCount: number;
   unitSystem: UnitHelpers.UnitSystem;
   sunExposureDate: Date;
   isDrawingTrack: boolean;
@@ -36,7 +36,6 @@ export interface StateChanges {
   legendOpen?: boolean;
   legendSection?: string | null;
   layersOpen?: boolean;
-  mapFiltersOpen?: boolean;
   mapStyle?: MapStyle;
   mapStyleOverlay?: MapStyleOverlay | null;
   mapFilters?: MapFilters;
@@ -44,6 +43,7 @@ export interface StateChanges {
   markers?: MapMarker[];
   latestMarker?: MapMarker;
   tracks?: Track[];
+  visibleSkiAreasCount?: number;
   unitSystem?: UnitHelpers.UnitSystem;
   sunExposureDate?: Date;
   isDrawingTrack?: boolean;
@@ -112,13 +112,13 @@ export function getInitialState(): State {
     legendOpen: false,
     legendSection: null,
     layersOpen: false,
-    mapFiltersOpen: false,
     mapStyle,
     mapStyleOverlay,
     mapFilters: defaultMapFilters,
     selectedObject: null,
     markers: [],
     tracks,
+    visibleSkiAreasCount: 0,
     unitSystem: getUnitSystem_NonReactive(),
     sunExposureDate,
     isDrawingTrack: false,
