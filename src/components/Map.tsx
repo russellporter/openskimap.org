@@ -126,8 +126,8 @@ export class Map {
     );
 
     this.demSource = new mlcontour.DemSource({
-      url: "https://tiles.openskimap.org/dynamic/data/merged-terrain/{z}/{x}/{y}.webp",
-      encoding: "mapbox",
+      url: "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp",
+      encoding: "terrarium",
       maxzoom: 16,
       worker: true,
       cacheSize: 100,
