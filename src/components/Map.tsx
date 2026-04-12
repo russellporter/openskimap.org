@@ -19,13 +19,13 @@ import { computeCameraPositionFromHint } from "./CameraPosition";
 import { EsriAttribution } from "./EsriAttribution";
 import EventBus from "./EventBus";
 import { InfoControl } from "./InfoControl";
-import { SelectedObject } from "./SelectedObject";
 import { LogoControl } from "./LogoControl";
 import { getFilterRules } from "./MapFilterRules";
 import { MapInteractionManager } from "./MapInteractionManager";
 import { getVisibleSkiAreasCount } from "./MapVisibilityUtils";
 import { registerSatelliteTileProtocol } from "./SatelliteTileProtocol";
 import { SearchBarControl } from "./SearchBarControl";
+import { SelectedObject } from "./SelectedObject";
 import { panToZoomLevel } from "./SkiAreaInfo";
 import { SlopeTerrainRenderer } from "./SlopeTerrainRenderer";
 import { TerrainInspectorControl } from "./TerrainInspectorControl";
@@ -256,8 +256,17 @@ export class Map {
 
   setSelectedObject = (selectedObject: SelectedObject | null) => {
     const viewportHint = selectedObject?.feature?.properties.viewportHint;
-    if (selectedObject?.pan !== undefined && viewportHint && selectedObject.feature) {
-      this.goToViewport(viewportHint, selectedObject.pan?.animate !== false, selectedObject.showInfo, selectedObject.feature.properties.type);
+    if (
+      selectedObject?.pan !== undefined &&
+      viewportHint &&
+      selectedObject.feature
+    ) {
+      this.goToViewport(
+        viewportHint,
+        selectedObject.pan?.animate !== false,
+        selectedObject.showInfo,
+        selectedObject.feature.properties.type,
+      );
     }
 
     if (
@@ -275,7 +284,11 @@ export class Map {
       this.infoControl = null;
     }
 
-    if (selectedObject !== null && selectedObject.feature && selectedObject.showInfo) {
+    if (
+      selectedObject !== null &&
+      selectedObject.feature &&
+      selectedObject.showInfo
+    ) {
       this.infoControl = new InfoControl(selectedObject, this.eventBus);
       this.map.addControl(this.infoControl);
     }
@@ -289,8 +302,18 @@ export class Map {
     this.map.flyTo({ center: center, zoom: panToZoomLevel });
   };
 
-  goToViewport = (hint: ViewportHint, animate: boolean, isInfoCardShown: boolean, featureType: FeatureType) => {
-    const position = computeCameraPositionFromHint(hint, this.map, isInfoCardShown, featureType);
+  goToViewport = (
+    hint: ViewportHint,
+    animate: boolean,
+    isInfoCardShown: boolean,
+    featureType: FeatureType,
+  ) => {
+    const position = computeCameraPositionFromHint(
+      hint,
+      this.map,
+      isInfoCardShown,
+      featureType,
+    );
     if (animate) {
       this.map.flyTo({
         center: position.center,
