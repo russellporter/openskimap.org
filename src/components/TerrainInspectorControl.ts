@@ -13,7 +13,7 @@ function haversineDistance(
   lat1: number,
   lng1: number,
   lat2: number,
-  lng2: number
+  lng2: number,
 ): number {
   const R = 6371000;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -34,10 +34,11 @@ export class TerrainInspectorControl implements maplibregl.IControl {
   private _data: TerrainData | null = null;
   private _userLocation: { lng: number; lat: number } | null = null;
   private _lastSampledLocation: { lng: number; lat: number } | null = null;
+  terrainExaggeration = 1;
 
   constructor(
     map: maplibregl.Map,
-    geolocateControl: maplibregl.GeolocateControl
+    geolocateControl: maplibregl.GeolocateControl,
   ) {
     this._map = map;
     this._geolocateControl = geolocateControl;
@@ -71,7 +72,7 @@ export class TerrainInspectorControl implements maplibregl.IControl {
           this._userLocation.lat,
           this._userLocation.lng,
           this._lastSampledLocation.lat,
-          this._lastSampledLocation.lng
+          this._lastSampledLocation.lng,
         ),
       };
     }
@@ -83,7 +84,10 @@ export class TerrainInspectorControl implements maplibregl.IControl {
     this._render();
 
     this._geolocateControl.on("geolocate", this._onGeolocate);
-    this._geolocateControl.on("trackuserlocationend", this._onTrackUserLocationEnd);
+    this._geolocateControl.on(
+      "trackuserlocationend",
+      this._onTrackUserLocationEnd,
+    );
 
     if (isMobile) {
       this._map.on("move", this._onMoveThrottled);
@@ -100,7 +104,10 @@ export class TerrainInspectorControl implements maplibregl.IControl {
 
   onRemove = (): void => {
     this._geolocateControl.off("geolocate", this._onGeolocate);
-    this._geolocateControl.off("trackuserlocationend", this._onTrackUserLocationEnd);
+    this._geolocateControl.off(
+      "trackuserlocationend",
+      this._onTrackUserLocationEnd,
+    );
 
     if (isMobile) {
       this._map.off("move", this._onMoveThrottled);
@@ -147,25 +154,33 @@ export class TerrainInspectorControl implements maplibregl.IControl {
     const map = this._map;
 
     const dLat = SAMPLE_RADIUS_METERS / 111111;
-    const dLng = SAMPLE_RADIUS_METERS / (111111 * Math.cos((lat * Math.PI) / 180));
+    const dLng =
+      SAMPLE_RADIUS_METERS / (111111 * Math.cos((lat * Math.PI) / 180));
 
-    const elevCenter = map.queryTerrainElevation({ lng, lat });
-    const elevN = map.queryTerrainElevation({ lng, lat: lat + dLat });
-    const elevS = map.queryTerrainElevation({ lng, lat: lat - dLat });
-    const elevE = map.queryTerrainElevation({ lng: lng + dLng, lat });
-    const elevW = map.queryTerrainElevation({ lng: lng - dLng, lat });
+    const rawCenter = map.queryTerrainElevation({ lng, lat });
+    const rawN = map.queryTerrainElevation({ lng, lat: lat + dLat });
+    const rawS = map.queryTerrainElevation({ lng, lat: lat - dLat });
+    const rawE = map.queryTerrainElevation({ lng: lng + dLng, lat });
+    const rawW = map.queryTerrainElevation({ lng: lng - dLng, lat });
 
     if (
-      elevCenter === null ||
-      elevN === null ||
-      elevS === null ||
-      elevE === null ||
-      elevW === null
+      rawCenter === null ||
+      rawN === null ||
+      rawS === null ||
+      rawE === null ||
+      rawW === null
     ) {
       this._data = null;
       this._render();
       return;
     }
+
+    const exag = this.terrainExaggeration;
+    const elevCenter = rawCenter / exag;
+    const elevN = rawN / exag;
+    const elevS = rawS / exag;
+    const elevE = rawE / exag;
+    const elevW = rawW / exag;
 
     const dN = (elevN - elevS) / (2 * SAMPLE_RADIUS_METERS);
     const dE = (elevE - elevW) / (2 * SAMPLE_RADIUS_METERS);
@@ -174,15 +189,14 @@ export class TerrainInspectorControl implements maplibregl.IControl {
     const slopeDegrees = (slopeRad * 180) / Math.PI;
     const slopePercent = Math.tan(slopeRad) * 100;
 
-    const aspectDegrees =
-      ((Math.atan2(dE, dN) * 180) / Math.PI + 180) % 360;
+    const aspectDegrees = ((Math.atan2(dE, dN) * 180) / Math.PI + 180) % 360;
 
     const distanceMeters = this._userLocation
       ? haversineDistance(
           this._userLocation.lat,
           this._userLocation.lng,
           lat,
-          lng
+          lng,
         )
       : null;
 

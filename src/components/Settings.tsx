@@ -1,9 +1,11 @@
 import {
+  Box,
   FormControl,
   FormControlLabel,
   FormLabel,
   Radio,
   RadioGroup,
+  Slider,
   Switch,
   Typography,
 } from "@mui/material";
@@ -15,7 +17,16 @@ import { UnitSystem } from "./utils/UnitHelpers";
 interface Props {
   unitSystem: UnitSystem;
   terrainInspectorEnabled: boolean;
+  terrainExaggeration: number;
   eventBus: EventBus;
+}
+
+function exaggerationToSlider(exaggeration: number): number {
+  return Math.log10(Math.max(0.1, exaggeration));
+}
+
+function sliderToExaggeration(sliderValue: number): number {
+  return Math.pow(10, sliderValue);
 }
 
 export default class Settings extends React.Component<Props> {
@@ -78,6 +89,32 @@ export default class Settings extends React.Component<Props> {
                 </div>
               }
             />
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <FormLabel>
+              <Typography fontSize="1rem">Elevation Exaggeration</Typography>
+              <Typography fontSize="0.8rem" color="text.secondary">
+                Amplify or reduce vertical relief in 3D view
+              </Typography>
+            </FormLabel>
+            <Box sx={{ mx: 1, mt: 1 }}>
+              <Slider
+                value={exaggerationToSlider(this.props.terrainExaggeration)}
+                min={-1}
+                max={Math.log10(20)}
+                step={0.01}
+                valueLabelDisplay="auto"
+                valueLabelFormat={(value) =>
+                  `${Math.round(sliderToExaggeration(value) * 100)}%`
+                }
+                onChange={(_, value) =>
+                  this.props.eventBus.setTerrainExaggeration(
+                    sliderToExaggeration(value as number),
+                  )
+                }
+              />
+            </Box>
           </div>
         </div>
       </>

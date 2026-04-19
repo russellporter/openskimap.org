@@ -26,6 +26,7 @@ export default interface State {
   isDrawingTrack: boolean;
   drawingTrackCoordinates: [number, number][];
   terrainInspectorEnabled: boolean;
+  terrainExaggeration: number;
 }
 
 export interface StateChanges {
@@ -49,6 +50,7 @@ export interface StateChanges {
   isDrawingTrack?: boolean;
   drawingTrackCoordinates?: [number, number][];
   terrainInspectorEnabled?: boolean;
+  terrainExaggeration?: number;
 }
 
 export function getInitialState(): State {
@@ -124,5 +126,6 @@ export function getInitialState(): State {
     isDrawingTrack: false,
     drawingTrackCoordinates: [],
     terrainInspectorEnabled: localStorage.getItem("terrainInspectorEnabled") === "true",
+    terrainExaggeration: parseFloat(localStorage.getItem("terrainExaggeration") || "1") || 1,
   };
 }

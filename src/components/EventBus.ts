@@ -40,4 +40,5 @@ export default interface EventBus {
   showInfo(id: string, pan?: PanConfig): void;
   hideInfo(): void;
   setTerrainInspectorEnabled(enabled: boolean): void;
+  setTerrainExaggeration(exaggeration: number): void;
 }

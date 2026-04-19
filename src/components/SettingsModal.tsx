@@ -9,6 +9,7 @@ export const SettingsModal: React.FunctionComponent<{
   open: boolean;
   unitSystem: UnitSystem;
   terrainInspectorEnabled: boolean;
+  terrainExaggeration: number;
   eventBus: EventBus;
 }> = (props) => {
   return (
@@ -23,6 +24,7 @@ export const SettingsModal: React.FunctionComponent<{
           eventBus={props.eventBus}
           unitSystem={props.unitSystem}
           terrainInspectorEnabled={props.terrainInspectorEnabled}
+          terrainExaggeration={props.terrainExaggeration}
         />
       </Box>
     </Dialog>

@@ -335,6 +335,10 @@ export default class StateReducer implements EventBus {
     this.update({ terrainInspectorEnabled: enabled });
   };
 
+  setTerrainExaggeration = (exaggeration: number) => {
+    this.update({ terrainExaggeration: exaggeration });
+  };
+
   private update(changes: StateChanges): void {
     const state = this._state as { [key: string]: any };
     Object.keys(changes).forEach((key) => {

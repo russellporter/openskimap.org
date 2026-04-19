@@ -56,6 +56,8 @@ export class Map {
   private currentFilters: MapFilters = defaultMapFilters;
   private terrainEnabled = false;
   private terrainInspectorEnabled = false;
+  private terrainExaggeration = 1;
+  private baseHillshadeExaggeration: Record<string, number> = {};
   private terrainInspectorControl: TerrainInspectorControl | null = null;
   private currentSlopeOverlay: MapStyleOverlay | null = null;
   private slopeRenderer: SlopeTerrainRenderer | null = null;
@@ -182,7 +184,7 @@ export class Map {
           // Enable 3D terrain
           const terrainSource = this.map.getSource("terrain");
           if (terrainSource) {
-            this.map.setTerrain({ source: "terrain" });
+            this.map.setTerrain({ source: "terrain", exaggeration: this.terrainExaggeration });
           }
         } else {
           // Disable 3D terrain
@@ -427,6 +429,19 @@ export class Map {
               };
             }
 
+            // Apply hillshade exaggeration multiplier
+            if (updatedLayer.type === "hillshade") {
+              const baseExaggeration = updatedLayer.paint?.["hillshade-exaggeration"] ?? 0.5;
+              this.baseHillshadeExaggeration[updatedLayer.id] = baseExaggeration;
+              updatedLayer = {
+                ...updatedLayer,
+                paint: {
+                  ...updatedLayer.paint,
+                  "hillshade-exaggeration": Math.min(0.7, baseExaggeration * Math.sqrt(this.terrainExaggeration)),
+                },
+              };
+            }
+
             return updatedLayer;
           });
         };
@@ -440,7 +455,7 @@ export class Map {
           layers: updatedLayers,
           terrain:
             this.terrainEnabled || this.terrainInspectorEnabled
-              ? newStyle.terrain
+              ? { source: "terrain", ...newStyle.terrain, exaggeration: this.terrainExaggeration }
               : undefined,
         };
 
@@ -784,6 +799,34 @@ export class Map {
     });
   };
 
+  setTerrainExaggeration = (exaggeration: number) => {
+    this.terrainExaggeration = exaggeration;
+    this.waitForMapLoaded(() => {
+      if (this.terrainEnabled || this.terrainInspectorEnabled) {
+        this.map.setTerrain({ source: "terrain", exaggeration });
+      }
+      this.updateHillshadeExaggeration();
+      if (this.terrainInspectorControl) {
+        this.terrainInspectorControl.terrainExaggeration = exaggeration;
+      }
+    });
+  };
+
+  private updateHillshadeExaggeration = () => {
+    const style = this.map.getStyle();
+    if (!style) return;
+    for (const layer of style.layers) {
+      if (layer.type === "hillshade") {
+        const baseExaggeration = this.baseHillshadeExaggeration[layer.id] ?? 0.5;
+        this.map.setPaintProperty(
+          layer.id,
+          "hillshade-exaggeration",
+          Math.min(0.7, baseExaggeration * Math.sqrt(this.terrainExaggeration)),
+        );
+      }
+    }
+  };
+
   setTerrainInspectorEnabled = (enabled: boolean) => {
     this.terrainInspectorEnabled = enabled;
     this.waitForMapLoaded(() => {
@@ -791,7 +834,7 @@ export class Map {
         if (!this.terrainEnabled) {
           const terrainSource = this.map.getSource("terrain");
           if (terrainSource) {
-            this.map.setTerrain({ source: "terrain" });
+            this.map.setTerrain({ source: "terrain", exaggeration: this.terrainExaggeration });
           }
         }
         if (!this.terrainInspectorControl) {
@@ -799,6 +842,7 @@ export class Map {
             this.map,
             this.geolocateControl,
           );
+          this.terrainInspectorControl.terrainExaggeration = this.terrainExaggeration;
           this.map.addControl(this.terrainInspectorControl, "bottom-left");
         }
       } else {

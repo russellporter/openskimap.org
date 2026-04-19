@@ -261,7 +261,8 @@ function initialize() {
     if (
       changes.settingsOpen !== undefined ||
       changes.unitSystem !== undefined ||
-      changes.terrainInspectorEnabled !== undefined
+      changes.terrainInspectorEnabled !== undefined ||
+      changes.terrainExaggeration !== undefined
     ) {
       settingsRoot.render(
         <Themed>
@@ -270,6 +271,7 @@ function initialize() {
             open={state.settingsOpen}
             unitSystem={state.unitSystem}
             terrainInspectorEnabled={state.terrainInspectorEnabled}
+            terrainExaggeration={state.terrainExaggeration}
           />
         </Themed>,
       );
@@ -281,6 +283,14 @@ function initialize() {
         String(state.terrainInspectorEnabled),
       );
       map.setTerrainInspectorEnabled(state.terrainInspectorEnabled);
+    }
+
+    if (changes.terrainExaggeration !== undefined) {
+      localStorage.setItem(
+        "terrainExaggeration",
+        String(state.terrainExaggeration),
+      );
+      map.setTerrainExaggeration(state.terrainExaggeration);
     }
 
     if (
