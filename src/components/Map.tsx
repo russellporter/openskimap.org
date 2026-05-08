@@ -394,6 +394,10 @@ export class Map {
             if (layer.id === "selected-run" || layer.id === "selected-lift") {
               filterRule = filterRules.selected;
               mergeExistingFilter = false; // Replace existing filter
+              updatedLayer = {
+                ...updatedLayer,
+                layout: { ...updatedLayer.layout, visibility: "none" },
+              };
             } else if (sourceLayer === "skiareas") {
               filterRule = filterRules.skiAreas;
             } else if (sourceLayer === "runs") {
@@ -449,10 +453,31 @@ export class Map {
         // Apply visibility and filter rules to layers
         const updatedLayers = applyFilters(newStyle.layers);
 
+        // Inject glow layers beneath selected-run and selected-lift
+        const updatedLayersWithGlow = [...updatedLayers];
+        let glowOffset = 0;
+        updatedLayers.forEach((layer, index) => {
+          if (layer.id === "selected-run" || layer.id === "selected-lift") {
+            const glowLayer = {
+              ...layer,
+              id: `${layer.id}-glow`,
+              layout: { ...layer.layout, visibility: "visible" },
+              paint: {
+                "line-color": "#fffacd",
+                "line-width": 26,
+                "line-blur": 12,
+                "line-opacity": 0.85,
+              },
+            };
+            updatedLayersWithGlow.splice(index + glowOffset, 0, glowLayer);
+            glowOffset++;
+          }
+        });
+
         // Handle 3D terrain for all styles
         let baseStyle = {
           ...newStyle,
-          layers: updatedLayers,
+          layers: updatedLayersWithGlow,
           terrain:
             this.terrainEnabled || this.terrainInspectorEnabled
               ? { source: "terrain", ...newStyle.terrain, exaggeration: this.terrainExaggeration }
