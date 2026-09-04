@@ -1,5 +1,6 @@
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import * as ReactDOM from "react-dom/client";
 import { AboutModal } from "./components/AboutModal";
 import { editMap } from "./components/ExternalURLOpener";
@@ -154,6 +155,7 @@ function initialize() {
   // Initial render of drop zone (hidden)
   renderDropZone();
 
+  maplibregl.setWorkerUrl(maplibreWorkerUrl);
   maplibregl.setRTLTextPlugin(
     "https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js",
     false,

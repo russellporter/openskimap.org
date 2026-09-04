@@ -1,4 +1,4 @@
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 
 // SHA-256 hash of the empty placeholder tile that Esri returns for areas with no imagery
 const EMPTY_TILE_HASH = "9eafd300d61393184a4abc1d458564cfd1cd9b6f9c4e9c74687045c0a0e5b858";

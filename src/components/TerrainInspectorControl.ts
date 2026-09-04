@@ -60,7 +60,7 @@ export class TerrainInspectorControl implements maplibregl.IControl {
     }
   };
 
-  private _onGeolocate = (e: GeolocationPosition) => {
+  private _onGeolocate = (e: maplibregl.GeolocatePositionEvent) => {
     this._userLocation = {
       lng: e.coords.longitude,
       lat: e.coords.latitude,

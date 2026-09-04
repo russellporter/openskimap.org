@@ -78,9 +78,8 @@ export function computeCameraPositionFromHint(
   // Derive near/far ground coverage from MapLibre's vertical FOV and the 45° pitch.
   // At 45° pitch, perspective makes the near side (downhill, bottom of viewport) cover
   // less ground per pixel than the far side (uphill, top).
-  // map.transform.fov is in degrees in MapLibre v5.
   const pitchRad = (45 * Math.PI) / 180;
-  const fovDeg: number = (map as any).transform?.fov ?? 60;
+  const fovDeg = map.getVerticalFieldOfView();
   const halfFovRad = (fovDeg / 2) * (Math.PI / 180);
   const cot = (a: number) => Math.cos(a) / Math.sin(a);
   const nearGround = cot(pitchRad) - cot(pitchRad + halfFovRad);
