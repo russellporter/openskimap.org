@@ -20,6 +20,7 @@ import {
   SkiAreaActivity,
   SkiAreaFeature,
   SkiAreaProperties,
+  SkiPass,
 } from "openskidata-format";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -48,7 +49,18 @@ type LocationResult = {
   type: "location";
   data: SkiAreaFeature | LiftFeature | RunFeature;
 };
-type Result = CommandResult | LocationResult;
+/** A ski pass is not a place, so selecting one filters the map instead of panning to it. */
+type SkiPassResult = { type: "ski_pass"; data: SkiPass };
+type Result = CommandResult | LocationResult | SkiPassResult;
+
+/** The API returns ski passes alongside features; they have no geometry to show. */
+type SearchResultData = LocationResult["data"] | { properties: SkiPass };
+
+function isSkiPassResultData(
+  data: SearchResultData,
+): data is { properties: SkiPass } {
+  return data.properties.type === "skiPass";
+}
 
 const SearchBar: React.FC<Props> = (props) => {
   const { width, eventBus, shouldCollapse } = props;
@@ -87,7 +99,7 @@ const SearchBar: React.FC<Props> = (props) => {
 
   const processSearchResults = (
     query: string,
-    locationResultsData: LocationResult["data"][],
+    searchResultsData: SearchResultData[],
   ) => {
     let results: Result[] = [];
 
@@ -112,10 +124,12 @@ const SearchBar: React.FC<Props> = (props) => {
     }
 
     results = results.concat(
-      locationResultsData.map((resultData: LocationResult["data"]) => ({
-        type: "location",
-        data: resultData,
-      })),
+      searchResultsData.map(
+        (resultData: SearchResultData): Result =>
+          isSkiPassResultData(resultData)
+            ? { type: "ski_pass", data: resultData.properties }
+            : { type: "location", data: resultData },
+      ),
     );
 
     setState((prevState: State) => ({ ...prevState, results }));
@@ -125,11 +139,9 @@ const SearchBar: React.FC<Props> = (props) => {
     fetch(API_BASE_URL + "/search?query=" + encodeURIComponent(query)).then(
       (response) => {
         if (stateRef.current?.searchQuery === query) {
-          response
-            .json()
-            .then((locationResultsData: LocationResult["data"][]) => {
-              processSearchResults(query, locationResultsData);
-            });
+          response.json().then((searchResultsData: SearchResultData[]) => {
+            processSearchResults(query, searchResultsData);
+          });
         }
       },
     );
@@ -188,6 +200,9 @@ const SearchBar: React.FC<Props> = (props) => {
       case "location":
         const feature = result.data;
         eventBus.showInfo(feature.properties.id, { animate: true });
+        break;
+      case "ski_pass":
+        eventBus.setSelectedSkiPasses([result.data.id]);
         break;
     }
   };
@@ -332,6 +347,8 @@ function resultID(result: Result): string {
   switch (result.type) {
     case "add_marker":
       return "add_marker";
+    case "ski_pass":
+      return "ski_pass_" + result.data.id;
     case "location":
       return "location_" + result.data.properties.id;
   }
@@ -366,6 +383,8 @@ function getPrimaryText(result: Result): string | null {
   switch (result.type) {
     case "add_marker":
       return "Mark Location";
+    case "ski_pass":
+      return result.data.name;
     case "location":
       const properties = result.data.properties;
       const name = properties.name;
@@ -389,6 +408,9 @@ function getSecondaryText(result: Result): string {
       const latDirection = latitude >= 0 ? "N" : "S";
       const lonDirection = longitude >= 0 ? "E" : "W";
       return `Location: ${Math.abs(latitude)}°${latDirection}, ${Math.abs(longitude)}°${lonDirection}`;
+    case "ski_pass":
+      const count = result.data.skiAreaCount;
+      return `Ski pass - show its ${count} ski area${count === 1 ? "" : "s"}`;
     case "location":
       const properties = result.data.properties;
       return [getFeatureDetails(properties), getLocation(properties)]

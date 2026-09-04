@@ -3,7 +3,11 @@ import { shallowEqualObjects } from "shallow-equal";
 import { MapMarker, parseMarkers, stringifyMarkers } from "../MapMarker";
 import { ObjectIDType } from "./SelectedObject";
 
-const validIDTypes: ObjectIDType[] = ["openskimap", "skimap_org", "openstreetmap"];
+const validIDTypes: ObjectIDType[] = [
+  "openskimap",
+  "skimap_org",
+  "openstreetmap",
+];
 
 export interface URLState {
   aboutInfoOpen: boolean;
@@ -13,6 +17,13 @@ export interface URLState {
   selectedObjectID: string | null;
   selectedObjectIDType: ObjectIDType;
   showInfo: boolean;
+  /**
+   * Selected ski passes, comma separated, or null when the URL says nothing about them.
+   *
+   * Held as a string rather than an array because URLState is compared with shallowEqualObjects,
+   * which a freshly built array would fail on every update.
+   */
+  selectedSkiPasses: string | null;
 }
 
 export function updateURL(state: URLState) {
@@ -30,18 +41,22 @@ export function updateURL(state: URLState) {
     legend: state.legendOpen ? null : undefined,
     obj: state.selectedObjectID !== null ? state.selectedObjectID : undefined,
     obj_type:
-      state.selectedObjectID !== null && state.selectedObjectIDType !== "openskimap"
+      state.selectedObjectID !== null &&
+      state.selectedObjectIDType !== "openskimap"
         ? state.selectedObjectIDType
         : undefined,
-    show_info:
-      state.selectedObjectID && !state.showInfo ? "false" : undefined,
+    show_info: state.selectedObjectID && !state.showInfo ? "false" : undefined,
     markers:
       state.markers.length > 0 ? stringifyMarkers(state.markers) : undefined,
+    passes:
+      state.selectedSkiPasses !== null && state.selectedSkiPasses.length > 0
+        ? state.selectedSkiPasses
+        : undefined,
   });
   window.history.replaceState(
     state,
     "OpenSkiMap.org",
-    "/" + (query.length > 0 ? "?" : "") + query + location.hash
+    "/" + (query.length > 0 ? "?" : "") + query + location.hash,
   );
 }
 
@@ -66,5 +81,6 @@ export function getURLState(): URLState {
       query.markers !== undefined && typeof query.markers === "string"
         ? parseMarkers(query.markers)
         : [],
+    selectedSkiPasses: typeof query.passes === "string" ? query.passes : null,
   };
 }

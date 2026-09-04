@@ -194,6 +194,12 @@ function initialize() {
       selectedObjectIDType: state.selectedObject?.idType ?? "openskimap",
       showInfo: state.selectedObject?.showInfo ?? true,
       markers: state.markers,
+      // Null, not "", when nothing is selected: getURLState reports an absent parameter as
+      // null, and URLState is compared field by field.
+      selectedSkiPasses:
+        state.mapFilters.selectedSkiPasses.length > 0
+          ? state.mapFilters.selectedSkiPasses.join(",")
+          : null,
     });
 
     if (changes.mapStyle !== undefined) {
@@ -344,6 +350,13 @@ function initialize() {
 
     if (changes.unitSystem !== undefined) {
       setUnitSystem(changes.unitSystem);
+    }
+
+    if (changes.mapFilters !== undefined) {
+      localStorage.setItem(
+        "selectedSkiPasses",
+        state.mapFilters.selectedSkiPasses.join(","),
+      );
     }
 
     if (changes.tracks !== undefined) {

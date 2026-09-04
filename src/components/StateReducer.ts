@@ -1,5 +1,6 @@
 import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
+import { parseSkiPassSelection, SkiPassFilterKey } from "../SkiPasses";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import EventBus from "./EventBus";
@@ -152,6 +153,12 @@ export default class StateReducer implements EventBus {
           showInfo && state.selectedObjectIDType === "openskimap"
             ? state.selectedObjectID
             : null,
+        // A URL that says nothing about ski passes leaves the saved selection alone, so that a
+        // link without the parameter does not silently clear it.
+        selectedSkiPasses:
+          state.selectedSkiPasses === null
+            ? this._state.mapFilters.selectedSkiPasses
+            : parseSkiPassSelection(state.selectedSkiPasses),
       },
       markers: state.markers,
     });
@@ -167,7 +174,11 @@ export default class StateReducer implements EventBus {
     }
   };
 
-  showInfo = (id: string, pan?: PanConfig, idType: ObjectIDType = "openskimap") => {
+  showInfo = (
+    id: string,
+    pan?: PanConfig,
+    idType: ObjectIDType = "openskimap",
+  ) => {
     this.update({
       selectedObject: { id, idType, showInfo: true },
       mapFilters: { ...this._state.mapFilters, selectedObjectID: id },
@@ -226,6 +237,17 @@ export default class StateReducer implements EventBus {
       },
     });
   }
+
+  // An arrow property, not a method: this is passed to components detached from the event bus,
+  // as showInfo and hideInfo are.
+  setSelectedSkiPasses = (keys: SkiPassFilterKey[]): void => {
+    this.update({
+      mapFilters: {
+        ...this._state.mapFilters,
+        selectedSkiPasses: [...keys],
+      },
+    });
+  };
 
   addMarker(marker: MapMarker): void {
     this.update({

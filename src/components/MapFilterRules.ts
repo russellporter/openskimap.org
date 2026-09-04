@@ -3,7 +3,10 @@ import { SkiAreaActivity } from "openskidata-format";
 import MapFilters from "../MapFilters";
 
 // A filter rule can be a MapLibre expression filter, "hidden" (to hide the object completely), or null (no filter)
-export type ObjectFilterRules = maplibregl.ExpressionFilterSpecification | "hidden" | null;
+export type ObjectFilterRules =
+  | maplibregl.ExpressionFilterSpecification
+  | "hidden"
+  | null;
 
 export interface MapFilterRules {
   runs: ObjectFilterRules;
@@ -27,6 +30,7 @@ export function getFilterRules(filters: MapFilters): MapFilterRules {
     getElevationFilterRules(filters),
     getVerticalFilterRules(filters),
     getRunLengthFilterRules(filters),
+    getSkiPassFilterRules(filters),
     getSelectedObjectFilterRules(filters),
   ].reduce((previous, rules) => {
     return {
@@ -40,7 +44,7 @@ export function getFilterRules(filters: MapFilters): MapFilterRules {
 
 export function combine(
   left: ObjectFilterRules,
-  right: ObjectFilterRules
+  right: ObjectFilterRules,
 ): ObjectFilterRules {
   if (left === "hidden" || right === "hidden") {
     return "hidden";
@@ -56,7 +60,7 @@ export function combine(
 
 function getActivityFilterRules(filters: MapFilters): MapFilterRules {
   const hasDownhill = !filters.hiddenActivities.includes(
-    SkiAreaActivity.Downhill
+    SkiAreaActivity.Downhill,
   );
   const hasNordic = !filters.hiddenActivities.includes(SkiAreaActivity.Nordic);
   if (!hasDownhill && !hasNordic) {
@@ -117,7 +121,7 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
   }
 
   const hasDownhill = !filters.hiddenActivities.includes(
-    SkiAreaActivity.Downhill
+    SkiAreaActivity.Downhill,
   );
   const hasNordic = !filters.hiddenActivities.includes(SkiAreaActivity.Nordic);
 
@@ -138,6 +142,32 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
 
   return {
     skiAreas: skiAreasFilter,
+    lifts: null,
+    runs: null,
+    selected: null,
+  };
+}
+
+function getSkiPassFilterRules(filters: MapFilters): MapFilterRules {
+  if (filters.selectedSkiPasses.length === 0) {
+    return noRules();
+  }
+
+  // Ski areas carry their actual pass IDs as a delimited string, for example
+  // ";ikon-standard;ikon-2-day;". Matching ";<key>;" rather than the bare key keeps one pass ID
+  // from matching another, so that "ikon-standard" cannot partially match another product ID.
+  //
+  // The "has" guard is required: "get" returns null for a ski area on no pass, and "in" against
+  // null is an evaluation error that would break the whole layer's filter.
+  const rules: maplibregl.ExpressionSpecification[] =
+    filters.selectedSkiPasses.map((key) => [
+      "in",
+      `;${key};`,
+      ["get", "ski_passes"],
+    ]);
+
+  return {
+    skiAreas: ["all", ["has", "ski_passes"], ["any", ...rules]],
     lifts: null,
     runs: null,
     selected: null,

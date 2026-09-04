@@ -18,14 +18,16 @@ import {
   Typography,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { SkiAreaActivity } from "openskidata-format";
+import { SkiAreaActivity, SkiPass } from "openskidata-format";
 import * as React from "react";
 import MapFilters from "../MapFilters";
+import { loadSkiPassCatalog, selectedSkiPassNames } from "../SkiPasses";
 import { MapStyle, MapStyleOverlay, SLOPE_OVERLAY_NAMES } from "../MapStyle";
 import { Track, readGpxFile } from "../utils/TrackParser";
 import { DownhillCheckbox, NordicCheckbox } from "./Checkbox";
 import EventBus from "./EventBus";
 import { ModalHeader } from "./ModalHeader";
+import { SkiPassesModal } from "./SkiPassesModal";
 import { UnitSystemManager } from "./UnitSystemManager";
 import * as UnitHelpers from "./utils/UnitHelpers";
 
@@ -44,7 +46,39 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (
   props,
 ) => {
   const [isUploading, setIsUploading] = React.useState(false);
+  const [skiPassesOpen, setSkiPassesOpen] = React.useState(false);
+  const [skiPassList, setSkiPassList] = React.useState<SkiPass[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const selectedSkiPasses = props.mapFilters.selectedSkiPasses;
+
+  // Only to turn the selected keys into names for the summary; the picker loads its own copy.
+  React.useEffect(() => {
+    if (selectedSkiPasses.length === 0 || skiPassList.length > 0) {
+      return;
+    }
+    let cancelled = false;
+    loadSkiPassCatalog()
+      .then((catalog) => {
+        if (!cancelled) {
+          setSkiPassList(catalog.passes);
+        }
+      })
+      .catch(() => {
+        // Falling back to the raw keys in the summary is better than failing the whole modal.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSkiPasses, skiPassList]);
+
+  const selectedSkiPassesSummary = React.useMemo(() => {
+    if (selectedSkiPasses.length === 0) {
+      return "Any pass";
+    }
+    const names = selectedSkiPassNames(skiPassList, selectedSkiPasses);
+    return names.length === 1 ? names[0] : `${names[0]} +${names.length - 1}`;
+  }, [selectedSkiPasses, skiPassList]);
 
   const handleMapStyleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newStyle = event.target.value as MapStyle;
@@ -315,6 +349,21 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
                 )}
               />
             </Box>
+
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Ski Passes
+              </Typography>
+              <Box sx={{ pl: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => setSkiPassesOpen(true)}
+                >
+                  {selectedSkiPassesSummary}
+                </Button>
+              </Box>
+            </Box>
           </Box>
 
           {/* Right column: Base Map + Slope Overlays */}
@@ -517,6 +566,13 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
           </Box>
         </Box>
       </Box>
+
+      <SkiPassesModal
+        open={skiPassesOpen}
+        onClose={() => setSkiPassesOpen(false)}
+        selected={selectedSkiPasses}
+        onChange={props.eventBus.setSelectedSkiPasses}
+      />
     </Dialog>
   );
 };

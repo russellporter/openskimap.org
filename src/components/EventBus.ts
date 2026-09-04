@@ -1,5 +1,6 @@
 import { SkiAreaActivity } from "openskidata-format";
 import { MapMarker } from "../MapMarker";
+import { SkiPassFilterKey } from "../SkiPasses";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
 import { PanConfig } from "./SelectedObject";
@@ -28,6 +29,7 @@ export default interface EventBus {
   setMinimumElevation(elevation: number): void;
   setMinimumVertical(vertical: number): void;
   setMinimumRunLength(runLength: number): void;
+  setSelectedSkiPasses(keys: SkiPassFilterKey[]): void;
   setVisibleSkiAreasCount(count: number): void;
   addMarker(marker: MapMarker): void;
   addTrack(track: Track): void;
