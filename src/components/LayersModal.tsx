@@ -1,11 +1,14 @@
 import {
+  ChevronRight as ChevronRightIcon,
   Close as CloseIcon,
+  ConfirmationNumberOutlined as SkiPassIcon,
   Create as CreateIcon,
   Download as DownloadIcon,
   Upload as UploadIcon,
 } from "@mui/icons-material";
 import {
   Button,
+  ButtonBase,
   Dialog,
   FormControlLabel,
   FormGroup,
@@ -17,11 +20,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import { SkiAreaActivity, SkiPass } from "openskidata-format";
 import * as React from "react";
 import MapFilters from "../MapFilters";
-import { loadSkiPassCatalog, selectedSkiPassNames } from "../SkiPasses";
+import { loadSkiPassCatalog } from "../SkiPasses";
 import { MapStyle, MapStyleOverlay, SLOPE_OVERLAY_NAMES } from "../MapStyle";
 import { Track, readGpxFile } from "../utils/TrackParser";
 import { DownhillCheckbox, NordicCheckbox } from "./Checkbox";
@@ -52,9 +56,10 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (
 
   const selectedSkiPasses = props.mapFilters.selectedSkiPasses;
 
-  // Only to turn the selected keys into names for the summary; the picker loads its own copy.
+  // Only load the catalog when a single selection needs its public name. The picker
+  // loads its own copy, and multiple selections can be summarized without it.
   React.useEffect(() => {
-    if (selectedSkiPasses.length === 0 || skiPassList.length > 0) {
+    if (selectedSkiPasses.length !== 1 || skiPassList.length > 0) {
       return;
     }
     let cancelled = false;
@@ -65,7 +70,7 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (
         }
       })
       .catch(() => {
-        // Falling back to the raw keys in the summary is better than failing the whole modal.
+        // Keep the count-only fallback rather than exposing an internal pass ID.
       });
     return () => {
       cancelled = true;
@@ -74,10 +79,15 @@ export const LayersModal: React.FunctionComponent<LayersModalProps> = (
 
   const selectedSkiPassesSummary = React.useMemo(() => {
     if (selectedSkiPasses.length === 0) {
-      return "Any pass";
+      return "Choose ski passes";
     }
-    const names = selectedSkiPassNames(skiPassList, selectedSkiPasses);
-    return names.length === 1 ? names[0] : `${names[0]} +${names.length - 1}`;
+    if (selectedSkiPasses.length > 1) {
+      return `${selectedSkiPasses.length} passes selected`;
+    }
+    return (
+      skiPassList.find((pass) => pass.id === selectedSkiPasses[0])?.name ??
+      "1 pass selected"
+    );
   }, [selectedSkiPasses, skiPassList]);
 
   const handleMapStyleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -342,27 +352,77 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
                         />
                       </Box>
                     </Box>
+                    <ButtonBase
+                      onClick={() => setSkiPassesOpen(true)}
+                      aria-label={`Ski pass access: ${selectedSkiPassesSummary}`}
+                      sx={(theme) => ({
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        mb: 2,
+                        px: 1.5,
+                        py: 1.25,
+                        border: "1px solid",
+                        borderColor:
+                          selectedSkiPasses.length > 0
+                            ? "primary.main"
+                            : "divider",
+                        borderRadius: 1,
+                        bgcolor:
+                          selectedSkiPasses.length > 0
+                            ? alpha(theme.palette.primary.main, 0.06)
+                            : "transparent",
+                        textAlign: "left",
+                        transition: theme.transitions.create(
+                          ["background-color", "border-color"],
+                          { duration: theme.transitions.duration.shortest },
+                        ),
+                        "&:hover": {
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        },
+                        "&.Mui-focusVisible": {
+                          outline: `2px solid ${theme.palette.primary.main}`,
+                          outlineOffset: 2,
+                        },
+                      })}
+                    >
+                      <Box
+                        sx={(theme) => ({
+                          width: 36,
+                          height: 36,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          borderRadius: "50%",
+                          color: "primary.main",
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        })}
+                      >
+                        <SkiPassIcon fontSize="small" />
+                      </Box>
+                      <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          Ski pass access
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block" }}
+                          noWrap
+                        >
+                          {selectedSkiPassesSummary}
+                        </Typography>
+                      </Box>
+                      <ChevronRightIcon color="action" />
+                    </ButtonBase>
                     <Typography variant="subtitle2">
                       {props.visibleSkiAreasCount} visible ski areas
                     </Typography>
                   </Box>
                 )}
               />
-            </Box>
-
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                Ski Passes
-              </Typography>
-              <Box sx={{ pl: 1 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => setSkiPassesOpen(true)}
-                >
-                  {selectedSkiPassesSummary}
-                </Button>
-              </Box>
             </Box>
           </Box>
 

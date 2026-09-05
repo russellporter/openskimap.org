@@ -6,13 +6,13 @@ import {
   Alert,
   Box,
   Button,
+  ButtonBase,
   Checkbox,
   CircularProgress,
   Collapse,
   Dialog,
   DialogActions,
   FormControlLabel,
-  IconButton,
   Link,
   Typography,
 } from "@mui/material";
@@ -89,24 +89,39 @@ const SkiPassBrandRow: React.FunctionComponent<{
   onToggle: (key: SkiPassFilterKey, checked: boolean) => void;
 }> = ({ group, selected, onToggle }) => {
   const [expanded, setExpanded] = React.useState(false);
+  const contentID = `ski-pass-brand-${group.brand.id}`;
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", py: 0.5 }}>
+      <ButtonBase
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-controls={contentID}
+        aria-label={`${expanded ? "Collapse" : "Expand"} ${group.brand.name} passes`}
+        sx={(theme) => ({
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          py: 0.5,
+          borderRadius: 1,
+          textAlign: "left",
+          "&:hover": {
+            bgcolor: "action.hover",
+          },
+          "&.Mui-focusVisible": {
+            outline: `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+          },
+        })}
+      >
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="body1">{group.brand.name}</Typography>
           <Typography variant="caption" color="textSecondary">
             {group.passes.length} passes
           </Typography>
         </Box>
-        <IconButton
-          size="small"
-          aria-label={`${expanded ? "Hide" : "Show"} ${group.brand.name} passes`}
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </IconButton>
-      </Box>
-      <Collapse in={expanded} unmountOnExit>
+        {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+      </ButtonBase>
+      <Collapse id={contentID} in={expanded} unmountOnExit>
         {group.passes.map((pass) => (
           <SkiPassRow
             key={pass.id}
