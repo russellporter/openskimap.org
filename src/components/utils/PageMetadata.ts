@@ -17,7 +17,7 @@ const metaDescriptionElement = getMetaDescription();
 const originalMetaDescription = metaDescriptionElement.getAttribute("content")!;
 
 export function updatePageMetadata(
-  feature: SkiAreaFeature | LiftFeature | RunFeature | null
+  feature: SkiAreaFeature | LiftFeature | RunFeature | null,
 ) {
   const name = feature !== null ? getDetailedTitle(feature) : null;
   if (name !== null && name.length > 0) {
@@ -55,7 +55,7 @@ function skiAreaNames(skiAreas: SkiAreaSummaryFeature[]): string | null {
 }
 
 function getLocationText(
-  feature: SkiAreaFeature | LiftFeature | RunFeature
+  feature: SkiAreaFeature | LiftFeature | RunFeature,
 ): string | null {
   const places = feature.properties.places;
   if (!places || places.length === 0) {
@@ -67,12 +67,12 @@ function getLocationText(
     new Set(
       places
         .map((place) => place.localized.en.locality)
-        .filter((locality): locality is string => locality !== null)
-    )
+        .filter((locality): locality is string => locality !== null),
+    ),
   );
 
   const countries = Array.from(
-    new Set(places.map((place) => place.localized.en.country))
+    new Set(places.map((place) => place.localized.en.country)),
   );
 
   if (localities.length === 0 && countries.length === 0) {
@@ -95,7 +95,7 @@ function getLocationText(
 }
 
 function getDetailedTitle(
-  feature: SkiAreaFeature | LiftFeature | RunFeature
+  feature: SkiAreaFeature | LiftFeature | RunFeature,
 ): string | null {
   const properties = feature.properties;
   switch (properties.type) {

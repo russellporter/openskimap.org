@@ -4,9 +4,7 @@ import MapFilters from "../MapFilters";
 
 // A filter rule can be a MapLibre expression filter, "hidden" (to hide the object completely), or null (no filter)
 export type ObjectFilterRules =
-  | maplibregl.ExpressionFilterSpecification
-  | "hidden"
-  | null;
+  maplibregl.ExpressionFilterSpecification | "hidden" | null;
 
 export interface MapFilterRules {
   runs: ObjectFilterRules;

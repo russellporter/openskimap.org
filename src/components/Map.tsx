@@ -184,7 +184,10 @@ export class Map {
           // Enable 3D terrain
           const terrainSource = this.map.getSource("terrain");
           if (terrainSource) {
-            this.map.setTerrain({ source: "terrain", exaggeration: this.terrainExaggeration });
+            this.map.setTerrain({
+              source: "terrain",
+              exaggeration: this.terrainExaggeration,
+            });
           }
         } else {
           // Disable 3D terrain
@@ -431,13 +434,18 @@ export class Map {
 
             // Apply hillshade exaggeration multiplier
             if (updatedLayer.type === "hillshade") {
-              const baseExaggeration = updatedLayer.paint?.["hillshade-exaggeration"] ?? 0.5;
-              this.baseHillshadeExaggeration[updatedLayer.id] = baseExaggeration;
+              const baseExaggeration =
+                updatedLayer.paint?.["hillshade-exaggeration"] ?? 0.5;
+              this.baseHillshadeExaggeration[updatedLayer.id] =
+                baseExaggeration;
               updatedLayer = {
                 ...updatedLayer,
                 paint: {
                   ...updatedLayer.paint,
-                  "hillshade-exaggeration": Math.min(0.7, baseExaggeration * Math.sqrt(this.terrainExaggeration)),
+                  "hillshade-exaggeration": Math.min(
+                    0.7,
+                    baseExaggeration * Math.sqrt(this.terrainExaggeration),
+                  ),
                 },
               };
             }
@@ -455,7 +463,11 @@ export class Map {
           layers: updatedLayers,
           terrain:
             this.terrainEnabled || this.terrainInspectorEnabled
-              ? { source: "terrain", ...newStyle.terrain, exaggeration: this.terrainExaggeration }
+              ? {
+                  source: "terrain",
+                  ...newStyle.terrain,
+                  exaggeration: this.terrainExaggeration,
+                }
               : undefined,
         };
 
@@ -817,7 +829,8 @@ export class Map {
     if (!style) return;
     for (const layer of style.layers) {
       if (layer.type === "hillshade") {
-        const baseExaggeration = this.baseHillshadeExaggeration[layer.id] ?? 0.5;
+        const baseExaggeration =
+          this.baseHillshadeExaggeration[layer.id] ?? 0.5;
         this.map.setPaintProperty(
           layer.id,
           "hillshade-exaggeration",
@@ -834,7 +847,10 @@ export class Map {
         if (!this.terrainEnabled) {
           const terrainSource = this.map.getSource("terrain");
           if (terrainSource) {
-            this.map.setTerrain({ source: "terrain", exaggeration: this.terrainExaggeration });
+            this.map.setTerrain({
+              source: "terrain",
+              exaggeration: this.terrainExaggeration,
+            });
           }
         }
         if (!this.terrainInspectorControl) {
@@ -842,7 +858,8 @@ export class Map {
             this.map,
             this.geolocateControl,
           );
-          this.terrainInspectorControl.terrainExaggeration = this.terrainExaggeration;
+          this.terrainInspectorControl.terrainExaggeration =
+            this.terrainExaggeration;
           this.map.addControl(this.terrainInspectorControl, "bottom-left");
         }
       } else {

@@ -1,42 +1,50 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import { VitePWA } from "vite-plugin-pwa";
+import { readFileSync } from "node:fs";
+import { defineConfig, type Plugin } from "vite";
+
+const buildTimestamp = Date.now().toString();
+
+function leanPWA(): Plugin {
+  return {
+    name: "openskimap-pwa",
+    apply: "build",
+    generateBundle(_options, bundle) {
+      const generatedAssets = Object.keys(bundle)
+        .filter((fileName) => /\.(?:css|html|ico|js|png|svg)$/.test(fileName))
+        .map((fileName) => `/${fileName}`);
+      const precacheURLs = [
+        "/",
+        "/manifest.webmanifest",
+        "/pwa-192.png",
+        "/pwa-512.png",
+        "/pwa-maskable-512.png",
+        ...generatedAssets,
+      ];
+      const serviceWorker = readFileSync(
+        new URL("./src/service-worker.js", import.meta.url),
+        "utf8",
+      )
+        .replace("__BUILD_ID__", buildTimestamp)
+        .replace(
+          "__PRECACHE_URLS__",
+          JSON.stringify([...new Set(precacheURLs)]),
+        );
+
+      this.emitFile({
+        type: "asset",
+        fileName: "sw.js",
+        source: serviceWorker,
+      });
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      strategies: "generateSW",
-      registerType: "autoUpdate",
-      workbox: {
-        clientsClaim: true,
-        skipWaiting: true,
-        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) =>
-              url.origin === "https://tiles.openskimap.org" ||
-              url.origin === "https://tiles.openfreemap.org" ||
-              url.origin === "https://services.arcgisonline.com",
-            handler: "NetworkFirst",
-            options: {
-              cacheName: `tiles-cache-v2`,
-              expiration: {
-                maxEntries: 50000,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-                purgeOnQuotaError: true,
-              },
-              networkTimeoutSeconds: 3,
-            },
-          },
-        ],
-      },
-    }),
-  ],
+  plugins: [react(), leanPWA()],
 
   // Define global constants
   define: {
-    BUILD_TIMESTAMP: JSON.stringify(Date.now().toString()),
+    BUILD_TIMESTAMP: JSON.stringify(buildTimestamp),
   },
 
   // Development server configuration

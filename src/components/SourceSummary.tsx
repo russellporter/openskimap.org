@@ -8,10 +8,10 @@ import {
 import * as React from "react";
 
 export const SourceSummary: React.FunctionComponent<{ sources: Source[] }> = (
-  props
+  props,
 ) => {
   const hasOpenStreetMapSource = props.sources.some(
-    (source) => source.type === SourceType.OPENSTREETMAP
+    (source) => source.type === SourceType.OPENSTREETMAP,
   );
   const aggregatedSources = props.sources.reduce(
     (aggregation: Map<SourceType, string[]>, source) => {
@@ -21,7 +21,7 @@ export const SourceSummary: React.FunctionComponent<{ sources: Source[] }> = (
       aggregation.get(source.type)!.push(source.id);
       return aggregation;
     },
-    new Map<SourceType, string[]>()
+    new Map<SourceType, string[]>(),
   );
   return (
     <Typography variant="subtitle1" color="textSecondary">

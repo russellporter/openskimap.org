@@ -8,7 +8,7 @@ export const UnitSystemManager: React.FunctionComponent<{
   render: (unitSystem: UnitSystem) => React.ReactNode;
 }> = (props) => {
   const [unitSystem, setUnitSystem] = React.useState<UnitSystem>(
-    getUnitSystem_NonReactive()
+    getUnitSystem_NonReactive(),
   );
 
   React.useEffect(() => {
@@ -26,7 +26,7 @@ export const UnitSystemManager: React.FunctionComponent<{
     return () => {
       window.removeEventListener(
         SettingsEvent.EVENT_TYPE,
-        handleSettingsChange
+        handleSettingsChange,
       );
     };
   }, []);
@@ -46,7 +46,7 @@ export function setUnitSystem(unitSystem: UnitSystem) {
 
 export function getUnitSystem_NonReactive(): UnitSystem {
   return unitSystemFromString(
-    localStorage.getItem(UNIT_SYSTEM_SETTING_LOCAL_STORAGE_KEY)
+    localStorage.getItem(UNIT_SYSTEM_SETTING_LOCAL_STORAGE_KEY),
   );
 }
 

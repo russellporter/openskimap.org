@@ -24,7 +24,6 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": ".",
     "types": ["vite/client"]
   },
   "include": ["src/**/*"],

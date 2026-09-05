@@ -25,7 +25,7 @@ export class EsriAttribution {
   constructor(
     map: maplibregl.Map,
     attributionUrl: string,
-    attributionControl: maplibregl.AttributionControl
+    attributionControl: maplibregl.AttributionControl,
   ) {
     this.map = map;
     this.attributionUrl = attributionUrl;
@@ -140,7 +140,7 @@ export class EsriAttribution {
   }
   private boundsIntersect(
     mapBounds: maplibregl.LngLatBounds,
-    attrBounds: AttributionBounds
+    attrBounds: AttributionBounds,
   ): boolean {
     const mapSW = mapBounds.getSouthWest();
     const mapNE = mapBounds.getNorthEast();

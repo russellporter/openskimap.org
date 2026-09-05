@@ -70,7 +70,10 @@ export class TrackDrawingManager {
     this.updateDrawingVisualization();
   }
 
-  private coordinatesEqual(a: [number, number][], b: [number, number][]): boolean {
+  private coordinatesEqual(
+    a: [number, number][],
+    b: [number, number][],
+  ): boolean {
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) {
       if (a[i][0] !== b[i][0] || a[i][1] !== b[i][1]) return false;
@@ -197,7 +200,9 @@ export class TrackDrawingManager {
   }
 
   private updateLine(): void {
-    const source = this.map.getSource(DRAWING_SOURCE_ID) as maplibregl.GeoJSONSource;
+    const source = this.map.getSource(
+      DRAWING_SOURCE_ID,
+    ) as maplibregl.GeoJSONSource;
     if (!source) return;
 
     source.setData({

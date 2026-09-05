@@ -22,7 +22,7 @@ export class MapStyleControl implements maplibregl.IControl {
     this._satelliteButton.setAttribute("aria-label", "Satellite Layer");
     this._satelliteButton.addEventListener(
       "click",
-      this._onToggleButton.bind(this)
+      this._onToggleButton.bind(this),
     );
   }
 
@@ -48,7 +48,7 @@ export class MapStyleControl implements maplibregl.IControl {
     this._enabled = enabled;
     this._satelliteButton.setAttribute(
       "aria-pressed",
-      enabled ? "true" : "false"
+      enabled ? "true" : "false",
     );
     if (enabled) {
       this._satelliteButton.classList.add("openskimap-style-enabled");

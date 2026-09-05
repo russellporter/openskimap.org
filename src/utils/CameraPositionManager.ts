@@ -55,7 +55,7 @@ export class CameraPositionManager {
     center: maplibregl.LngLat,
     zoom: number,
     bearing: number,
-    pitch: number
+    pitch: number,
   ): void {
     // Always save to localStorage
     this.saveCameraToLocalStorage(center, zoom, bearing, pitch);
@@ -119,7 +119,7 @@ export class CameraPositionManager {
     center: maplibregl.LngLat,
     zoom: number,
     bearing: number,
-    pitch: number
+    pitch: number,
   ): string {
     const precision = Math.max(0, Math.ceil(Math.log(zoom) / Math.LN2) + 2);
 
@@ -143,7 +143,7 @@ export class CameraPositionManager {
     center: maplibregl.LngLat,
     zoom: number,
     bearing: number,
-    pitch: number
+    pitch: number,
   ): void {
     localStorage.setItem("slippy.lat", center.lat.toString());
     localStorage.setItem("slippy.lng", center.lng.toString());
@@ -156,7 +156,7 @@ export class CameraPositionManager {
     center: maplibregl.LngLat,
     zoom: number,
     bearing: number,
-    pitch: number
+    pitch: number,
   ): void {
     const newHash = this.generateLocationHash(center, zoom, bearing, pitch);
 

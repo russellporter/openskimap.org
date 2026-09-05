@@ -69,7 +69,7 @@ export class InfoControl implements maplibregl.IControl {
             />
           )}
         />
-      </Themed>
+      </Themed>,
     );
   };
 }

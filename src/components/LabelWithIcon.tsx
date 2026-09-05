@@ -7,7 +7,7 @@ interface LabelWithIconProps {
 }
 
 export const LabelWithIcon: React.FunctionComponent<LabelWithIconProps> = (
-  props
+  props,
 ) => {
   return (
     <span className={"label label-" + props.appearance}>

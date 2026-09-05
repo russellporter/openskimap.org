@@ -13,7 +13,7 @@ self.addEventListener("activate", function (event) {
           cacheNames.map(function (cacheName) {
             console.log("Deleting cache:", cacheName);
             return caches.delete(cacheName);
-          })
+          }),
         );
       }),
       // Unregister this service worker
@@ -26,6 +26,6 @@ self.addEventListener("activate", function (event) {
           });
         });
       }),
-    ])
+    ]),
   );
 });

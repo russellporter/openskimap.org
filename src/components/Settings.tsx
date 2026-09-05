@@ -43,7 +43,7 @@ export default class Settings extends React.Component<Props> {
           <FormControl>
             <FormLabel>
               {" "}
-              <Typography fontSize="1.15rem" color="WindowText">
+              <Typography sx={{ fontSize: "1.15rem", color: "WindowText" }}>
                 Unit Style{" "}
               </Typography>
             </FormLabel>
@@ -82,8 +82,12 @@ export default class Settings extends React.Component<Props> {
               }
               label={
                 <div>
-                  <Typography fontSize="1rem">Terrain Inspector</Typography>
-                  <Typography fontSize="0.8rem" color="text.secondary">
+                  <Typography sx={{ fontSize: "1rem" }}>
+                    Terrain Inspector
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: "0.8rem", color: "text.secondary" }}
+                  >
                     Show elevation, slope &amp; aspect at a selected point
                   </Typography>
                 </div>
@@ -93,8 +97,10 @@ export default class Settings extends React.Component<Props> {
 
           <div style={{ marginTop: 16 }}>
             <FormLabel>
-              <Typography fontSize="1rem">Elevation Exaggeration</Typography>
-              <Typography fontSize="0.8rem" color="text.secondary">
+              <Typography sx={{ fontSize: "1rem" }}>
+                Elevation Exaggeration
+              </Typography>
+              <Typography sx={{ fontSize: "0.8rem", color: "text.secondary" }}>
                 Amplify or reduce vertical relief in 3D view
               </Typography>
             </FormLabel>

@@ -1,5 +1,3 @@
-import queryString from "query-string";
-import { shallowEqualObjects } from "shallow-equal";
 import { MapMarker, parseMarkers, stringifyMarkers } from "../MapMarker";
 import { ObjectIDType } from "./SelectedObject";
 
@@ -19,68 +17,59 @@ export interface URLState {
   showInfo: boolean;
   /**
    * Selected ski passes, comma separated, or null when the URL says nothing about them.
-   *
-   * Held as a string rather than an array because URLState is compared with shallowEqualObjects,
-   * which a freshly built array would fail on every update.
    */
   selectedSkiPasses: string | null;
 }
 
 export function updateURL(state: URLState) {
-  if (shallowEqualObjects(state, getURLState())) {
-    return;
-  }
-
   if (!window.history) {
     return;
   }
 
-  const query = queryString.stringify({
-    about: state.aboutInfoOpen ? null : undefined,
-    legal: state.legalOpen ? null : undefined,
-    legend: state.legendOpen ? null : undefined,
-    obj: state.selectedObjectID !== null ? state.selectedObjectID : undefined,
-    obj_type:
-      state.selectedObjectID !== null &&
-      state.selectedObjectIDType !== "openskimap"
-        ? state.selectedObjectIDType
-        : undefined,
-    show_info: state.selectedObjectID && !state.showInfo ? "false" : undefined,
-    markers:
-      state.markers.length > 0 ? stringifyMarkers(state.markers) : undefined,
-    passes:
-      state.selectedSkiPasses !== null && state.selectedSkiPasses.length > 0
-        ? state.selectedSkiPasses
-        : undefined,
-  });
-  window.history.replaceState(
-    state,
-    "OpenSkiMap.org",
-    "/" + (query.length > 0 ? "?" : "") + query + location.hash,
-  );
+  const query: string[] = [];
+  if (state.aboutInfoOpen) query.push("about");
+  if (state.legalOpen) query.push("legal");
+  if (state.legendOpen) query.push("legend");
+  if (state.selectedObjectID !== null) {
+    query.push(encodeParameter("obj", state.selectedObjectID));
+    if (state.selectedObjectIDType !== "openskimap") {
+      query.push(encodeParameter("obj_type", state.selectedObjectIDType));
+    }
+    if (!state.showInfo) query.push("show_info=false");
+  }
+  if (state.markers.length > 0) {
+    query.push(encodeParameter("markers", stringifyMarkers(state.markers)));
+  }
+  if (state.selectedSkiPasses) {
+    query.push(encodeParameter("passes", state.selectedSkiPasses));
+  }
+
+  const nextURL = `/${query.length > 0 ? `?${query.join("&")}` : ""}${location.hash}`;
+  const currentURL = `${location.pathname}${location.search}${location.hash}`;
+  if (currentURL !== nextURL) {
+    window.history.replaceState(state, "OpenSkiMap.org", nextURL);
+  }
 }
 
 export function getURLState(): URLState {
-  const query = queryString.parseUrl(window.location.toString()).query;
-  const rawType = query.obj_type;
+  const query = new URL(window.location.href).searchParams;
+  const rawType = query.get("obj_type");
   const selectedObjectIDType: ObjectIDType =
     typeof rawType === "string" && (validIDTypes as string[]).includes(rawType)
       ? (rawType as ObjectIDType)
       : "openskimap";
   return {
-    aboutInfoOpen: query.about !== undefined ? true : false,
-    legalOpen: query.legal !== undefined ? true : false,
-    legendOpen: query.legend !== undefined ? true : false,
-    selectedObjectID:
-      query.obj !== undefined && typeof query.obj === "string"
-        ? query.obj
-        : null,
+    aboutInfoOpen: query.has("about"),
+    legalOpen: query.has("legal"),
+    legendOpen: query.has("legend"),
+    selectedObjectID: query.get("obj"),
     selectedObjectIDType,
-    showInfo: query.show_info !== "false",
-    markers:
-      query.markers !== undefined && typeof query.markers === "string"
-        ? parseMarkers(query.markers)
-        : [],
-    selectedSkiPasses: typeof query.passes === "string" ? query.passes : null,
+    showInfo: query.get("show_info") !== "false",
+    markers: query.has("markers") ? parseMarkers(query.get("markers")!) : [],
+    selectedSkiPasses: query.get("passes"),
   };
+}
+
+function encodeParameter(name: string, value: string): string {
+  return new URLSearchParams([[name, value]]).toString();
 }

@@ -17,7 +17,7 @@ export default class About extends React.Component<Props> {
             About
           </Typography>
         </ModalHeader>
-        <Typography paragraph={true}>
+        <Typography component="p" sx={{ mb: 2 }}>
           This map uses OpenStreetMap and Skimap.org data to show ski areas,
           runs, and lifts around the world. Backcountry ski routes, winter
           hiking, and sled trails are also displayed. You can add ski trails and
@@ -35,7 +35,7 @@ export default class About extends React.Component<Props> {
           . After editing, it may take several days your changes to show up on
           the OpenSkiMap.
         </Typography>
-        <Typography paragraph={true}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Want to see the world's largest collection of traditional ski maps?
           Visit{" "}
           <Link href="http://www.skimap.org" target="_blank">
@@ -43,30 +43,31 @@ export default class About extends React.Component<Props> {
           </Link>
           .
         </Typography>
-        <Typography paragraph={true}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Suggestions for improvements? Email{" "}
           <Link href="mailto:contact@skimap.org">contact@skimap.org</Link>.
         </Typography>
         <Typography variant="h6" id="modal-title">
           Embedding
         </Typography>
-        <Typography paragraph={true}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Embedding of the website in an iframe is permitted.
         </Typography>
         <EmbedCode />
         <Typography
           variant="body2"
           color="text.secondary"
-          paragraph={true}
+          component="p"
+          sx={{ mb: 2 }}
         >
           To link to a specific feature, include both the <code>obj</code> query
-          parameter and the location hash. Feature IDs may change over time — the
-          location hash ensures the map still shows the right area.
+          parameter and the location hash. Feature IDs may change over time —
+          the location hash ensures the map still shows the right area.
         </Typography>
         <Typography variant="h6" id="modal-title">
           Acceptable Use
         </Typography>
-        <Typography paragraph={true}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Direct use of tiles hosted at tiles.openskimap.org is not permitted.
           Please prepare and host your own tiles using the data from{" "}
           <Link href="https://openskidata.org" target="_blank">
@@ -77,7 +78,7 @@ export default class About extends React.Component<Props> {
         <Typography variant="h6" id="modal-title">
           Code
         </Typography>
-        <Typography paragraph={true}>
+        <Typography component="p" sx={{ mb: 2 }}>
           This project is{" "}
           <Link
             href="https://www.github.com/russellporter/openskimap.org"
@@ -90,7 +91,7 @@ export default class About extends React.Component<Props> {
         <Typography variant="h6" id="modal-title">
           Data Downloads
         </Typography>
-        <Typography paragraph={true}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Ski area, run, lift and spot data is available for download in
           GeoJSON, CSV and GeoPackage format at{" "}
           <Link href="https://openskidata.org" target="_blank">

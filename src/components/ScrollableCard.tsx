@@ -21,7 +21,7 @@ export const ScrollableCard: React.FunctionComponent<
 
     // Show header separator when scrolled down
     setShowHeaderSeparator(card.scrollTop > 0);
-    
+
     // Show footer separator when content extends below the visible area
     const contentBottom = content.offsetTop + content.scrollHeight;
     const visibleBottom = card.scrollTop + card.clientHeight;
@@ -33,13 +33,13 @@ export const ScrollableCard: React.FunctionComponent<
     const card = cardRef.current;
     if (!card) return;
 
-    card.addEventListener('scroll', updateSeparators);
-    
+    card.addEventListener("scroll", updateSeparators);
+
     // Initial check
     updateSeparators();
-    
+
     return () => {
-      card.removeEventListener('scroll', updateSeparators);
+      card.removeEventListener("scroll", updateSeparators);
     };
   }, []);
 
@@ -55,7 +55,7 @@ export const ScrollableCard: React.FunctionComponent<
 
     // Observe the content element for any size changes
     resizeObserver.observe(content);
-    
+
     return () => {
       resizeObserver.disconnect();
     };
@@ -73,17 +73,23 @@ export const ScrollableCard: React.FunctionComponent<
         position: "relative",
       }}
     >
-      <div style={{ 
-        position: "sticky", 
-        top: 0, 
-        backgroundColor: "white",
-        zIndex: 2,
-        borderBottom: showHeaderSeparator ? "1px solid rgba(0, 0, 0, 0.12)" : "none" 
-      }}>
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          backgroundColor: "white",
+          zIndex: 2,
+          borderBottom: showHeaderSeparator
+            ? "1px solid rgba(0, 0, 0, 0.12)"
+            : "none",
+        }}
+      >
         {props.header}
       </div>
       <div ref={contentRef}>
-        <CardContent style={{ paddingTop: "0px" }}>{props.children}</CardContent>
+        <CardContent style={{ paddingTop: "0px" }}>
+          {props.children}
+        </CardContent>
       </div>
       {props.footer && (
         <div
@@ -92,7 +98,9 @@ export const ScrollableCard: React.FunctionComponent<
             bottom: 0,
             backgroundColor: "white",
             zIndex: 2,
-            borderTop: showFooterSeparator ? "1px solid rgba(0, 0, 0, 0.12)" : "none",
+            borderTop: showFooterSeparator
+              ? "1px solid rgba(0, 0, 0, 0.12)"
+              : "none",
           }}
         >
           {props.footer}

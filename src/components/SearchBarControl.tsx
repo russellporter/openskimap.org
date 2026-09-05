@@ -36,7 +36,7 @@ export class SearchBarControl implements maplibregl.IControl {
   };
 
   expandSearch = () => {
-    // Defer to avoid being overridden by useDetectClickOutside
+    // Defer until the newly expanded input has mounted.
     // which sets expanded=false in the same click event
     setTimeout(() => {
       document.dispatchEvent(new Event("expand-search"));
@@ -53,7 +53,7 @@ export class SearchBarControl implements maplibregl.IControl {
           width={controlWidth(this._map!)}
           shouldCollapse={shouldCollapse}
         />
-      </Themed>
+      </Themed>,
     );
   };
 

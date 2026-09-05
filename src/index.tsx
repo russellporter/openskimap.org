@@ -23,6 +23,7 @@ import { updatePageMetadata } from "./components/utils/PageMetadata";
 import "./index.css";
 import { CameraPositionManager } from "./utils/CameraPositionManager";
 import { readGpxFile } from "./utils/TrackParser";
+import "./registerServiceWorker";
 
 function initialize() {
   const sidebarRoot = ReactDOM.createRoot(document.getElementById("sidebar")!);

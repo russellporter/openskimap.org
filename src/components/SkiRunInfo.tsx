@@ -19,12 +19,17 @@ import { Badge } from "./Badge";
 import { CardHeader } from "./CardHeader";
 import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
-import { HeightProfile } from "./HeightProfile";
 import { ScrollableCard } from "./ScrollableCard";
 import { SourceSummary } from "./SourceSummary";
 import { formattedSlope } from "./utils/formattedSlope";
 import { getRunTitleAndSubtitle } from "./utils/PageMetadata";
 import * as UnitHelpers from "./utils/UnitHelpers";
+
+const HeightProfile = React.lazy(() =>
+  import("./HeightProfile").then((module) => ({
+    default: module.HeightProfile,
+  })),
+);
 
 interface Props {
   feature: RunFeature;
@@ -56,7 +61,9 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
         />
       }
       footer={
-        actions.length > 0 ? <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions> : undefined
+        actions.length > 0 ? (
+          <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions>
+        ) : undefined
       }
     >
       <Typography gutterBottom variant="h5" component="h2">
@@ -66,7 +73,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
               text={properties.ref}
               color={getRunColor(
                 properties.difficultyConvention,
-                properties.difficulty
+                properties.difficulty,
               )}
             />
           </span>
@@ -76,18 +83,10 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
       {subtitle && <Typography>{subtitle}</Typography>}
       <GroomingLabel feature={feature} />
       {properties.snowmaking === true ? (
-        <Chip
-          icon={<AcUnitIcon />}
-          label="Snowmaking"
-          sx={{ mr: 1 }}
-        />
+        <Chip icon={<AcUnitIcon />} label="Snowmaking" sx={{ mr: 1 }} />
       ) : null}
       {properties.snowfarming === true ? (
-        <Chip
-          icon={<AcUnitIcon />}
-          label="Snowfarming"
-          sx={{ mr: 1 }}
-        />
+        <Chip icon={<AcUnitIcon />} label="Snowfarming" sx={{ mr: 1 }} />
       ) : null}
       {properties.oneway === true &&
       !properties.uses.includes(RunUse.Downhill) ? (
@@ -112,8 +111,12 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
           sx={{ mr: 1 }}
         />
       ) : null}
-      {properties.tunnel === true ? <Chip label="Tunnel" sx={{ mr: 1 }} /> : null}
-      {properties.gladed === true ? <Chip label="Gladed" sx={{ mr: 1 }} /> : null}
+      {properties.tunnel === true ? (
+        <Chip label="Tunnel" sx={{ mr: 1 }} />
+      ) : null}
+      {properties.gladed === true ? (
+        <Chip label="Gladed" sx={{ mr: 1 }} />
+      ) : null}
       {properties.patrolled === true ? (
         <Chip
           avatar={
@@ -151,7 +154,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             Ascent:{" "}
             {UnitHelpers.heightText(
               elevationData.ascentInMeters,
-              props.unitSystem
+              props.unitSystem,
             )}
           </span>
         ) : null}
@@ -160,37 +163,42 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
             Descent:{" "}
             {UnitHelpers.heightText(
               elevationData.descentInMeters,
-              props.unitSystem
+              props.unitSystem,
             )}
           </span>
         ) : null}
       </Typography>
-      {elevationData && (elevationData.averagePitchInPercent !== null || elevationData.maxPitchInPercent !== null) && (
-        <Typography className={"distance-and-elevation-info"}>
-          {elevationData.averagePitchInPercent !== null && (
-            <span>
-              Average Slope: {formattedSlope(elevationData.averagePitchInPercent)}
-            </span>
-          )}
-          {elevationData.maxPitchInPercent !== null && (
-            <span>
-              Max Slope: {formattedSlope(elevationData.maxPitchInPercent)}
-            </span>
-          )}
-        </Typography>
-      )}
+      {elevationData &&
+        (elevationData.averagePitchInPercent !== null ||
+          elevationData.maxPitchInPercent !== null) && (
+          <Typography className={"distance-and-elevation-info"}>
+            {elevationData.averagePitchInPercent !== null && (
+              <span>
+                Average Slope:{" "}
+                {formattedSlope(elevationData.averagePitchInPercent)}
+              </span>
+            )}
+            {elevationData.maxPitchInPercent !== null && (
+              <span>
+                Max Slope: {formattedSlope(elevationData.maxPitchInPercent)}
+              </span>
+            )}
+          </Typography>
+        )}
       {properties.description && (
         <Typography>
           <span>Notes: {properties.description}</span>
         </Typography>
       )}
       {elevationData !== null && (
-        <HeightProfile
-          feature={feature as GeoJSON.Feature<LineString, RunProperties>}
-          elevationData={elevationData}
-          map={props.map}
-          unitSystem={props.unitSystem}
-        />
+        <React.Suspense fallback={null}>
+          <HeightProfile
+            feature={feature as GeoJSON.Feature<LineString, RunProperties>}
+            elevationData={elevationData}
+            map={props.map}
+            unitSystem={props.unitSystem}
+          />
+        </React.Suspense>
       )}
       {<SourceSummary sources={properties.sources} />}
     </ScrollableCard>
@@ -198,7 +206,7 @@ export const SkiRunInfo: React.FunctionComponent<Props> = (props) => {
 };
 
 const GroomingLabel: React.FunctionComponent<{ feature: RunFeature }> = (
-  props
+  props,
 ) => {
   const grooming = props.feature.properties.grooming;
   const isNordic = props.feature.properties.uses.includes(RunUse.Nordic);

@@ -25,7 +25,6 @@ import {
 } from "openskidata-format";
 import * as React from "react";
 import { Line } from "react-chartjs-2";
-import "whatwg-fetch";
 import * as UnitHelpers from "./utils/UnitHelpers";
 
 Chart.register(LinearScale);
@@ -50,7 +49,6 @@ interface OverlayData {
 }
 
 interface HeightProfileState {
-  LineChart: typeof Line | null;
   chartHighlightPosition: maplibregl.LngLat | null;
   overlayData: OverlayData | null;
 }
@@ -163,17 +161,12 @@ export class HeightProfile extends React.Component<
     super(props);
 
     this.state = {
-      LineChart: null,
       chartHighlightPosition: null,
       overlayData: null,
     };
   }
 
   componentDidMount() {
-    import("react-chartjs-2").then((module) =>
-      this.setState({ LineChart: module.Line }),
-    );
-
     // Set up map event listeners if map is provided
     if (this.props.map) {
       this.props.map.on("mousemove", this._onMapMouseMove);
@@ -326,12 +319,11 @@ export class HeightProfile extends React.Component<
   };
 
   render() {
-    const LineChart = this.state.LineChart;
     const feature = this.props.feature;
     const elevationData = this.props.elevationData;
     const unitSystem = this.props.unitSystem;
 
-    if (LineChart === null || elevationData === null) {
+    if (elevationData === null) {
       return null;
     }
 
@@ -491,10 +483,7 @@ export class HeightProfile extends React.Component<
 
     // Compute overlay data for map-hover highlights
     let mapHoverOverlay: OverlayData | null = null;
-    if (
-      highlightPositionX !== null &&
-      this.highlightPixelCoords !== null
-    ) {
+    if (highlightPositionX !== null && this.highlightPixelCoords !== null) {
       const elevation = getInterpolatedElevation(
         rawElevationsAndDistance,
         highlightPositionX,
@@ -610,15 +599,11 @@ export class HeightProfile extends React.Component<
             }}
           >
             <div>
-              {UnitHelpers.heightText(
-                overlayData.elevation,
-                unitSystem,
-                true,
-              )}
+              {UnitHelpers.heightText(overlayData.elevation, unitSystem, true)}
             </div>
             <div>
-              {Math.round(overlayData.slopeDegrees)}°{" "}
-              ({Math.round(overlayData.slopePercent)}%)
+              {Math.round(overlayData.slopeDegrees)}° (
+              {Math.round(overlayData.slopePercent)}%)
             </div>
           </div>
         )}

@@ -121,7 +121,7 @@ export const SlopeAspectRose: React.FC<{ feature: SkiAreaFeature }> = ({
         </Tooltip>
       </Typography>
       {feature.properties.activities.some(
-        (activity) => activity !== "downhill"
+        (activity) => activity !== "downhill",
       ) && (
         <Typography variant="body2" color="textSecondary">
           Only downhill runs are included in the analysis.

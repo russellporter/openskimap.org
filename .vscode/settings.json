@@ -1,5 +1,4 @@
 {
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.preferences.importModuleSpecifier": "relative",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.tabSize": 2,
@@ -13,6 +12,5 @@
     "**/.yarn": true,
     "**/.pnp.*": true
   },
-  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": false
 }

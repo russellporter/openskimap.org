@@ -20,7 +20,7 @@ export function unitSystemFromString(unitSystem: string | null): UnitSystem {
 
 export function closestEquivalent(
   unit: MetricLengthUnit,
-  unitSystem: UnitSystem
+  unitSystem: UnitSystem,
 ): LengthUnit {
   switch (unitSystem) {
     case "metric":
@@ -55,7 +55,7 @@ export function labelForLengthUnit(unit: LengthUnit) {
 
 function formattedLengthString(
   lengthWithUnit: LengthWithUnit,
-  withSpace: boolean
+  withSpace: boolean,
 ) {
   const unit = lengthWithUnit.lengthUnit;
   const valuePrefix = `${lengthWithUnit.length}${withSpace ? " " : ""}`;
@@ -66,7 +66,7 @@ function formattedLengthString(
 function convertDistance(
   lengthInMeters: number,
   unit: LengthUnit,
-  roundToNearestDecimal = false
+  roundToNearestDecimal = false,
 ): LengthWithUnit {
   let lengthInUnit;
 
@@ -97,18 +97,18 @@ function convertDistance(
 export function heightText(
   heightInMeters: number,
   unitSystem: UnitSystem,
-  withSpace = false
+  withSpace = false,
 ) {
   switch (unitSystem) {
     case "metric":
       return formattedLengthString(
         convertDistance(heightInMeters, "meters"),
-        withSpace
+        withSpace,
       );
     case "imperial":
       return formattedLengthString(
         convertDistance(heightInMeters, "feet"),
-        withSpace
+        withSpace,
       );
   }
 }
@@ -131,7 +131,7 @@ export function distanceText({
       const distanceInKilometers = convertDistance(
         distanceInMeters,
         "kilometers",
-        roundToNearestDecimal
+        roundToNearestDecimal,
       );
 
       if (forceLongestUnit || distanceInKilometers.length > 1) {
@@ -140,13 +140,13 @@ export function distanceText({
 
       return formattedLengthString(
         convertDistance(distanceInMeters, "meters"),
-        withSpace
+        withSpace,
       );
     case "imperial":
       const distanceInMiles = convertDistance(
         distanceInMeters,
         "miles",
-        roundToNearestDecimal
+        roundToNearestDecimal,
       );
 
       if (forceLongestUnit || distanceInMiles.length >= 0.1) {
@@ -155,14 +155,14 @@ export function distanceText({
 
       return formattedLengthString(
         convertDistance(distanceInMeters, "feet"),
-        withSpace
+        withSpace,
       );
   }
 }
 
 export function speedInUnits(
   speedInMetersPerSecond: number,
-  unitSystem: UnitSystem
+  unitSystem: UnitSystem,
 ): string {
   if (unitSystem === "metric") {
     return `${speedInMetersPerSecond.toFixed(1)} m/s`;
@@ -174,7 +174,7 @@ export function speedInUnits(
 
 export function verticalSpeedInUnits(
   speedInMetersPerSecond: number,
-  unitSystem: UnitSystem
+  unitSystem: UnitSystem,
 ): string {
   if (unitSystem === "metric") {
     const speedInMetersPerMinute = speedInMetersPerSecond * 60;

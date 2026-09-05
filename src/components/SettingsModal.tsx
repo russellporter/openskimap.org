@@ -1,5 +1,4 @@
-import { Dialog } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, Dialog } from "@mui/material";
 import * as React from "react";
 import EventBus from "./EventBus";
 import Settings from "./Settings";

@@ -5,7 +5,7 @@ import { getFilterRules } from "./MapFilterRules";
 
 export function getVisibleSkiAreasCount(
   map: maplibregl.Map,
-  filters: MapFilters
+  filters: MapFilters,
 ): number {
   const activeRules = getFilterRules(filters);
   const rules = activeRules.skiAreas;
@@ -33,10 +33,10 @@ export function getVisibleSkiAreasCount(
       .filter(
         (skiArea) =>
           skiArea.geometry.type === "Point" &&
-          bounds.contains(skiArea.geometry.coordinates as [number, number])
+          bounds.contains(skiArea.geometry.coordinates as [number, number]),
       )
       .map((skiArea) => skiArea.properties as SkiAreaFeature)
-      .map((skiAreaProperties) => skiAreaProperties.id)
+      .map((skiAreaProperties) => skiAreaProperties.id),
   );
 
   return skiAreaIDs.size;

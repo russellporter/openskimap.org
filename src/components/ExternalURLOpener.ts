@@ -20,7 +20,7 @@ export function editMap(map: Map) {
       "/" +
       center.lat +
       "/" +
-      center.lng
+      center.lng,
   );
 }
 

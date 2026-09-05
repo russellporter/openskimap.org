@@ -1,5 +1,4 @@
-import { Dialog, Link, Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, Dialog, Link, Typography } from "@mui/material";
 import * as React from "react";
 import EventBus from "./EventBus";
 import { ModalHeader } from "./ModalHeader";
@@ -26,7 +25,7 @@ export const LegalModal: React.FunctionComponent<{
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
           Map Data
         </Typography>
-        <Typography paragraph sx={{ mb: 2 }}>
+        <Typography component="p" sx={{ mb: 2 }}>
           <Link href="https://www.openstreetmap.org/copyright" target="_blank">
             © OpenStreetMap contributors
           </Link>{" "}
@@ -36,7 +35,7 @@ export const LegalModal: React.FunctionComponent<{
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
           Place Data
         </Typography>
-        <Typography paragraph sx={{ mb: 2 }}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Data from{" "}
           <Link href="https://whosonfirst.org/" target="_blank">
             Who's On First
@@ -51,7 +50,7 @@ export const LegalModal: React.FunctionComponent<{
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
           Base Map
         </Typography>
-        <Typography paragraph sx={{ mb: 2 }}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Graciously provided by{" "}
           <Link href="https://openfreemap.org/" target="_blank">
             OpenFreeMap
@@ -66,7 +65,7 @@ export const LegalModal: React.FunctionComponent<{
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
           Satellite Imagery
         </Typography>
-        <Typography paragraph sx={{ mb: 2 }}>
+        <Typography component="p" sx={{ mb: 2 }}>
           Powered by{" "}
           <Link href="https://www.esri.com/" target="_blank">
             Esri
@@ -76,7 +75,7 @@ export const LegalModal: React.FunctionComponent<{
         <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
           Terrain Data
         </Typography>
-        <Typography paragraph sx={{ mb: 3 }}>
+        <Typography component="p" sx={{ mb: 3 }}>
           <Link href="https://mapterhorn.com/attribution" target="_blank">
             © Mapterhorn
           </Link>

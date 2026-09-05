@@ -3,7 +3,7 @@ import * as React from "react";
 import { theme } from "./Theme";
 
 export const Themed: React.FunctionComponent<React.PropsWithChildren<{}>> = (
-  props
+  props,
 ) => (
   <StyledEngineProvider injectFirst>
     <ThemeProvider theme={theme}>{props.children}</ThemeProvider>

@@ -78,17 +78,81 @@ export const TerrainInspector: React.FunctionComponent<Props> = ({
             style={{ opacity: 0.4 }}
           >
             {/* white outline — vertical */}
-            <line x1="10" y1="1" x2="10" y2="6" stroke="white" strokeWidth="5" strokeLinecap="round" />
-            <line x1="10" y1="14" x2="10" y2="19" stroke="white" strokeWidth="5" strokeLinecap="round" />
+            <line
+              x1="10"
+              y1="1"
+              x2="10"
+              y2="6"
+              stroke="white"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+            <line
+              x1="10"
+              y1="14"
+              x2="10"
+              y2="19"
+              stroke="white"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
             {/* white outline — horizontal */}
-            <line x1="1" y1="10" x2="6" y2="10" stroke="white" strokeWidth="5" strokeLinecap="round" />
-            <line x1="14" y1="10" x2="19" y2="10" stroke="white" strokeWidth="5" strokeLinecap="round" />
+            <line
+              x1="1"
+              y1="10"
+              x2="6"
+              y2="10"
+              stroke="white"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+            <line
+              x1="14"
+              y1="10"
+              x2="19"
+              y2="10"
+              stroke="white"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
             {/* black lines — vertical */}
-            <line x1="10" y1="1" x2="10" y2="6" stroke="black" strokeWidth="3" strokeLinecap="round" />
-            <line x1="10" y1="14" x2="10" y2="19" stroke="black" strokeWidth="3" strokeLinecap="round" />
+            <line
+              x1="10"
+              y1="1"
+              x2="10"
+              y2="6"
+              stroke="black"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <line
+              x1="10"
+              y1="14"
+              x2="10"
+              y2="19"
+              stroke="black"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
             {/* black lines — horizontal */}
-            <line x1="1" y1="10" x2="6" y2="10" stroke="black" strokeWidth="3" strokeLinecap="round" />
-            <line x1="14" y1="10" x2="19" y2="10" stroke="black" strokeWidth="3" strokeLinecap="round" />
+            <line
+              x1="1"
+              y1="10"
+              x2="6"
+              y2="10"
+              stroke="black"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <line
+              x1="14"
+              y1="10"
+              x2="19"
+              y2="10"
+              stroke="black"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
       )}
@@ -110,7 +174,10 @@ export const TerrainInspector: React.FunctionComponent<Props> = ({
           backdropFilter: "blur(4px)",
         }}
       >
-        ▲ {elevation} &nbsp; ⬙ {slope} &nbsp; ↗ {aspect}{data.distanceMeters !== null && <> &nbsp; ⊙ {distanceText(data.distanceMeters, unitSystem)}</>}
+        ▲ {elevation} &nbsp; ⬙ {slope} &nbsp; ↗ {aspect}
+        {data.distanceMeters !== null && (
+          <> &nbsp; ⊙ {distanceText(data.distanceMeters, unitSystem)}</>
+        )}
       </div>
     </>
   );

@@ -1,0 +1,5 @@
+.yarn/
+dev-dist/
+dist/
+public/*.svg
+yarn.lock

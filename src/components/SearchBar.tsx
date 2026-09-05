@@ -1,6 +1,7 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import {
+  ClickAwayListener,
   Divider,
   List,
   ListItemButton,
@@ -24,7 +25,6 @@ import {
 } from "openskidata-format";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDetectClickOutside } from "react-detect-click-outside";
 import { debounce, throttle } from "throttle-debounce";
 import { API_BASE_URL } from "../Config";
 import { MapMarker } from "../MapMarker";
@@ -124,11 +124,10 @@ const SearchBar: React.FC<Props> = (props) => {
     }
 
     results = results.concat(
-      searchResultsData.map(
-        (resultData: SearchResultData): Result =>
-          isSkiPassResultData(resultData)
-            ? { type: "ski_pass", data: resultData.properties }
-            : { type: "location", data: resultData },
+      searchResultsData.map((resultData: SearchResultData): Result =>
+        isSkiPassResultData(resultData)
+          ? { type: "ski_pass", data: resultData.properties }
+          : { type: "location", data: resultData },
       ),
     );
 
@@ -207,97 +206,99 @@ const SearchBar: React.FC<Props> = (props) => {
     }
   };
 
-  const ref = useDetectClickOutside({
-    onTriggered: () => {
-      setState((prevState) => ({ ...prevState, hideResults: true }));
-      if (shouldCollapse && stateRef.current.searchQuery === "") {
-        setExpanded(false);
-      }
-    },
-  });
+  const handleClickAway = () => {
+    setState((prevState) => ({ ...prevState, hideResults: true }));
+    if (shouldCollapse && stateRef.current.searchQuery === "") {
+      setExpanded(false);
+    }
+  };
 
   if (shouldCollapse && !expanded) {
     return (
-      <div ref={ref}>
-        <Paper
-          elevation={1}
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-          }}
-        >
-          <IconButton
-            style={{ padding: "10" }}
-            aria-label="Menu"
-            onClick={eventBus.openSidebar}
-            size="large"
+      <ClickAwayListener onClickAway={handleClickAway}>
+        <div>
+          <Paper
+            elevation={1}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+            }}
           >
-            <MenuIcon />
-          </IconButton>
-        </Paper>
-      </div>
+            <IconButton
+              style={{ padding: "10" }}
+              aria-label="Menu"
+              onClick={eventBus.openSidebar}
+              size="large"
+            >
+              <MenuIcon />
+            </IconButton>
+          </Paper>
+        </div>
+      </ClickAwayListener>
     );
   }
 
   return (
-    <div ref={ref}>
-      <Paper style={{ width: width }} elevation={1}>
-        <div style={{ alignItems: "center", display: "flex" }}>
-          <IconButton
-            style={{ padding: "10" }}
-            aria-label="Menu"
-            onClick={eventBus.openSidebar}
-            size="large"
-          >
-            <MenuIcon />
-          </IconButton>
-          <InputBase
-            inputRef={inputRef}
-            name="search"
-            onFocus={() => {
-              setState((prevState) => ({ ...prevState, hideResults: false }));
-            }}
-            sx={{ ml: 1, flex: 1, minWidth: 0 }}
-            inputProps={{ style: { textOverflow: "ellipsis" } }}
-            placeholder="Search Ski Areas, Lifts, and Runs"
-            onChange={(e) => {
-              setState((prevState) => ({ ...prevState, hideResults: false }));
-              updateSearchQuery(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              handleKeyNavigation(e);
-              if (e.keyCode === 13 && results.length > state.selectedIndex) {
-                showResult(results[state.selectedIndex]);
-              }
-            }}
-            value={state.searchQuery}
-          />
-          <IconButton
-            style={{ padding: "10" }}
-            aria-label="Search"
-            disabled={state.searchQuery.length == 0}
-            onClick={() => {
-              if (results.length > 0) {
-                showResult(results[0]);
-              }
-            }}
-            size="large"
-          >
-            <SearchIcon />
-          </IconButton>
-        </div>
-        {results.length > 0 && !hideResults ? (
-          <React.Fragment>
-            <Divider />
-            <SearchResults
-              onSelect={showResult}
-              selectedIndex={state.selectedIndex}
-              results={results}
+    <ClickAwayListener onClickAway={handleClickAway}>
+      <div>
+        <Paper style={{ width: width }} elevation={1}>
+          <div style={{ alignItems: "center", display: "flex" }}>
+            <IconButton
+              style={{ padding: "10" }}
+              aria-label="Menu"
+              onClick={eventBus.openSidebar}
+              size="large"
+            >
+              <MenuIcon />
+            </IconButton>
+            <InputBase
+              inputRef={inputRef}
+              name="search"
+              onFocus={() => {
+                setState((prevState) => ({ ...prevState, hideResults: false }));
+              }}
+              sx={{ ml: 1, flex: 1, minWidth: 0 }}
+              inputProps={{ style: { textOverflow: "ellipsis" } }}
+              placeholder="Search Ski Areas, Lifts, and Runs"
+              onChange={(e) => {
+                setState((prevState) => ({ ...prevState, hideResults: false }));
+                updateSearchQuery(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                handleKeyNavigation(e);
+                if (e.keyCode === 13 && results.length > state.selectedIndex) {
+                  showResult(results[state.selectedIndex]);
+                }
+              }}
+              value={state.searchQuery}
             />
-          </React.Fragment>
-        ) : null}
-      </Paper>
-    </div>
+            <IconButton
+              style={{ padding: "10" }}
+              aria-label="Search"
+              disabled={state.searchQuery.length == 0}
+              onClick={() => {
+                if (results.length > 0) {
+                  showResult(results[0]);
+                }
+              }}
+              size="large"
+            >
+              <SearchIcon />
+            </IconButton>
+          </div>
+          {results.length > 0 && !hideResults ? (
+            <React.Fragment>
+              <Divider />
+              <SearchResults
+                onSelect={showResult}
+                selectedIndex={state.selectedIndex}
+                results={results}
+              />
+            </React.Fragment>
+          ) : null}
+        </Paper>
+      </div>
+    </ClickAwayListener>
   );
 };
 
@@ -364,14 +365,16 @@ const SearchResult: React.FunctionComponent<{
       <ListItemText
         primary={getPrimaryText(props.result)}
         secondary={getSecondaryText(props.result)}
-        primaryTypographyProps={{
-          sx: {
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            lineClamp: 3,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+        slotProps={{
+          primary: {
+            sx: {
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              lineClamp: 3,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            },
           },
         }}
       />

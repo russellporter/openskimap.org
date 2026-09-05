@@ -43,7 +43,9 @@ export const SkiLiftInfo: React.FunctionComponent<{
         />
       }
       footer={
-        actions.length > 0 ? <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions> : undefined
+        actions.length > 0 ? (
+          <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions>
+        ) : undefined
       }
     >
       <Typography gutterBottom variant="h5" component="h2">
@@ -64,12 +66,8 @@ export const SkiLiftInfo: React.FunctionComponent<{
           {getLiftNameAndType(properties)}
         </span>
       </Typography>
-      {properties.access === 'private' ? (
-        <Chip
-          icon={<LockIcon />}
-          label="Private"
-          sx={{ mr: 1 }}
-        />
+      {properties.access === "private" ? (
+        <Chip icon={<LockIcon />} label="Private" sx={{ mr: 1 }} />
       ) : null}
       {properties.tunnel === true ? (
         <Chip label="Tunnel" sx={{ mr: 1 }} />
@@ -89,17 +87,17 @@ export const SkiLiftInfo: React.FunctionComponent<{
             Vertical:{" "}
             {UnitHelpers.heightText(
               elevationData.verticalInMeters,
-              props.unitSystem
+              props.unitSystem,
             )}{" "}
             (
             {UnitHelpers.heightText(
               elevationData.minElevationInMeters,
-              props.unitSystem
+              props.unitSystem,
             )}{" "}
             -{" "}
             {UnitHelpers.heightText(
               elevationData.maxElevationInMeters,
-              props.unitSystem
+              props.unitSystem,
             )}
             )
           </span>
@@ -111,7 +109,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
             Speed:{" "}
             {UnitHelpers.speedInUnits(
               elevationData.speedInMetersPerSecond,
-              props.unitSystem
+              props.unitSystem,
             )}
           </span>
         )}
@@ -126,7 +124,7 @@ export const SkiLiftInfo: React.FunctionComponent<{
             Vertical speed:{" "}
             {UnitHelpers.verticalSpeedInUnits(
               elevationData.verticalSpeedInMetersPerSecond,
-              props.unitSystem
+              props.unitSystem,
             )}
           </span>
         )}
