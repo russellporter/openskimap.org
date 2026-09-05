@@ -15,10 +15,6 @@ export interface URLState {
   selectedObjectID: string | null;
   selectedObjectIDType: ObjectIDType;
   showInfo: boolean;
-  /**
-   * Selected ski passes, comma separated, or null when the URL says nothing about them.
-   */
-  selectedSkiPasses: string | null;
 }
 
 export function updateURL(state: URLState) {
@@ -39,9 +35,6 @@ export function updateURL(state: URLState) {
   }
   if (state.markers.length > 0) {
     query.push(encodeParameter("markers", stringifyMarkers(state.markers)));
-  }
-  if (state.selectedSkiPasses) {
-    query.push(encodeParameter("passes", state.selectedSkiPasses));
   }
 
   const nextURL = `/${query.length > 0 ? `?${query.join("&")}` : ""}${location.hash}`;
@@ -66,7 +59,6 @@ export function getURLState(): URLState {
     selectedObjectIDType,
     showInfo: query.get("show_info") !== "false",
     markers: query.has("markers") ? parseMarkers(query.get("markers")!) : [],
-    selectedSkiPasses: query.get("passes"),
   };
 }
 

@@ -1,5 +1,4 @@
 import MapFilters, { defaultMapFilters } from "../MapFilters";
-import { parseSkiPassSelection } from "../SkiPasses";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
@@ -111,12 +110,6 @@ export function getInitialState(): State {
     sunExposureDate.setDate(15);
   }
 
-  // Which passes you hold is a lasting fact rather than a transient filter, so unlike the
-  // elevation and run length filters it survives a reload.
-  const selectedSkiPasses = parseSkiPassSelection(
-    localStorage.getItem("selectedSkiPasses") ?? "",
-  );
-
   return {
     sidebarOpen: false,
     aboutInfoOpen: false,
@@ -127,7 +120,7 @@ export function getInitialState(): State {
     layersOpen: false,
     mapStyle,
     mapStyleOverlay,
-    mapFilters: { ...defaultMapFilters, selectedSkiPasses },
+    mapFilters: { ...defaultMapFilters, selectedSkiPasses: [] },
     selectedObject: null,
     markers: [],
     tracks,

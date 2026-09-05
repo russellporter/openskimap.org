@@ -6,20 +6,12 @@ import {
 } from "openskidata-format";
 import { TILES_BASE_URL } from "./Config";
 
-/** An actual purchasable pass ID, shared by URLs, local storage, and vector tiles. */
+/** An actual purchasable pass ID matching the IDs in vector tiles. */
 export type SkiPassFilterKey = SkiPassID;
 
 export interface SkiPassGroup {
   brand: SkiPassBrand;
   passes: SkiPass[];
-}
-
-/** Reads a comma-separated ski pass selection from the URL or local storage. */
-export function parseSkiPassSelection(value: string): SkiPassFilterKey[] {
-  return value
-    .split(",")
-    .map((key) => key.trim())
-    .filter((key) => key.length > 0);
 }
 
 /** Separates branded pass families from standalone products. */
