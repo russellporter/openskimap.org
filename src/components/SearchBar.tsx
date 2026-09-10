@@ -1,7 +1,6 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import {
-  ClickAwayListener,
   Divider,
   List,
   ListItemButton,
@@ -21,10 +20,10 @@ import {
   SkiAreaActivity,
   SkiAreaFeature,
   SkiAreaProperties,
-  SkiPass,
 } from "openskidata-format";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useDetectClickOutside } from "react-detect-click-outside";
 import { debounce, throttle } from "throttle-debounce";
 import { API_BASE_URL } from "../Config";
 import { MapMarker } from "../MapMarker";
@@ -49,18 +48,7 @@ type LocationResult = {
   type: "location";
   data: SkiAreaFeature | LiftFeature | RunFeature;
 };
-/** A ski pass is not a place, so selecting one filters the map instead of panning to it. */
-type SkiPassResult = { type: "ski_pass"; data: SkiPass };
-type Result = CommandResult | LocationResult | SkiPassResult;
-
-/** The API returns ski passes alongside features; they have no geometry to show. */
-type SearchResultData = LocationResult["data"] | { properties: SkiPass };
-
-function isSkiPassResultData(
-  data: SearchResultData,
-): data is { properties: SkiPass } {
-  return data.properties.type === "skiPass";
-}
+type Result = CommandResult | LocationResult;
 
 const SearchBar: React.FC<Props> = (props) => {
   const { width, eventBus, shouldCollapse } = props;
@@ -99,7 +87,7 @@ const SearchBar: React.FC<Props> = (props) => {
 
   const processSearchResults = (
     query: string,
-    searchResultsData: SearchResultData[],
+    locationResultsData: LocationResult["data"][],
   ) => {
     let results: Result[] = [];
 
@@ -124,11 +112,10 @@ const SearchBar: React.FC<Props> = (props) => {
     }
 
     results = results.concat(
-      searchResultsData.map((resultData: SearchResultData): Result =>
-        isSkiPassResultData(resultData)
-          ? { type: "ski_pass", data: resultData.properties }
-          : { type: "location", data: resultData },
-      ),
+      locationResultsData.map((resultData: LocationResult["data"]) => ({
+        type: "location",
+        data: resultData,
+      })),
     );
 
     setState((prevState: State) => ({ ...prevState, results }));
@@ -138,9 +125,11 @@ const SearchBar: React.FC<Props> = (props) => {
     fetch(API_BASE_URL + "/search?query=" + encodeURIComponent(query)).then(
       (response) => {
         if (stateRef.current?.searchQuery === query) {
-          response.json().then((searchResultsData: SearchResultData[]) => {
-            processSearchResults(query, searchResultsData);
-          });
+          response
+            .json()
+            .then((locationResultsData: LocationResult["data"][]) => {
+              processSearchResults(query, locationResultsData);
+            });
         }
       },
     );
@@ -200,105 +189,100 @@ const SearchBar: React.FC<Props> = (props) => {
         const feature = result.data;
         eventBus.showInfo(feature.properties.id, { animate: true });
         break;
-      case "ski_pass":
-        eventBus.setSelectedSkiPasses([result.data.id]);
-        break;
     }
   };
 
-  const handleClickAway = () => {
-    setState((prevState) => ({ ...prevState, hideResults: true }));
-    if (shouldCollapse && stateRef.current.searchQuery === "") {
-      setExpanded(false);
-    }
-  };
+  const ref = useDetectClickOutside({
+    onTriggered: () => {
+      setState((prevState) => ({ ...prevState, hideResults: true }));
+      if (shouldCollapse && stateRef.current.searchQuery === "") {
+        setExpanded(false);
+      }
+    },
+  });
 
   if (shouldCollapse && !expanded) {
     return (
-      <ClickAwayListener onClickAway={handleClickAway}>
-        <div>
-          <Paper
-            elevation={1}
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-            }}
+      <div ref={ref}>
+        <Paper
+          elevation={1}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+          }}
+        >
+          <IconButton
+            style={{ padding: "10" }}
+            aria-label="Menu"
+            onClick={eventBus.openSidebar}
+            size="large"
           >
-            <IconButton
-              style={{ padding: "10" }}
-              aria-label="Menu"
-              onClick={eventBus.openSidebar}
-              size="large"
-            >
-              <MenuIcon />
-            </IconButton>
-          </Paper>
-        </div>
-      </ClickAwayListener>
+            <MenuIcon />
+          </IconButton>
+        </Paper>
+      </div>
     );
   }
 
   return (
-    <ClickAwayListener onClickAway={handleClickAway}>
-      <div>
-        <Paper style={{ width: width }} elevation={1}>
-          <div style={{ alignItems: "center", display: "flex" }}>
-            <IconButton
-              style={{ padding: "10" }}
-              aria-label="Menu"
-              onClick={eventBus.openSidebar}
-              size="large"
-            >
-              <MenuIcon />
-            </IconButton>
-            <InputBase
-              inputRef={inputRef}
-              name="search"
-              onFocus={() => {
-                setState((prevState) => ({ ...prevState, hideResults: false }));
-              }}
-              sx={{ ml: 1, flex: 1, minWidth: 0 }}
-              inputProps={{ style: { textOverflow: "ellipsis" } }}
-              placeholder="Search Ski Areas, Lifts, and Runs"
-              onChange={(e) => {
-                setState((prevState) => ({ ...prevState, hideResults: false }));
-                updateSearchQuery(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                handleKeyNavigation(e);
-                if (e.keyCode === 13 && results.length > state.selectedIndex) {
-                  showResult(results[state.selectedIndex]);
-                }
-              }}
-              value={state.searchQuery}
+    <div ref={ref}>
+      <Paper style={{ width: width }} elevation={1}>
+        <div style={{ alignItems: "center", display: "flex" }}>
+          <IconButton
+            style={{ padding: "10" }}
+            aria-label="Menu"
+            onClick={eventBus.openSidebar}
+            size="large"
+          >
+            <MenuIcon />
+          </IconButton>
+          <InputBase
+            inputRef={inputRef}
+            name="search"
+            onFocus={() => {
+              setState((prevState) => ({ ...prevState, hideResults: false }));
+            }}
+            sx={{ ml: 1, flex: 1, minWidth: 0 }}
+            inputProps={{ style: { textOverflow: "ellipsis" } }}
+            placeholder="Search Ski Areas, Lifts, and Runs"
+            onChange={(e) => {
+              setState((prevState) => ({ ...prevState, hideResults: false }));
+              updateSearchQuery(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              handleKeyNavigation(e);
+              if (e.keyCode === 13 && results.length > state.selectedIndex) {
+                showResult(results[state.selectedIndex]);
+              }
+            }}
+            value={state.searchQuery}
+          />
+          <IconButton
+            style={{ padding: "10" }}
+            aria-label="Search"
+            disabled={state.searchQuery.length == 0}
+            onClick={() => {
+              if (results.length > 0) {
+                showResult(results[0]);
+              }
+            }}
+            size="large"
+          >
+            <SearchIcon />
+          </IconButton>
+        </div>
+        {results.length > 0 && !hideResults ? (
+          <React.Fragment>
+            <Divider />
+            <SearchResults
+              onSelect={showResult}
+              selectedIndex={state.selectedIndex}
+              results={results}
             />
-            <IconButton
-              style={{ padding: "10" }}
-              aria-label="Search"
-              disabled={state.searchQuery.length == 0}
-              onClick={() => {
-                if (results.length > 0) {
-                  showResult(results[0]);
-                }
-              }}
-              size="large"
-            >
-              <SearchIcon />
-            </IconButton>
-          </div>
-          {results.length > 0 && !hideResults ? (
-            <React.Fragment>
-              <Divider />
-              <SearchResults
-                onSelect={showResult}
-                selectedIndex={state.selectedIndex}
-                results={results}
-              />
-            </React.Fragment>
-          ) : null}
-        </Paper>
-      </div>
-    </ClickAwayListener>
+          </React.Fragment>
+        ) : null}
+      </Paper>
+    </div>
   );
 };
 
@@ -348,8 +332,6 @@ function resultID(result: Result): string {
   switch (result.type) {
     case "add_marker":
       return "add_marker";
-    case "ski_pass":
-      return "ski_pass_" + result.data.id;
     case "location":
       return "location_" + result.data.properties.id;
   }
@@ -365,16 +347,14 @@ const SearchResult: React.FunctionComponent<{
       <ListItemText
         primary={getPrimaryText(props.result)}
         secondary={getSecondaryText(props.result)}
-        slotProps={{
-          primary: {
-            sx: {
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              lineClamp: 3,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            },
+        primaryTypographyProps={{
+          sx: {
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            lineClamp: 3,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           },
         }}
       />
@@ -386,8 +366,6 @@ function getPrimaryText(result: Result): string | null {
   switch (result.type) {
     case "add_marker":
       return "Mark Location";
-    case "ski_pass":
-      return result.data.name;
     case "location":
       const properties = result.data.properties;
       const name = properties.name;
@@ -411,9 +389,6 @@ function getSecondaryText(result: Result): string {
       const latDirection = latitude >= 0 ? "N" : "S";
       const lonDirection = longitude >= 0 ? "E" : "W";
       return `Location: ${Math.abs(latitude)}°${latDirection}, ${Math.abs(longitude)}°${lonDirection}`;
-    case "ski_pass":
-      const count = result.data.skiAreaCount;
-      return `Ski pass - show its ${count} ski area${count === 1 ? "" : "s"}`;
     case "location":
       const properties = result.data.properties;
       return [getFeatureDetails(properties), getLocation(properties)]

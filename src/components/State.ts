@@ -1,5 +1,4 @@
 import MapFilters, { defaultMapFilters } from "../MapFilters";
-import { parseSkiPassSelection } from "../SkiPasses";
 import { MapMarker } from "../MapMarker";
 import { MapStyle, MapStyleOverlay } from "../MapStyle";
 import { Track } from "../utils/TrackParser";
@@ -57,21 +56,17 @@ export interface StateChanges {
 export function getInitialState(): State {
   // Load saved map style from localStorage, default to Terrain
   const savedMapStyle = localStorage.getItem("mapStyle") as MapStyle;
-  const mapStyle =
-    savedMapStyle && Object.values(MapStyle).includes(savedMapStyle)
-      ? savedMapStyle
-      : MapStyle.Terrain;
+  const mapStyle = savedMapStyle && Object.values(MapStyle).includes(savedMapStyle) 
+    ? savedMapStyle 
+    : MapStyle.Terrain;
 
   // Load saved overlay from localStorage, default to Slope
   const savedOverlay = localStorage.getItem("mapStyleOverlay");
   let mapStyleOverlay: MapStyleOverlay | null = MapStyleOverlay.Slope;
-
+  
   if (savedOverlay === "null" || savedOverlay === null) {
     mapStyleOverlay = null;
-  } else if (
-    savedOverlay &&
-    Object.values(MapStyleOverlay).includes(savedOverlay as MapStyleOverlay)
-  ) {
+  } else if (savedOverlay && Object.values(MapStyleOverlay).includes(savedOverlay as MapStyleOverlay)) {
     mapStyleOverlay = savedOverlay as MapStyleOverlay;
   }
 
@@ -90,7 +85,7 @@ export function getInitialState(): State {
   // Load saved sun exposure date from localStorage, default to January 15th for winter skiing
   const savedSunExposureDate = localStorage.getItem("sunExposureDate");
   let sunExposureDate: Date;
-
+  
   if (savedSunExposureDate) {
     try {
       sunExposureDate = new Date(savedSunExposureDate);
@@ -111,12 +106,6 @@ export function getInitialState(): State {
     sunExposureDate.setDate(15);
   }
 
-  // Which passes you hold is a lasting fact rather than a transient filter, so unlike the
-  // elevation and run length filters it survives a reload.
-  const selectedSkiPasses = parseSkiPassSelection(
-    localStorage.getItem("selectedSkiPasses") ?? "",
-  );
-
   return {
     sidebarOpen: false,
     aboutInfoOpen: false,
@@ -127,7 +116,7 @@ export function getInitialState(): State {
     layersOpen: false,
     mapStyle,
     mapStyleOverlay,
-    mapFilters: { ...defaultMapFilters, selectedSkiPasses },
+    mapFilters: defaultMapFilters,
     selectedObject: null,
     markers: [],
     tracks,
@@ -136,9 +125,7 @@ export function getInitialState(): State {
     sunExposureDate,
     isDrawingTrack: false,
     drawingTrackCoordinates: [],
-    terrainInspectorEnabled:
-      localStorage.getItem("terrainInspectorEnabled") === "true",
-    terrainExaggeration:
-      parseFloat(localStorage.getItem("terrainExaggeration") || "1") || 1,
+    terrainInspectorEnabled: localStorage.getItem("terrainInspectorEnabled") === "true",
+    terrainExaggeration: parseFloat(localStorage.getItem("terrainExaggeration") || "1") || 1,
   };
 }

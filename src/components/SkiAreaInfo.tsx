@@ -21,7 +21,6 @@ import EventBus from "./EventBus";
 import { getWebsiteActions } from "./FeatureActions";
 import { formattedActivityName, formattedDifficultyName } from "./Formatters";
 import { ScrollableCard } from "./ScrollableCard";
-import { SkiAreaPasses } from "./SkiAreaPasses";
 import { SlopeAspectRose } from "./SlopeAspectRose";
 import { SourceSummary } from "./SourceSummary";
 import { StatusIcon } from "./StatusIcon";
@@ -37,7 +36,7 @@ interface SkiAreaPopupProps {
 }
 
 export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
-  props,
+  props
 ) => {
   const properties = props.feature.properties;
   const actions = getActions(properties);
@@ -51,9 +50,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
         />
       }
       footer={
-        actions.length > 0 ? (
-          <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions>
-        ) : undefined
+        actions.length > 0 ? <CardActions sx={{ flexWrap: "wrap" }}>{actions}</CardActions> : undefined
       }
     >
       <Typography variant="h5" component="h2">
@@ -73,10 +70,6 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
         />
       )}
       <SourceSummary sources={properties.sources} />
-      <SkiAreaPasses
-        skiPasses={properties.skiPasses}
-        eventBus={props.eventBus}
-      />
       {properties.activities.includes(SkiAreaActivity.Downhill) && (
         <SlopeAspectRose feature={props.feature} />
       )}
@@ -86,7 +79,7 @@ export const SkiAreaInfo: React.FunctionComponent<SkiAreaPopupProps> = (
 
 function getActions(properties: SkiAreaProperties): React.JSX.Element[] {
   const skimapOrgSource = properties.sources.find(
-    (s) => s.type === SourceType.SKIMAP_ORG,
+    (s) => s.type === SourceType.SKIMAP_ORG
   );
   let actions: React.JSX.Element[] = [];
   if (skimapOrgSource) {
@@ -99,7 +92,7 @@ function getActions(properties: SkiAreaProperties): React.JSX.Element[] {
         href={"https://skimap.org/SkiAreas/view/" + skimapOrgSource.id}
       >
         See Paper Maps
-      </Button>,
+      </Button>
     );
   }
 
@@ -126,9 +119,7 @@ function getTitle(properties: SkiAreaProperties) {
     summary = "Ski Area";
   }
 
-  const locality = properties.places.find(
-    (place) => place.localized.en.locality,
-  )?.localized.en.locality;
+  const locality = properties.places.find((place) => place.localized.en.locality)?.localized.en.locality;
   if (locality) {
     return summary + " near " + locality;
   } else {
@@ -139,7 +130,7 @@ function getTitle(properties: SkiAreaProperties) {
 function elevationSummary(
   statistics: SkiAreaStatistics,
   activities: SkiAreaActivity[],
-  unitSystem: UnitHelpers.UnitSystem,
+  unitSystem: UnitHelpers.UnitSystem
 ) {
   const minElevation = statistics.minElevation;
   const maxElevation = statistics.maxElevation;
@@ -169,7 +160,7 @@ function elevationSummary(
 function formatSnowmakingInfo(
   snowmakingKm: number,
   snowfarmingKm: number,
-  unitSystem: UnitHelpers.UnitSystem,
+  unitSystem: UnitHelpers.UnitSystem
 ): string {
   const parts: string[] = [];
 
@@ -183,7 +174,7 @@ function formatSnowmakingInfo(
         unitSystem,
         forceLongestUnit: true,
         roundToNearestDecimal: true,
-      }) + " snowmaking",
+      }) + " snowmaking"
     );
   }
 
@@ -194,7 +185,7 @@ function formatSnowmakingInfo(
         unitSystem,
         forceLongestUnit: true,
         roundToNearestDecimal: true,
-      }) + " snowfarming",
+      }) + " snowfarming"
     );
   }
 
@@ -255,15 +246,13 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
         }, 0);
 
         // Calculate snowmaking and snowfarming totals
-        const statisticsForActivity =
-          props.statistics.runs.byActivity[activityStatistics[0]];
+        const statisticsForActivity = props.statistics.runs.byActivity[activityStatistics[0]];
         let totalSnowmakingKm = 0;
         let totalSnowfarmingKm = 0;
 
         if (statisticsForActivity) {
           difficulties.forEach((difficulty) => {
-            const stats =
-              statisticsForActivity.byDifficulty[difficulty || "other"];
+            const stats = statisticsForActivity.byDifficulty[difficulty || "other"];
             if (stats) {
               totalSnowmakingKm += stats.snowmakingLengthInKm || 0;
               totalSnowfarmingKm += stats.snowfarmingLengthInKm || 0;
@@ -287,11 +276,7 @@ const SkiAreaStatisticsSummary: React.FunctionComponent<{
                 forceLongestUnit: true,
                 roundToNearestDecimal: true,
               })}
-              {formatSnowmakingInfo(
-                totalSnowmakingKm,
-                totalSnowfarmingKm,
-                props.unitSystem,
-              )}
+              {formatSnowmakingInfo(totalSnowmakingKm, totalSnowfarmingKm, props.unitSystem)}
             </Typography>
             <RunDifficultyBarChart
               activity={activityStatistics[0]}
@@ -354,7 +339,7 @@ function getFormattedLiftStatistics(statistics: LiftStatistics) {
           liftStatisticsByCategory.get("surface")!.count += count;
           break;
       }
-    },
+    }
   );
 
   const formattedStatistics = [...liftStatisticsByCategory.entries()].flatMap(
@@ -371,7 +356,7 @@ function getFormattedLiftStatistics(statistics: LiftStatistics) {
           getLiftCategoryName(category) +
           (statistics.count === 1 ? "" : "s"),
       ];
-    },
+    }
   );
 
   if (formattedStatistics.length === 0) {
