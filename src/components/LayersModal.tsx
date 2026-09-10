@@ -5,6 +5,7 @@ import {
   Upload as UploadIcon,
 } from "@mui/icons-material";
 import {
+  Box,
   Button,
   Dialog,
   FormControlLabel,
@@ -17,7 +18,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import { SkiAreaActivity } from "openskidata-format";
 import * as React from "react";
 import MapFilters from "../MapFilters";
@@ -405,8 +405,8 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
                         props.eventBus.setSunExposureDate(newDate);
                       }
                     }}
-                    InputLabelProps={{
-                      shrink: true,
+                    slotProps={{
+                      inputLabel: { shrink: true },
                     }}
                     size="small"
                     fullWidth
@@ -517,6 +517,7 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
           </Box>
         </Box>
       </Box>
+
     </Dialog>
   );
 };

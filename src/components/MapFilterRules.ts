@@ -3,7 +3,8 @@ import { SkiAreaActivity } from "openskidata-format";
 import MapFilters from "../MapFilters";
 
 // A filter rule can be a MapLibre expression filter, "hidden" (to hide the object completely), or null (no filter)
-export type ObjectFilterRules = maplibregl.ExpressionFilterSpecification | "hidden" | null;
+export type ObjectFilterRules =
+  maplibregl.ExpressionFilterSpecification | "hidden" | null;
 
 export interface MapFilterRules {
   runs: ObjectFilterRules;
@@ -40,7 +41,7 @@ export function getFilterRules(filters: MapFilters): MapFilterRules {
 
 export function combine(
   left: ObjectFilterRules,
-  right: ObjectFilterRules
+  right: ObjectFilterRules,
 ): ObjectFilterRules {
   if (left === "hidden" || right === "hidden") {
     return "hidden";
@@ -56,7 +57,7 @@ export function combine(
 
 function getActivityFilterRules(filters: MapFilters): MapFilterRules {
   const hasDownhill = !filters.hiddenActivities.includes(
-    SkiAreaActivity.Downhill
+    SkiAreaActivity.Downhill,
   );
   const hasNordic = !filters.hiddenActivities.includes(SkiAreaActivity.Nordic);
   if (!hasDownhill && !hasNordic) {
@@ -117,7 +118,7 @@ function getRunLengthFilterRules(filters: MapFilters): MapFilterRules {
   }
 
   const hasDownhill = !filters.hiddenActivities.includes(
-    SkiAreaActivity.Downhill
+    SkiAreaActivity.Downhill,
   );
   const hasNordic = !filters.hiddenActivities.includes(SkiAreaActivity.Nordic);
 

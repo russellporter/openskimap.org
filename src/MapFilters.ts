@@ -8,7 +8,7 @@ export default interface MapFilters {
   selectedObjectID: string | null;
 }
 
-export const defaultMapFilters = {
+export const defaultMapFilters: MapFilters = {
   hiddenActivities: [],
   minVertical: null,
   minElevation: null,

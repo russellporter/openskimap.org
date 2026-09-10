@@ -167,7 +167,11 @@ export default class StateReducer implements EventBus {
     }
   };
 
-  showInfo = (id: string, pan?: PanConfig, idType: ObjectIDType = "openskimap") => {
+  showInfo = (
+    id: string,
+    pan?: PanConfig,
+    idType: ObjectIDType = "openskimap",
+  ) => {
     this.update({
       selectedObject: { id, idType, showInfo: true },
       mapFilters: { ...this._state.mapFilters, selectedObjectID: id },
@@ -227,6 +231,8 @@ export default class StateReducer implements EventBus {
     });
   }
 
+  // An arrow property, not a method: this is passed to components detached from the event bus,
+  // as showInfo and hideInfo are.
   addMarker(marker: MapMarker): void {
     this.update({
       markers: [...this._state.markers, marker],
