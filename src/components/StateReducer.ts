@@ -6,7 +6,7 @@ import EventBus from "./EventBus";
 import { loadGeoJSON } from "./GeoJSONLoader";
 import { MapFeature, ObjectIDType, PanConfig } from "./SelectedObject";
 import State, { StateChanges } from "./State";
-import { URLState } from "./URLHistory";
+import { CameraTarget, URLState } from "./URLHistory";
 import { updatePageMetadata } from "./utils/PageMetadata";
 import { UnitSystem } from "./utils/UnitHelpers";
 
@@ -103,7 +103,11 @@ export default class StateReducer implements EventBus {
   private loadInfoData = async (
     id: string,
     idType: ObjectIDType,
-    options: { panAfterLoad: boolean; animate: boolean },
+    options: {
+      panAfterLoad: boolean;
+      animate: boolean;
+      fallbackCamera?: CameraTarget | null;
+    },
   ) => {
     try {
       const feature = await loadGeoJSON<MapFeature>(id, idType);
@@ -132,6 +136,9 @@ export default class StateReducer implements EventBus {
     } catch (error) {
       console.log(error);
       this.hideInfo();
+      if (options.fallbackCamera) {
+        this.update({ fallbackCamera: options.fallbackCamera });
+      }
     }
   };
 
@@ -167,6 +174,7 @@ export default class StateReducer implements EventBus {
       this.loadInfoData(state.selectedObjectID, state.selectedObjectIDType, {
         panAfterLoad: true,
         animate: false,
+        fallbackCamera: state.fallbackCamera ?? null,
       });
     }
   };

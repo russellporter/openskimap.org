@@ -7,6 +7,11 @@ export function loadGeoJSON<T>(
 ): Promise<T> {
   return fetch(`${API_BASE_URL}/features/${idType}/${entityID}.geojson`).then(
     (response) => {
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load ${idType}/${entityID}: ${response.status} ${response.statusText}`,
+        );
+      }
       return response.json();
     },
   );

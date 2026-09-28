@@ -5,6 +5,7 @@ import { Track } from "../utils/TrackParser";
 import { SelectedObject } from "./SelectedObject";
 import { getUnitSystem_NonReactive } from "./UnitSystemManager";
 import * as UnitHelpers from "./utils/UnitHelpers";
+import { CameraTarget } from "./URLHistory";
 
 export default interface State {
   sidebarOpen: boolean;
@@ -53,6 +54,7 @@ export interface StateChanges {
   drawingTrackCoordinates?: [number, number][];
   terrainInspectorEnabled?: boolean;
   terrainExaggeration?: number;
+  fallbackCamera?: CameraTarget | null;
 }
 
 export function getInitialState(): State {

@@ -342,6 +342,10 @@ function initialize() {
       map.setSelectedObject(changes.selectedObject);
     }
 
+    if (changes.fallbackCamera) {
+      map.jumpToCamera(changes.fallbackCamera);
+    }
+
     if (changes.mapFilters !== undefined) {
       map.setFilters(state.mapFilters);
     }

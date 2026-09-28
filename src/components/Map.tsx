@@ -29,6 +29,7 @@ import { SelectedObject } from "./SelectedObject";
 import { panToZoomLevel } from "./SkiAreaInfo";
 import { SlopeTerrainRenderer } from "./SlopeTerrainRenderer";
 import { TerrainInspectorControl } from "./TerrainInspectorControl";
+import { CameraTarget } from "./URLHistory";
 import {
   addUnitSystemChangeListener_NonReactive,
   getUnitSystem_NonReactive,
@@ -306,6 +307,17 @@ export class Map {
 
   flyTo = (center: maplibregl.LngLatLike) => {
     this.map.flyTo({ center: center, zoom: panToZoomLevel });
+  };
+
+  jumpToCamera = (camera: CameraTarget) => {
+    this.waitForMapLoaded(() => {
+      this.map.jumpTo({
+        center: [camera.longitude, camera.latitude],
+        zoom: camera.zoom,
+        ...(camera.bearing !== undefined ? { bearing: camera.bearing } : {}),
+        ...(camera.pitch !== undefined ? { pitch: camera.pitch } : {}),
+      });
+    });
   };
 
   goToViewport = (

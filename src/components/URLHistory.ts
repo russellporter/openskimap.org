@@ -15,6 +15,15 @@ export interface URLState {
   selectedObjectID: string | null;
   selectedObjectIDType: ObjectIDType;
   showInfo: boolean;
+  fallbackCamera?: CameraTarget | null;
+}
+
+export interface CameraTarget {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+  bearing?: number;
+  pitch?: number;
 }
 
 export function updateURL(state: URLState) {
@@ -59,7 +68,57 @@ export function getURLState(): URLState {
     selectedObjectIDType,
     showInfo: query.get("show_info") !== "false",
     markers: query.has("markers") ? parseMarkers(query.get("markers")!) : [],
+    fallbackCamera: parseFallbackCamera(query.get("fallback_camera")),
   };
+}
+
+/**
+ * Parses a fallback camera in the same format as the map location hash:
+ * `zoom/latitude/longitude[/bearing[/pitch]]`, e.g. `17.9/37.635/-119.006/-119.8/0`.
+ * A leading `#` is tolerated. Returns null when the value is missing or invalid.
+ */
+function parseFallbackCamera(value: string | null): CameraTarget | null {
+  if (value === null) {
+    return null;
+  }
+
+  const parts = value.trim().replace(/^#/, "").split("/");
+  if (parts.length < 3) {
+    return null;
+  }
+
+  const zoom = Number(parts[0]);
+  const latitude = Number(parts[1]);
+  const longitude = Number(parts[2]);
+  if (
+    !Number.isFinite(zoom) ||
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return null;
+  }
+
+  const bearing = parseOptionalNumber(parts[3]);
+  const pitch = parseOptionalNumber(parts[4]);
+  return {
+    latitude,
+    longitude,
+    zoom: Math.min(24, Math.max(0, zoom)),
+    ...(bearing !== undefined ? { bearing } : {}),
+    ...(pitch !== undefined ? { pitch } : {}),
+  };
+}
+
+function parseOptionalNumber(value: string | undefined): number | undefined {
+  if (value === undefined || value.trim() === "") {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function encodeParameter(name: string, value: string): string {
