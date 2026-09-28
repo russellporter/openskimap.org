@@ -29,6 +29,15 @@ function sliderToExaggeration(sliderValue: number): number {
   return Math.pow(10, sliderValue);
 }
 
+// Percentage distance from 100% (exaggeration === 1) within which the slider
+// snaps to exactly 100%.
+const SNAP_TO_100_TOLERANCE = 0.1;
+
+function snappedExaggeration(sliderValue: number): number {
+  const exaggeration = sliderToExaggeration(sliderValue);
+  return Math.abs(exaggeration - 1) <= SNAP_TO_100_TOLERANCE ? 1 : exaggeration;
+}
+
 export default class Settings extends React.Component<Props> {
   render() {
     return (
@@ -110,13 +119,14 @@ export default class Settings extends React.Component<Props> {
                 min={-1}
                 max={Math.log10(20)}
                 step={0.01}
+                marks={[{ value: 0, label: "100%" }]}
                 valueLabelDisplay="auto"
                 valueLabelFormat={(value) =>
                   `${Math.round(sliderToExaggeration(value) * 100)}%`
                 }
                 onChange={(_, value) =>
                   this.props.eventBus.setTerrainExaggeration(
-                    sliderToExaggeration(value as number),
+                    snappedExaggeration(value as number),
                   )
                 }
               />
