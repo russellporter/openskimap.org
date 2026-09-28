@@ -88,6 +88,10 @@ export default class StateReducer implements EventBus {
     this.update({ mapStyleOverlay: overlay });
   };
 
+  setSlopeOverlayOpacity = (opacity: number) => {
+    this.update({ slopeOverlayOpacity: opacity });
+  };
+
   setSunExposureDate = (date: Date) => {
     this.update({ sunExposureDate: date });
   };

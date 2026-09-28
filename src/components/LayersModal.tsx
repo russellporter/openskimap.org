@@ -34,6 +34,7 @@ export interface LayersModalProps {
   eventBus: EventBus;
   currentMapStyle: MapStyle;
   currentMapStyleOverlay: MapStyleOverlay | null;
+  slopeOverlayOpacity: number;
   tracks: Track[];
   sunExposureDate: Date;
   mapFilters: MapFilters;
@@ -414,6 +415,23 @@ ${track.coordinates.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}">
                   />
                 </Box>
               )}
+
+              <Box sx={{ mt: 2, pl: 1 }}>
+                <FormLabel component="legend">Overlay Opacity</FormLabel>
+                <Box sx={{ mx: 1 }}>
+                  <Slider
+                    value={props.slopeOverlayOpacity}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+                    onChange={(_, value) =>
+                      props.eventBus.setSlopeOverlayOpacity(value as number)
+                    }
+                  />
+                </Box>
+              </Box>
             </Box>
           </Box>
         </Box>

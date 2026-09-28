@@ -16,6 +16,7 @@ export default interface State {
   layersOpen: boolean;
   mapStyle: MapStyle;
   mapStyleOverlay: MapStyleOverlay | null;
+  slopeOverlayOpacity: number;
   mapFilters: MapFilters;
   selectedObject: SelectedObject | null;
   markers: MapMarker[];
@@ -39,6 +40,7 @@ export interface StateChanges {
   layersOpen?: boolean;
   mapStyle?: MapStyle;
   mapStyleOverlay?: MapStyleOverlay | null;
+  slopeOverlayOpacity?: number;
   mapFilters?: MapFilters;
   selectedObject?: SelectedObject | null;
   markers?: MapMarker[];
@@ -86,6 +88,16 @@ export function getInitialState(): State {
     }
   }
 
+  // Load saved slope overlay opacity from localStorage, default to fully opaque
+  const savedSlopeOverlayOpacity = localStorage.getItem("slopeOverlayOpacity");
+  const parsedSlopeOverlayOpacity =
+    savedSlopeOverlayOpacity !== null
+      ? parseFloat(savedSlopeOverlayOpacity)
+      : NaN;
+  const slopeOverlayOpacity = isNaN(parsedSlopeOverlayOpacity)
+    ? 1
+    : Math.min(1, Math.max(0, parsedSlopeOverlayOpacity));
+
   // Load saved sun exposure date from localStorage, default to January 15th for winter skiing
   const savedSunExposureDate = localStorage.getItem("sunExposureDate");
   let sunExposureDate: Date;
@@ -120,6 +132,7 @@ export function getInitialState(): State {
     layersOpen: false,
     mapStyle,
     mapStyleOverlay,
+    slopeOverlayOpacity,
     mapFilters: { ...defaultMapFilters },
     selectedObject: null,
     markers: [],

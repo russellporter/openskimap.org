@@ -204,6 +204,14 @@ function initialize() {
       localStorage.setItem("mapStyle", state.mapStyle);
     }
 
+    if (changes.slopeOverlayOpacity !== undefined) {
+      map.setSlopeOverlayOpacity(state.slopeOverlayOpacity);
+      localStorage.setItem(
+        "slopeOverlayOpacity",
+        String(state.slopeOverlayOpacity),
+      );
+    }
+
     if (changes.mapStyleOverlay !== undefined) {
       map.setSlopeOverlay(state.mapStyleOverlay);
       localStorage.setItem(
@@ -300,6 +308,7 @@ function initialize() {
       changes.layersOpen !== undefined ||
       changes.mapStyle !== undefined ||
       changes.mapStyleOverlay !== undefined ||
+      changes.slopeOverlayOpacity !== undefined ||
       changes.tracks !== undefined ||
       changes.sunExposureDate !== undefined ||
       changes.mapFilters !== undefined ||
@@ -312,6 +321,7 @@ function initialize() {
             open={state.layersOpen}
             currentMapStyle={state.mapStyle}
             currentMapStyleOverlay={state.mapStyleOverlay}
+            slopeOverlayOpacity={state.slopeOverlayOpacity}
             tracks={state.tracks}
             sunExposureDate={state.sunExposureDate}
             mapFilters={state.mapFilters}

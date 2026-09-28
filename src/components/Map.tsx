@@ -60,6 +60,7 @@ export class Map {
   private baseHillshadeExaggeration: Record<string, number> = {};
   private terrainInspectorControl: TerrainInspectorControl | null = null;
   private currentSlopeOverlay: MapStyleOverlay | null = null;
+  private slopeOverlayOpacity = 1;
   private slopeRenderer: SlopeTerrainRenderer | null = null;
   private cameraPositionManager: CameraPositionManager;
 
@@ -625,7 +626,7 @@ export class Map {
             type: "raster",
             source: sourceName,
             paint: {
-              "raster-opacity": 0.7,
+              "raster-opacity": this.slopeOverlayOpacity,
             },
           });
         }
@@ -786,6 +787,19 @@ export class Map {
 
   getCurrentSlopeOverlay = (): MapStyleOverlay | null => {
     return this.currentSlopeOverlay;
+  };
+
+  setSlopeOverlayOpacity = (opacity: number) => {
+    this.slopeOverlayOpacity = opacity;
+    this.waitForMapLoaded(() => {
+      if (this.map.getLayer("slope-terrain-overlay")) {
+        this.map.setPaintProperty(
+          "slope-terrain-overlay",
+          "raster-opacity",
+          opacity,
+        );
+      }
+    });
   };
 
   setSunExposureDate = (date: Date) => {
