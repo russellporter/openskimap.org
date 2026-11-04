@@ -1,0 +1,185 @@
+name: Dependabot auto-merge
+
+on:
+  pull_request:
+    branches: ["master"]
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted]
+  check_run:
+    types: [completed]
+  status:
+  workflow_dispatch:
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: read
+      statuses: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      EXPECT_CHECKS: "false"
+    steps:
+      - name: Merge eligible Dependabot pull requests
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          
+          const token = process.env.GH_TOKEN;
+          const repoFullName = process.env.GITHUB_REPOSITORY;
+          const eventName = process.env.GITHUB_EVENT_NAME;
+          const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+          const expectChecks = process.env.EXPECT_CHECKS === "true";
+          const [owner, repo] = repoFullName.split("/");
+          const apiRoot = "https://api.github.com";
+          const baseHeaders = {
+            Accept: "application/vnd.github+json",
+            Authorization: "Bearer " + token,
+            "X-GitHub-Api-Version": "2022-11-28"
+          };
+          
+          async function request(path, options) {
+            const url = path.startsWith("http") ? path : apiRoot + path;
+            const headers = { ...baseHeaders, ...((options && options.headers) || {}) };
+            const response = await fetch(url, { ...(options || {}), headers });
+            const raw = await response.text();
+            let data = {};
+            try {
+              data = raw ? JSON.parse(raw) : {};
+            } catch {
+              data = { message: raw };
+            }
+            return { ok: response.ok, status: response.status, data, headers: response.headers };
+          }
+          
+          async function paginate(path, key) {
+            let url = apiRoot + path;
+            const results = [];
+            while (url) {
+              const response = await request(url);
+              if (!response.ok) {
+                throw new Error("GitHub API " + response.status + ": " + JSON.stringify(response.data));
+              }
+              const page = key ? (response.data[key] || []) : response.data;
+              results.push(...page);
+              const links = response.headers.get("link") || "";
+              const nextLink = links.split(",").find((part) => /rel="next"/.test(part));
+              const match = nextLink && nextLink.match(/<([^>]+)>/);
+              url = match ? match[1] : null;
+            }
+            return results;
+          }
+          
+          async function main() {
+            if (eventName === "workflow_run" && event.workflow_run.event !== "pull_request") {
+              console.log("Ignoring a workflow run that was not started by a pull request.");
+              return;
+            }
+          
+            const repository = await request("/repos/" + owner + "/" + repo);
+            if (!repository.ok) {
+              throw new Error("Could not read repository metadata: " + JSON.stringify(repository.data));
+            }
+            const defaultBranch = repository.data.default_branch;
+            const pullRequests = await paginate(
+              "/repos/" + owner + "/" + repo + "/pulls?state=open&per_page=100",
+              null
+            );
+          
+            for (const pullRequest of pullRequests) {
+              if (
+                pullRequest.user?.login !== "dependabot[bot]" ||
+                pullRequest.base?.ref !== defaultBranch ||
+                pullRequest.draft ||
+                pullRequest.state !== "open" ||
+                !pullRequest.head?.sha
+              ) {
+                continue;
+              }
+          
+              const headSha = pullRequest.head.sha;
+              const checkRuns = await paginate(
+                "/repos/" + owner + "/" + repo + "/commits/" + headSha + "/check-runs?per_page=100",
+                "check_runs"
+              );
+              const currentRunPath = "/actions/runs/" + process.env.GITHUB_RUN_ID + "/";
+              const latestChecksByContext = new Map();
+          
+              for (const check of checkRuns) {
+                const checkUrl = [check.details_url, check.html_url, check.url].filter(Boolean).join(" ");
+                if (checkUrl.includes(currentRunPath)) {
+                  continue;
+                }
+          
+                const appId = check.app?.id || check.app?.slug || "unknown";
+                const key = appId + "::" + check.name;
+                const previous = latestChecksByContext.get(key);
+                if (!previous || Number(check.id) > Number(previous.id)) {
+                  latestChecksByContext.set(key, check);
+                }
+              }
+          
+              const latestChecks = [...latestChecksByContext.values()];
+              const commitStatuses = await request(
+                "/repos/" + owner + "/" + repo + "/commits/" + headSha + "/status"
+              );
+              if (!commitStatuses.ok) {
+                throw new Error("Could not read commit statuses: " + JSON.stringify(commitStatuses.data));
+              }
+              const statuses = commitStatuses.data.statuses || [];
+              const hasChecks = latestChecks.length > 0 || statuses.length > 0;
+          
+              if (expectChecks && !hasChecks) {
+                console.log("PR #" + pullRequest.number + " has CI configured but no results yet.");
+                continue;
+              }
+              if (latestChecks.some((check) => check.status !== "completed")) {
+                console.log("PR #" + pullRequest.number + " still has checks in progress.");
+                continue;
+              }
+              const passingConclusions = new Set(["success", "neutral", "skipped"]);
+              if (latestChecks.some((check) => !passingConclusions.has(check.conclusion))) {
+                console.log("PR #" + pullRequest.number + " has a failed or incomplete check.");
+                continue;
+              }
+              if (statuses.length > 0 && commitStatuses.data.state !== "success") {
+                console.log("PR #" + pullRequest.number + " has a pending or failed commit status.");
+                continue;
+              }
+          
+              const merge = await request(
+                "/repos/" + owner + "/" + repo + "/pulls/" + pullRequest.number + "/merge",
+                {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ sha: headSha, merge_method: "squash" })
+                }
+              );
+          
+              if (merge.ok && merge.data.merged) {
+                console.log("Merged Dependabot PR #" + pullRequest.number + ": " + merge.data.message);
+              } else if ([405, 409, 422].includes(merge.status)) {
+                console.log(
+                  "GitHub declined to merge PR #" +
+                    pullRequest.number +
+                    " (HTTP " +
+                    merge.status +
+                    "): " +
+                    JSON.stringify(merge.data)
+                );
+              } else {
+                throw new Error(
+                  "Merge API failed for PR #" + pullRequest.number + ": " + JSON.stringify(merge.data)
+                );
+              }
+            }
+          }
+          
+          main().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
