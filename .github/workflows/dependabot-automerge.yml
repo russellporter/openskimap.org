@@ -27,7 +27,7 @@ jobs:
         run: |
           node <<'NODE'
           const fs = require("fs");
-          
+
           const token = process.env.GH_TOKEN;
           const repoFullName = process.env.GITHUB_REPOSITORY;
           const eventName = process.env.GITHUB_EVENT_NAME;
@@ -40,7 +40,7 @@ jobs:
             Authorization: "Bearer " + token,
             "X-GitHub-Api-Version": "2022-11-28"
           };
-          
+
           async function request(path, options) {
             const url = path.startsWith("http") ? path : apiRoot + path;
             const headers = { ...baseHeaders, ...((options && options.headers) || {}) };
@@ -54,7 +54,7 @@ jobs:
             }
             return { ok: response.ok, status: response.status, data, headers: response.headers };
           }
-          
+
           async function paginate(path, key) {
             let url = apiRoot + path;
             const results = [];
@@ -72,13 +72,13 @@ jobs:
             }
             return results;
           }
-          
+
           async function main() {
             if (eventName === "workflow_run" && event.workflow_run.event !== "pull_request") {
               console.log("Ignoring a workflow run that was not started by a pull request.");
               return;
             }
-          
+
             const repository = await request("/repos/" + owner + "/" + repo);
             if (!repository.ok) {
               throw new Error("Could not read repository metadata: " + JSON.stringify(repository.data));
@@ -88,7 +88,7 @@ jobs:
               "/repos/" + owner + "/" + repo + "/pulls?state=open&per_page=100",
               null
             );
-          
+
             for (const pullRequest of pullRequests) {
               if (
                 pullRequest.user?.login !== "dependabot[bot]" ||
@@ -99,7 +99,7 @@ jobs:
               ) {
                 continue;
               }
-          
+
               const headSha = pullRequest.head.sha;
               const checkRuns = await paginate(
                 "/repos/" + owner + "/" + repo + "/commits/" + headSha + "/check-runs?per_page=100",
@@ -107,13 +107,13 @@ jobs:
               );
               const currentRunPath = "/actions/runs/" + process.env.GITHUB_RUN_ID + "/";
               const latestChecksByContext = new Map();
-          
+
               for (const check of checkRuns) {
                 const checkUrl = [check.details_url, check.html_url, check.url].filter(Boolean).join(" ");
                 if (checkUrl.includes(currentRunPath)) {
                   continue;
                 }
-          
+
                 const appId = check.app?.id || check.app?.slug || "unknown";
                 const key = appId + "::" + check.name;
                 const previous = latestChecksByContext.get(key);
@@ -121,7 +121,7 @@ jobs:
                   latestChecksByContext.set(key, check);
                 }
               }
-          
+
               const latestChecks = [...latestChecksByContext.values()];
               const commitStatuses = await request(
                 "/repos/" + owner + "/" + repo + "/commits/" + headSha + "/status"
@@ -131,7 +131,7 @@ jobs:
               }
               const statuses = commitStatuses.data.statuses || [];
               const hasChecks = latestChecks.length > 0 || statuses.length > 0;
-          
+
               if (expectChecks && !hasChecks) {
                 console.log("PR #" + pullRequest.number + " has CI configured but no results yet.");
                 continue;
@@ -149,7 +149,7 @@ jobs:
                 console.log("PR #" + pullRequest.number + " has a pending or failed commit status.");
                 continue;
               }
-          
+
               const merge = await request(
                 "/repos/" + owner + "/" + repo + "/pulls/" + pullRequest.number + "/merge",
                 {
@@ -158,7 +158,7 @@ jobs:
                   body: JSON.stringify({ sha: headSha, merge_method: "squash" })
                 }
               );
-          
+
               if (merge.ok && merge.data.merged) {
                 console.log("Merged Dependabot PR #" + pullRequest.number + ": " + merge.data.message);
               } else if ([405, 409, 422].includes(merge.status)) {
@@ -177,7 +177,7 @@ jobs:
               }
             }
           }
-          
+
           main().catch((error) => {
             console.error(error);
             process.exit(1);
