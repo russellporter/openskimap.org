@@ -20,7 +20,7 @@ jobs:
       checks: read
       statuses: read
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN || github.token }}
       EXPECT_CHECKS: "false"
     steps:
       - name: Merge eligible Dependabot pull requests
